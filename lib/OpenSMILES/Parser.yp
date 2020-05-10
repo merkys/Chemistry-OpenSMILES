@@ -16,6 +16,20 @@ use Graph::Undirected;
 
 smiles: atom ;
 
+atom: aliphatic_organic
+        {
+            my $atom = { symbol => $_[1] };
+            $self->{USER}{GRAPH}->add_node( $atom );
+            return $atom;
+        }
+    | aromatic_organic
+        {
+            my $atom = { symbol => $_[1] };
+            $self->{USER}{GRAPH}->add_node( $atom );
+            return $atom;
+        }
+    ;
+
 %%
 
 # Footer section
@@ -53,7 +67,16 @@ sub _Lexer
 
     # Element symbols
     if( $self->YYData->{INPUT} =~ s/^([A-Za-z][a-z])/ ) {
-        return ( 'element', $1 );
+        my $symbol = $1;
+        if(      $symbol =~ /^([BCNOSPFI]|Cl|Br)$/ ) {
+            return ( 'aliphatic_organic', $symbol );
+        } elsif( $symbol =~ /^[bcnosp]$/ ) {
+            return ( 'aromatic_organic', $symbol );
+        } elsif( $symbol eq 'se' || $symbol eq 'as' ) {
+            return ( $symbol, $symbol );
+        } else {
+            return ( 'element_symbol', $symbol );
+        }
     }
 
     # Chirality
@@ -75,8 +98,6 @@ sub _Lexer
     if( $self->YYData->{INPUT} =~ s/^(([-+])\1?[0-9]{0,2})/ ) {
         return ( 'charge', $1 );
     }
-
-
 
     my $char = substr( $self->YYData->{INPUT}, 0, 1 );
     if( $char ne '' ) {
