@@ -28,7 +28,71 @@ atom: aliphatic_organic
             $self->{USER}{GRAPH}->add_node( $atom );
             return $atom;
         }
+    | '[' maybe_isotope bracket_symbol maybe_chiral maybe_hcount charge maybe_class ']'
+        {
+            my $atom = {
+                         isotope   => $_[2],
+                         symbol    => $_[3],
+                         chirality => $_[4],
+                         hydrogens => $_[5],
+                         charge    => $_[6],
+                         class     => $_[7],
+                       };
+            $self->{USER}{GRAPH}->add_node( $atom );
+            return $atom;
+        }
     ;
+
+maybe_isotope: # empty
+             | number
+             ;
+
+bracket_symbol: aliphatic_organic | aromatic_organic | element_symbol | as | se ;
+
+maybe_chiral: # empty
+            | chiral
+            ;
+
+maybe_hcount: # empty
+                { return 0 }
+            | 'H'
+                { return 1 }
+            | 'H' digit
+                { return int( $_[2] ) }
+            ;
+
+charge: # empty
+        { return  0 }
+      | '-'
+        { return -1 }
+      | '-' '-'
+        { return -2 }
+      | '+'
+        { return  1 }
+      | '+' '+'
+        { return  2 }
+      | '-' digit
+        { return -int( $_[2] ) }
+      | '-' digit digit
+        { return -int( $_[2] * 10 + $_[1] ) }
+      | '+' digit
+        { return  int( $_[2] ) }
+      | '+' digit digit
+        { return  int( $_[2] * 10 + $_[1] ) }
+      ;
+
+maybe_class: # empty
+           | ':' number
+             { return $_[2] }
+           ;
+
+number: digit
+        { return int( $_[1] ) }
+      | number digit
+        { return $_[1] * 10 + int( $_[2] ) }
+      ;
+
+digit: '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' ;
 
 %%
 
@@ -86,17 +150,7 @@ sub _Lexer
                                         (TB|OH)[0-9]{1,2} |
                                         @?
                                         )/x ) {
-        return ( 'chiral', int( $1 . $2 ) );
-    }
-
-    # Numbers
-    if( $self->YYData->{INPUT} =~ s/^([0-9]+)/ ) {
-        return ( 'number', $1 );
-    }
-
-    # Charges
-    if( $self->YYData->{INPUT} =~ s/^(([-+])\1?[0-9]{0,2})/ ) {
-        return ( 'charge', $1 );
+        return ( 'chiral', $1 );
     }
 
     my $char = substr( $self->YYData->{INPUT}, 0, 1 );
