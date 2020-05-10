@@ -1,0 +1,100 @@
+# Header section
+
+%{
+
+use warnings;
+
+use Graph::Undirected;
+
+%}
+
+%%
+
+# Rules section
+
+# The top-level 'filter' rule
+
+smiles: atom ;
+
+%%
+
+# Footer section
+
+sub _Error
+{
+    my( $self ) = @_;
+    close $self->{USER}{FILEIN} if $self->{USER}{FILEIN};
+    my $msg = "$0: syntax error at line $self->{USER}{LINENO}, " .
+              "position $self->{USER}{CHARNO}";
+    if( $self->YYData->{INPUT} ) {
+        $self->YYData->{INPUT} =~ s/\n$//;
+        die "$msg: '" . $self->YYData->{INPUT} . "'.\n";
+    } else {
+        die "$msg.\n";
+    }
+}
+
+sub _Lexer
+{
+    my( $self ) = @_;
+
+    # If the line is empty and the input is originating from the file,
+    # another line is read.
+    if( !$self->YYData->{INPUT} && $self->{USER}{FILEIN} ) {
+        my $filein = $self->{USER}{FILEIN};
+        $self->YYData->{INPUT} = <$filein>;
+        $self->{USER}{LINENO} = -1 unless exists $self->{USER}{LINENO};
+        $self->{USER}{LINENO}++;
+        $self->{USER}{CHARNO} = 0;
+    }
+
+    $self->YYData->{INPUT} =~ s/^(\s+)//;
+    $self->{USER}{CHARNO} += length( $1 ) if defined $1;
+
+    # Element symbols
+    if( $self->YYData->{INPUT} =~ s/^([A-Za-z][a-z])/ ) {
+        return ( 'element', $1 );
+    }
+
+    # Chirality
+    if( $self->YYData->{INPUT} =~ s/^(@(
+                                        (TH|AL)[12]       |
+                                        SP     [123]      |
+                                        (TB|OH)[0-9]{1,2} |
+                                        @?
+                                        )/x ) {
+        return ( 'chiral', int( $1 . $2 ) );
+    }
+
+    # Numbers
+    if( $self->YYData->{INPUT} =~ s/^([0-9]+)/ ) {
+        return ( 'number', $1 );
+    }
+
+    # Charges
+    if( $self->YYData->{INPUT} =~ s/^(([-+])\1?[0-9]{0,2})/ ) {
+        return ( 'charge', $1 );
+    }
+
+
+
+    my $char = substr( $self->YYData->{INPUT}, 0, 1 );
+    if( $char ne '' ) {
+        $self->YYData->{INPUT} = substr( $self->YYData->{INPUT}, 1 );
+    }
+    $self->{USER}{CHARNO}++;
+    return( $char, $char );
+}
+
+sub parse
+{
+    my( $self, $string ) = @_;
+    $self->YYData->{INPUT} = $string;
+    $self->{USER}{GRAPH}     = Graph::Undirected->new;
+    $self->{USER}{RINGBONDS} = {};
+    $self->{USER}{LINENO} = 0;
+    $self->{USER}{CHARNO} = 0;
+    return $self->YYParse( yylex => \&_Lexer, yyerror => \&_Error );
+}
+
+1;
