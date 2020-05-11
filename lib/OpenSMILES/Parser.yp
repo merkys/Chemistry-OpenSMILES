@@ -23,6 +23,14 @@ chain: atom
             $_[0]->{USER}{GRAPH}->add_edge( $_[1]->{last}, $_[2] );
             return { first => $_[1]->{first}, last => $_[2] };
         }
+     | chain bond atom
+        {
+            # TODO: record the bond type
+            $_[0]->{USER}{GRAPH}->add_edge( $_[1]->{last}, $_[2] );
+            return { first => $_[1]->{first}, last => $_[2] };
+        }
+     | chain dot atom
+        { return { first => $_[3], last => $_[3] } }
      ;
 
 atom: aliphatic_organic
@@ -42,10 +50,25 @@ atom: aliphatic_organic
         {
             $_[0]->{USER}{GRAPH}->add_edge( $_[1], $_[2]->{first} );
         }
+    | atom '(' bond chain ')'
+        {
+            # TODO: record the bond type
+            $_[0]->{USER}{GRAPH}->add_edge( $_[1], $_[2]->{first} );
+        }
+    | atom '(' '.' chain ')'
+
+    # According to the specification of OpenSMILES, ring bonds are
+    # allowed only before the branch enumeration. However, I think this
+    # is too strict.
+
     | atom digit
         { $_[0]->_add_ring_bond( $_[1], $_[2] ) }
     | atom '%' digit digit
         { $_[0]->_add_ring_bond( $_[1], $_[3] . $_[4] ) }
+    | atom bond digit           # TODO: record the bond type
+        { $_[0]->_add_ring_bond( $_[1], $_[3] ) }
+    | atom bond '%' digit digit # TODO: record the bond type
+        { $_[0]->_add_ring_bond( $_[1], $_[4] . $_[5] ) }
     ;
 
 bracket_atom_incomplete: '[' number symbol
@@ -129,6 +152,8 @@ charge: '-'
 class: ':' number
         { return $_[2] }
       ;
+
+bond: '-' | '=' | '#' | '$' | ':' | '/' | '\\' ;
 
 number: digit
         { return int( $_[1] ) }
