@@ -130,7 +130,7 @@ aliphatic_organic: 'B' | 'C' | 'I' | 'N' | 'O' | 'P' | 'S' | 'F'
 
 aromatic_organic: 'b' | 'c' | 'n' | 'o' | 'p' | 's' ;
 
-symbol: aromatic_symbol | element_symbol ;
+symbol: aromatic_symbol | element_symbol | '*' ;
 
 aromatic_symbol: aromatic_organic
                | 'a' 's'

@@ -6,7 +6,7 @@ use OpenSMILES::Parser;
 use Test::More tests => 1;
 
 my @cases = qw(
-    [U]     [Pb]   [He]
+    [U]     [Pb]   [He]   [*]
     [CH4]   [ClH]  [ClH1]
     [Cl-]   [OH1-] [OH-1] [Cu+2] [Cu++]
     [13CH4] [2H+]  [238U]
