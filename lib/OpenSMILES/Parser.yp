@@ -19,13 +19,13 @@ smiles: atom ;
 atom: aliphatic_organic
         {
             my $atom = { symbol => $_[1] };
-            $self->{USER}{GRAPH}->add_node( $atom );
+            $_[0]->{USER}{GRAPH}->add_node( $atom );
             return $atom;
         }
     | aromatic_organic
         {
             my $atom = { symbol => $_[1] };
-            $self->{USER}{GRAPH}->add_node( $atom );
+            $_[0]->{USER}{GRAPH}->add_node( $atom );
             return $atom;
         }
     | '[' maybe_isotope bracket_symbol maybe_chiral maybe_hcount charge maybe_class ']'
@@ -38,7 +38,7 @@ atom: aliphatic_organic
                          charge    => $_[6],
                          class     => $_[7],
                        };
-            $self->{USER}{GRAPH}->add_node( $atom );
+            $_[0]->{USER}{GRAPH}->add_node( $atom );
             return $atom;
         }
     ;
@@ -130,7 +130,7 @@ sub _Lexer
     $self->{USER}{CHARNO} += length( $1 ) if defined $1;
 
     # Element symbols
-    if( $self->YYData->{INPUT} =~ s/^([A-Za-z][a-z])/ ) {
+    if( $self->YYData->{INPUT} =~ s/^([A-Za-z][a-z])// ) {
         my $symbol = $1;
         if(      $symbol =~ /^([BCNOSPFI]|Cl|Br)$/ ) {
             return ( 'aliphatic_organic', $symbol );
@@ -149,7 +149,7 @@ sub _Lexer
                                         SP     [123]      |
                                         (TB|OH)[0-9]{1,2} |
                                         @?
-                                        )/x ) {
+                                        ))//x ) {
         return ( 'chiral', $1 );
     }
 
