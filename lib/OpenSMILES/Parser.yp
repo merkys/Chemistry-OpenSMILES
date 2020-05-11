@@ -45,6 +45,12 @@ atom: aliphatic_organic
             $_[0]->{USER}{GRAPH}->add_vertex( $atom );
             return $atom;
         }
+    | '*'
+        {
+            my $atom = { symbol => $_[1] };
+            $_[0]->{USER}{GRAPH}->add_vertex( $atom );
+            return $atom;
+        }
     | bracket_atom
     | atom '(' chain ')'
         {
