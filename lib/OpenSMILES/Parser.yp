@@ -28,42 +28,70 @@ atom: aliphatic_organic
             $_[0]->{USER}{GRAPH}->add_node( $atom );
             return $atom;
         }
-    | '[' maybe_isotope bracket_symbol maybe_chiral maybe_hcount charge maybe_class ']'
-        {
-            my $atom = {
-                         isotope   => $_[2],
-                         symbol    => $_[3],
-                         chirality => $_[4],
-                         hydrogens => $_[5],
-                         charge    => $_[6],
-                         class     => $_[7],
-                       };
-            $_[0]->{USER}{GRAPH}->add_node( $atom );
-            return $atom;
-        }
+    | bracket_atom
     ;
 
-maybe_isotope: # empty
-             | number
-             ;
+bracket_atom_incomplete: '[' number bracket_symbol
+                                {
+                                    my $atom = {
+                                                 isotope => $_[2],
+                                                 symbol  => $_[3],
+                                               };
+                                    $_[0]->{USER}{GRAPH}->add_node( $atom );
+                                    return $atom;
+                                }
+                       | '[' bracket_symbol
+                                {
+                                    my $atom = {
+                                                 symbol  => $_[2],
+                                               };
+                                    $_[0]->{USER}{GRAPH}->add_node( $atom );
+                                    return $atom;
+                                }
+                       ;
+
+bracket_atom: bracket_atom_incomplete ']'
+            | bracket_atom_incomplete class ']'
+                { $_[1]->{class}  = $_[2] }
+            | bracket_atom_incomplete charge ']'
+                { $_[1]->{charge} = $_[2] }
+            | bracket_atom_incomplete charge class ']'
+                { $_[1]->{charge} = $_[2]; $_[1]->{class} = $_[3] }
+            | bracket_atom_incomplete hcount ']'
+                { $_[1]->{hydrogens} = $_[2] }
+            | bracket_atom_incomplete hcount class ']'
+                { $_[1]->{hydrogens} = $_[2]; $_[1]->{class} = $_[3] }
+            | bracket_atom_incomplete hcount charge ']'
+                { $_[1]->{hydrogens} = $_[2]; $_[1]->{charge} = $_[3] }
+            | bracket_atom_incomplete hcount charge class ']'
+                { $_[1]->{hydrogens} = $_[2]; $_[1]->{charge} = $_[3]; $_[1]->{class} = $_[4] }
+            | bracket_atom_incomplete chiral ']'
+                { $_[1]->{chirality} = $_[2] }
+            | bracket_atom_incomplete chiral class ']'
+                { $_[1]->{chirality} = $_[2]; $_[1]->{class} = $_[3] }
+            | bracket_atom_incomplete chiral charge ']'
+                { $_[1]->{chirality} = $_[2]; $_[1]->{charge} = $_[3] }
+            | bracket_atom_incomplete chiral charge class ']'
+                { $_[1]->{chirality} = $_[2]; $_[1]->{charge} = $_[3]; $_[1]->{class} = $_[4] }
+            | bracket_atom_incomplete chiral hcount ']'
+                { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3] }
+            | bracket_atom_incomplete chiral hcount class ']'
+                { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3]; $_[1]->{class} = $_[4] }
+            | bracket_atom_incomplete chiral hcount charge ']'
+                { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3]; $_[1]->{charge} = $_[4] }
+            | bracket_atom_incomplete chiral hcount charge class ']'
+                { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3]; $_[1]->{charge} = $_[4]; $_[1]->{class} = $_[5] }
+            ;
 
 bracket_symbol: aliphatic_organic | aromatic_organic | element_symbol | as | se ;
 
-maybe_chiral: # empty
-            | chiral
-            ;
+hcount: 'H'
+            { return 1 }
+      | 'H' digit
+            { return int( $_[2] ) }
+      ;
 
-maybe_hcount: # empty
-                { return 0 }
-            | 'H'
-                { return 1 }
-            | 'H' digit
-                { return int( $_[2] ) }
-            ;
-
-charge: # empty
-        { return  0 }
-      | '-'
+charge: '-'
         { return -1 }
       | '-' '-'
         { return -2 }
@@ -81,10 +109,9 @@ charge: # empty
         { return  int( $_[2] * 10 + $_[1] ) }
       ;
 
-maybe_class: # empty
-           | ':' number
-             { return $_[2] }
-           ;
+class: ':' number
+        { return $_[2] }
+      ;
 
 number: digit
         { return int( $_[1] ) }
@@ -130,7 +157,7 @@ sub _Lexer
     $self->{USER}{CHARNO} += length( $1 ) if defined $1;
 
     # Element symbols
-    if( $self->YYData->{INPUT} =~ s/^([A-Za-z][a-z])// ) {
+    if( $self->YYData->{INPUT} =~ s/^([A-Za-z][a-z]?|[a-z])// ) {
         my $symbol = $1;
         if(      $symbol =~ /^([BCNOSPFI]|Cl|Br)$/ ) {
             return ( 'aliphatic_organic', $symbol );
