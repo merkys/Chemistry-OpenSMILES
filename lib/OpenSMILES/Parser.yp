@@ -31,21 +31,21 @@ atom: aliphatic_organic
     | bracket_atom
     ;
 
-bracket_atom_incomplete: '[' number bracket_symbol
+bracket_atom_incomplete: '[' number symbol
                                 {
                                     my $atom = {
                                                  isotope => $_[2],
                                                  symbol  => $_[3],
                                                };
-                                    $_[0]->{USER}{GRAPH}->add_node( $atom );
+                                    $_[0]->{USER}{GRAPH}->add_vertex( $atom );
                                     return $atom;
                                 }
-                       | '[' bracket_symbol
+                       | '[' symbol
                                 {
                                     my $atom = {
                                                  symbol  => $_[2],
                                                };
-                                    $_[0]->{USER}{GRAPH}->add_node( $atom );
+                                    $_[0]->{USER}{GRAPH}->add_vertex( $atom );
                                     return $atom;
                                 }
                        ;
@@ -121,6 +121,37 @@ number: digit
 
 digit: '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' ;
 
+aliphatic_organic: 'B' | 'C' | 'I' | 'N' | 'O' | 'P' | 'S' | 'F'
+                 | 'C' 'l'
+                    { return $_[1] . $_[2] }
+                 | 'B' 'r'
+                    { return $_[1] . $_[2] }
+                 ;
+
+aromatic_organic: 'b' | 'c' | 'n' | 'o' | 'p' | 's' ;
+
+symbol: aromatic_symbol | element_symbol ;
+
+aromatic_symbol: aromatic_organic
+               | 'a' 's'
+                    { return $_[1] . $_[2] }
+               | 's' 'e'
+                    { return $_[1] . $_[2] }
+               ;
+
+element_symbol: uppercase_letter lowercase_letter
+                    { return $_[1] . $_[2] }
+              | uppercase_letter
+              ;
+
+uppercase_letter: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I'
+                | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R'
+                | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' ;
+
+lowercase_letter: 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i'
+                | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r'
+                | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z' ;
+
 %%
 
 # Footer section
@@ -155,20 +186,6 @@ sub _Lexer
 
     $self->YYData->{INPUT} =~ s/^(\s+)//;
     $self->{USER}{CHARNO} += length( $1 ) if defined $1;
-
-    # Element symbols
-    if( $self->YYData->{INPUT} =~ s/^([A-Za-z][a-z]?|[a-z])// ) {
-        my $symbol = $1;
-        if(      $symbol =~ /^([BCNOSPFI]|Cl|Br)$/ ) {
-            return ( 'aliphatic_organic', $symbol );
-        } elsif( $symbol =~ /^[bcnosp]$/ ) {
-            return ( 'aromatic_organic', $symbol );
-        } elsif( $symbol eq 'se' || $symbol eq 'as' ) {
-            return ( $symbol, $symbol );
-        } else {
-            return ( 'element_symbol', $symbol );
-        }
-    }
 
     # Chirality
     if( $self->YYData->{INPUT} =~ s/^(@(
