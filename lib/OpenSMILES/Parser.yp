@@ -18,19 +18,19 @@ smiles: chain ;
 
 chain: atom
         { return { first => $_[1], last => $_[1] } }
-     | chain atom
+     | atom chain
         {
-            $_[0]->{USER}{GRAPH}->add_edge( $_[1]->{last}, $_[2] );
-            return { first => $_[1]->{first}, last => $_[2] };
+            $_[0]->{USER}{GRAPH}->add_edge( $_[1], $_[2]->{first} );
+            return { first => $_[1], last => $_[2]->{last} };
         }
-     | chain bond atom
+     | atom bond chain
         {
             # TODO: record the bond type
-            $_[0]->{USER}{GRAPH}->add_edge( $_[1]->{last}, $_[2] );
-            return { first => $_[1]->{first}, last => $_[2] };
+            $_[0]->{USER}{GRAPH}->add_edge( $_[1], $_[3]->{first} );
+            return { first => $_[1], last => $_[3]->{last} };
         }
-     | chain dot atom
-        { return { first => $_[3], last => $_[3] } }
+     | atom dot chain
+        { return $_[3] }
      ;
 
 atom: aliphatic_organic
@@ -54,12 +54,12 @@ atom: aliphatic_organic
     | bracket_atom
     | atom '(' chain ')'
         {
-            $_[0]->{USER}{GRAPH}->add_edge( $_[1], $_[2]->{first} );
+            $_[0]->{USER}{GRAPH}->add_edge( $_[1], $_[3]->{first} );
         }
     | atom '(' bond chain ')'
         {
             # TODO: record the bond type
-            $_[0]->{USER}{GRAPH}->add_edge( $_[1], $_[2]->{first} );
+            $_[0]->{USER}{GRAPH}->add_edge( $_[1], $_[4]->{first} );
         }
     | atom '(' '.' chain ')'
 
@@ -98,35 +98,35 @@ bracket_atom_incomplete: '[' number symbol
 
 bracket_atom: bracket_atom_incomplete ']'
             | bracket_atom_incomplete class ']'
-                { $_[1]->{class}  = $_[2] }
+                { $_[1]->{class}  = $_[2]; return $_[1] }
             | bracket_atom_incomplete charge ']'
-                { $_[1]->{charge} = $_[2] }
+                { $_[1]->{charge} = $_[2]; return $_[1] }
             | bracket_atom_incomplete charge class ']'
-                { $_[1]->{charge} = $_[2]; $_[1]->{class} = $_[3] }
+                { $_[1]->{charge} = $_[2]; $_[1]->{class} = $_[3]; return $_[1] }
             | bracket_atom_incomplete hcount ']'
-                { $_[1]->{hydrogens} = $_[2] }
+                { $_[1]->{hydrogens} = $_[2]; return $_[1] }
             | bracket_atom_incomplete hcount class ']'
-                { $_[1]->{hydrogens} = $_[2]; $_[1]->{class} = $_[3] }
+                { $_[1]->{hydrogens} = $_[2]; $_[1]->{class} = $_[3]; return $_[1] }
             | bracket_atom_incomplete hcount charge ']'
-                { $_[1]->{hydrogens} = $_[2]; $_[1]->{charge} = $_[3] }
+                { $_[1]->{hydrogens} = $_[2]; $_[1]->{charge} = $_[3]; return $_[1] }
             | bracket_atom_incomplete hcount charge class ']'
-                { $_[1]->{hydrogens} = $_[2]; $_[1]->{charge} = $_[3]; $_[1]->{class} = $_[4] }
+                { $_[1]->{hydrogens} = $_[2]; $_[1]->{charge} = $_[3]; $_[1]->{class} = $_[4]; return $_[1] }
             | bracket_atom_incomplete chiral ']'
-                { $_[1]->{chirality} = $_[2] }
+                { $_[1]->{chirality} = $_[2]; return $_[1] }
             | bracket_atom_incomplete chiral class ']'
-                { $_[1]->{chirality} = $_[2]; $_[1]->{class} = $_[3] }
+                { $_[1]->{chirality} = $_[2]; $_[1]->{class} = $_[3]; return $_[1] }
             | bracket_atom_incomplete chiral charge ']'
-                { $_[1]->{chirality} = $_[2]; $_[1]->{charge} = $_[3] }
+                { $_[1]->{chirality} = $_[2]; $_[1]->{charge} = $_[3]; return $_[1] }
             | bracket_atom_incomplete chiral charge class ']'
-                { $_[1]->{chirality} = $_[2]; $_[1]->{charge} = $_[3]; $_[1]->{class} = $_[4] }
+                { $_[1]->{chirality} = $_[2]; $_[1]->{charge} = $_[3]; $_[1]->{class} = $_[4]; return $_[1] }
             | bracket_atom_incomplete chiral hcount ']'
-                { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3] }
+                { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3]; return $_[1] }
             | bracket_atom_incomplete chiral hcount class ']'
-                { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3]; $_[1]->{class} = $_[4] }
+                { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3]; $_[1]->{class} = $_[4]; return $_[1] }
             | bracket_atom_incomplete chiral hcount charge ']'
-                { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3]; $_[1]->{charge} = $_[4] }
+                { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3]; $_[1]->{charge} = $_[4]; return $_[1] }
             | bracket_atom_incomplete chiral hcount charge class ']'
-                { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3]; $_[1]->{charge} = $_[4]; $_[1]->{class} = $_[5] }
+                { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3]; $_[1]->{charge} = $_[4]; $_[1]->{class} = $_[5]; return $_[1] }
             ;
 
 bracket_symbol: aliphatic_organic | aromatic_organic | element_symbol | as | se ;
