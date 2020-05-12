@@ -31,6 +31,18 @@ chain: atom
         }
      | atom dot chain
         { return $_[3] }
+     | chain '(' chain ')'
+        {
+            $_[0]->{USER}{GRAPH}->add_edge( $_[1]->{last}, $_[3]->{first} );
+            return $_[1];
+        }
+     | chain '(' bond chain ')'
+        {
+            # TODO: record the bond type
+            $_[0]->{USER}{GRAPH}->add_edge( $_[1]->{last}, $_[4]->{first} );
+            return $_[1];
+        }
+     | chain '(' '.' chain ')'
      ;
 
 atom: aliphatic_organic
@@ -52,16 +64,6 @@ atom: aliphatic_organic
             return $atom;
         }
     | bracket_atom
-    | atom '(' chain ')'
-        {
-            $_[0]->{USER}{GRAPH}->add_edge( $_[1], $_[3]->{first} );
-        }
-    | atom '(' bond chain ')'
-        {
-            # TODO: record the bond type
-            $_[0]->{USER}{GRAPH}->add_edge( $_[1], $_[4]->{first} );
-        }
-    | atom '(' '.' chain ')'
 
     # According to the specification of OpenSMILES, ring bonds are
     # allowed only before the branch enumeration. However, I think this
@@ -169,12 +171,11 @@ number: digit
 
 digit: '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' ;
 
-aliphatic_organic: 'B' | 'C' | 'I' | 'N' | 'O' | 'P' | 'S' | 'F'
-                 | 'C' 'l'
+aliphatic_organic: 'C' 'l'
                     { return $_[1] . $_[2] }
                  | 'B' 'r'
                     { return $_[1] . $_[2] }
-                 ;
+                 | 'B' | 'C' | 'I' | 'N' | 'O' | 'P' | 'S' | 'F' ;
 
 aromatic_organic: 'b' | 'c' | 'n' | 'o' | 'p' | 's' ;
 
