@@ -131,8 +131,6 @@ bracket_atom: bracket_atom_incomplete ']'
                 { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3]; $_[1]->{charge} = $_[4]; $_[1]->{class} = $_[5]; return $_[1] }
             ;
 
-bracket_symbol: aliphatic_organic | aromatic_organic | element_symbol | as | se ;
-
 hcount: 'H'
             { return 1 }
       | 'H' digit
