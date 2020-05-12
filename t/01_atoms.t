@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use OpenSMILES::Parser;
-use Test::More tests => 1;
+use Test::More;
 
 my @cases = qw(
     C       N      Cl
@@ -13,10 +13,10 @@ my @cases = qw(
     [13CH4] [2H+]  [238U]
 );
 
-my $parser;
-for (@cases) {
-    $parser = OpenSMILES::Parser->new;
-    $parser->parse( $_ );
-}
+plan tests => scalar @cases;
 
-ok( 1 );
+for (@cases) {
+    my $parser = OpenSMILES::Parser->new;
+    my $graph = $parser->parse( $_ );
+    is( $graph->vertices, 1 );
+}
