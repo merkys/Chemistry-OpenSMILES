@@ -1,4 +1,4 @@
-package OpenSMILES;
+package Chemistry::OpenSMILES;
 
 use strict;
 use warnings;

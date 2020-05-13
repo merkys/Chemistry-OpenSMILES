@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use List::Util qw(sum);
-use OpenSMILES::Parser;
+use Chemistry::OpenSMILES::Parser;
 use Test::More;
 
 my %cases = (
@@ -51,7 +51,7 @@ my %cases = (
 plan tests => 3 * scalar keys %cases;
 
 for my $case (sort keys %cases) {
-    my $parser = OpenSMILES::Parser->new;
+    my $parser = Chemistry::OpenSMILES::Parser->new;
     my @graphs = $parser->parse( $case );
 
     is( scalar @graphs, @{$cases{$case}} == 3 ? $cases{$case}->[0] : 1 );

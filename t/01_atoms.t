@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use OpenSMILES::Parser;
+use Chemistry::OpenSMILES::Parser;
 use Test::More;
 
 my @cases = qw(
@@ -16,11 +16,11 @@ my @cases = qw(
 plan tests => 2 * scalar @cases;
 
 for (@cases) {
-    my $parser   = OpenSMILES::Parser->new;
+    my $parser   = Chemistry::OpenSMILES::Parser->new;
     my( $graph ) = $parser->parse( $_ );
     is( $graph->vertices, 1 );
     $_ = "[$_]" unless /^\[/;
-    is( join( '', map { OpenSMILES::Parser::_sprint_atom( $_ ) }
+    is( join( '', map { Chemistry::OpenSMILES::Parser::_sprint_atom( $_ ) }
                       $graph->vertices ),
         $_ );
 }
