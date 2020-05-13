@@ -6,22 +6,31 @@ use OpenSMILES::Parser;
 use Test::More;
 
 my %cases = (
-    'CC'    => 2,
-    'CCO'   => 3,
-    'NCCCC' => 5,
-    'CCCCN' => 5,
+    'CC'    => [ 2, 1 ],
+    'CCO'   => [ 3, 2 ],
+    'NCCCC' => [ 5, 4 ],
+    'CCCCN' => [ 5, 4 ],
 
-    'C=C'   => 2,
-    'C#N'   => 2,
-    'CC#CC' => 4,
-    'CCC=O' => 4,
-    '[Rh-](Cl)(Cl)(Cl)(Cl)$[Rh-](Cl)(Cl)(Cl)Cl' => 10,
+    'C=C'   => [ 2, 1 ],
+    'C#N'   => [ 2, 1 ],
+    'CC#CC' => [ 4, 3 ],
+    'CCC=O' => [ 4, 3 ],
+    '[Rh-](Cl)(Cl)(Cl)(Cl)$[Rh-](Cl)(Cl)(Cl)Cl' => [ 10, 9 ],
+
+    'C-C' => [ 2, 1 ],
+
+    'CCC(CC)CO'           => [  7,  6 ],
+    'CC(C)C(=O)C(C)C'     => [  8,  7 ],
+    'OCC(CCC)C(C(C)C)CCC' => [ 13, 12 ],
+    'OS(=O)(=S)O'         => [  5,  4 ],
+    'C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C))))))))))))))))))))C' => [ 22, 21 ],
 );
 
-plan tests => scalar keys %cases;
+plan tests => 2 * scalar keys %cases;
 
 for my $case (sort keys %cases) {
     my $parser = OpenSMILES::Parser->new;
     my $graph = $parser->parse( $case );
-    is( $graph->vertices, $cases{$case} );
+    is( $graph->vertices, $cases{$case}->[0] );
+    is( $graph->edges,    $cases{$case}->[1] );
 }
