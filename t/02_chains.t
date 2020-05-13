@@ -34,6 +34,13 @@ my %cases = (
     'C%25CCCCC%25'      => [  6,  6 ],
     'C1CCCCC%01'        => [  6,  6 ],
     'C12(CCCCC1)CCCCC2' => [ 11, 12 ],
+
+    '[Na+].[Cl-]'             => [  2,  0 ],
+    'c1cc(O.NCCO)ccc1'        => [ 11, 10 ],
+    'Oc1cc(.NCCO)ccc1'        => [ 11, 10 ],
+    'C1.C1'                   => [  2,  1 ],
+    'C1.C12.C2'               => [  3,  2 ],
+    'c1c2c3c4cc1.Br2.Cl3.Cl4' => [  9,  9 ],
 );
 
 plan tests => 2 * scalar keys %cases;
