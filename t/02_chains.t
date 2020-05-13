@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use List::Util qw(sum);
 use OpenSMILES::Parser;
 use Test::More;
 
@@ -35,19 +36,22 @@ my %cases = (
     'C1CCCCC%01'        => [  6,  6 ],
     'C12(CCCCC1)CCCCC2' => [ 11, 12 ],
 
-    #~ '[Na+].[Cl-]'             => [  2,  0 ],
-    #~ 'c1cc(O.NCCO)ccc1'        => [ 11, 10 ],
-    #~ 'Oc1cc(.NCCO)ccc1'        => [ 11, 10 ],
-    #~ 'C1.C1'                   => [  2,  1 ],
-    #~ 'C1.C12.C2'               => [  3,  2 ],
-    #~ 'c1c2c3c4cc1.Br2.Cl3.Cl4' => [  9,  9 ],
+    '[Na+].[Cl-]'             => [ 2,  2,  0 ],
+    'c1cc(O.NCCO)ccc1'        => [ 2, 11, 10 ],
+    'Oc1cc(.NCCO)ccc1'        => [ 2, 11, 10 ],
+    'C1.C1'                   => [ 1,  2,  1 ],
+    'C1.C12.C2'               => [ 1,  3,  2 ],
+    'c1c2c3c4cc1.Br2.Cl3.Cl4' => [ 1,  9,  9 ],
 );
 
-plan tests => 2 * scalar keys %cases;
+plan tests => 3 * scalar keys %cases;
 
 for my $case (sort keys %cases) {
-    my $parser   = OpenSMILES::Parser->new;
-    my( $graph ) = $parser->parse( $case );
-    is( $graph->vertices, $cases{$case}->[0] );
-    is( $graph->edges,    $cases{$case}->[1] );
+    my $parser = OpenSMILES::Parser->new;
+    my @graphs = $parser->parse( $case );
+
+    is( scalar @graphs, @{$cases{$case}} == 3 ? $cases{$case}->[0] : 1 );
+
+    is( sum( map { scalar $_->vertices } @graphs ), $cases{$case}->[-2] );
+    is( sum( map { scalar $_->edges    } @graphs ), $cases{$case}->[-1] );
 }
