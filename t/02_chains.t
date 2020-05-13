@@ -24,6 +24,9 @@ my %cases = (
     'OCC(CCC)C(C(C)C)CCC' => [ 13, 12 ],
     'OS(=O)(=S)O'         => [  5,  4 ],
     'C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C))))))))))))))))))))C' => [ 22, 21 ],
+
+    'C1CCCCC1'       => [  6,  6 ],
+    'N1CC2CCCCC2CC1' => [ 10, 11 ],
 );
 
 plan tests => 2 * scalar keys %cases;
