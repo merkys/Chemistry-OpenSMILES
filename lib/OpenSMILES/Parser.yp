@@ -111,8 +111,12 @@ sub _Lexer
                                          ))?
                                         (?<hcount>H[0-9]?)?
                                         (?<charge>--|\+\+|[-+][0-9]{0,2})?
-                                        (?<class>[0-9]+)? \]//x ) {
+                                        (:(?<class>[0-9]+))? \]//x ) {
         my $atom = { %+ };
+
+        # Atom class is an arbitrary number, 0 by default
+        $atom->{class} = exists $atom->{class} ? int $atom->{class} : 0;
+
         $self->{USER}{GRAPH}->add_vertex( $atom );
         return ( 'atom', $atom );
     }
@@ -174,7 +178,8 @@ sub _sprint_atom
                  (exists $atom->{chirality} ? $atom->{chirality} : '') .
                  (exists $atom->{hcount}    ? $atom->{hcount}    : '') .
                  (exists $atom->{charge}    ? $atom->{charge}    : '') .
-                 (exists $atom->{class}     ? $atom->{class}     : '') .
+                 (exists $atom->{class} && $atom->{class}
+                    ? ':' . $atom->{class} : '') .
            ']';
 }
 
