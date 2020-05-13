@@ -26,8 +26,7 @@ chain: atom
         }
      | chain bond atom
         {
-            # TODO: record the bond type
-            $_[0]->{USER}{GRAPH}->add_edge( $_[1]->{last}, $_[3] );
+            $_[0]->{USER}{GRAPH}->set_edge_attribute( $_[1]->{last}, $_[3], 'bond', $_[2] );
             $_[1]->{last} = $_[3];
             return $_[1];
         }
@@ -40,8 +39,7 @@ chain: atom
         }
      | chain '(' bond chain ')'
         {
-            # TODO: record the bond type
-            $_[0]->{USER}{GRAPH}->add_edge( $_[1]->{last}, $_[4]->{first} );
+            $_[0]->{USER}{GRAPH}->set_edge_attribute( $_[1]->{last}, $_[4]->{first}, 'bond', $_[3] );
             return $_[1];
         }
      | chain '(' '.' chain ')'
@@ -57,8 +55,7 @@ chain: atom
         }
      | chain bond ringbond
         {
-            # TODO: record the bond type
-            $_[0]->_add_ring_bond( $_[1]->{last}, $_[3] );
+            $_[0]->_add_ring_bond( $_[1]->{last}, $_[3], $_[2] );
             return $_[1];
         }
      ;
@@ -160,14 +157,30 @@ sub parse
 
 sub _add_ring_bond
 {
-    my( $self, $atom, $ring_bond ) = @_;
+    my( $self, $atom, $ring_bond, $bond ) = @_;
     $ring_bond = int( $ring_bond );
     if( $self->{USER}{RINGBONDS}{$ring_bond} ) {
-        $self->{USER}{GRAPH}->add_edge( $self->{USER}{RINGBONDS}{$ring_bond},
-                                        $atom );
+        if( $bond && $self->{USER}{RINGBONDS}{$ring_bond}{bond} &&
+            $bond ne $self->{USER}{RINGBONDS}{$ring_bond}{bond} ) {
+            die "ring bond types for ring bond '$ring_bond' do not match";
+        }
+        ( $bond ) = grep { defined }
+                         ( $bond, $self->{USER}{RINGBONDS}{$ring_bond}{bond} );
+        if( $bond ) {
+            $self->{USER}{GRAPH}->set_edge_attribute(
+                $self->{USER}{RINGBONDS}{$ring_bond}{atom},
+                $atom,
+                'bond',
+                $bond );
+        } else {
+            $self->{USER}{GRAPH}->add_edge( $self->{USER}{RINGBONDS}{$ring_bond}{atom},
+                                            $atom );
+        }
         delete $self->{USER}{RINGBONDS}{$ring_bond};
     } else {
-        $self->{USER}{RINGBONDS}{$ring_bond} = $atom;
+        $self->{USER}{RINGBONDS}{$ring_bond} =
+            { atom => $atom,
+              $bond ? ( bond => $bond ) : () };
     }
 }
 
