@@ -13,10 +13,14 @@ my @cases = qw(
     [13CH4] [2H+]  [238U]
 );
 
-plan tests => scalar @cases;
+plan tests => 2 * scalar @cases;
 
 for (@cases) {
     my $parser = OpenSMILES::Parser->new;
     my $graph = $parser->parse( $_ );
     is( $graph->vertices, 1 );
+    $_ = "[$_]" unless /^\[/;
+    is( join( '', map { OpenSMILES::Parser::_sprint_atom( $_ ) }
+                      $graph->vertices ),
+        $_ );
 }
