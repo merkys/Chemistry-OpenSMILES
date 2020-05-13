@@ -18,19 +18,21 @@ smiles: chain ;
 
 chain: atom
         { return { first => $_[1], last => $_[1] } }
-     | atom chain
+     | chain atom
         {
-            $_[0]->{USER}{GRAPH}->add_edge( $_[1], $_[2]->{first} );
-            return { first => $_[1], last => $_[2]->{last} };
+            $_[0]->{USER}{GRAPH}->add_edge( $_[1]->{last}, $_[2] );
+            $_[1]->{last} = $_[2];
+            return $_[1];
         }
-     | atom bond chain
+     | chain bond atom
         {
             # TODO: record the bond type
-            $_[0]->{USER}{GRAPH}->add_edge( $_[1], $_[3]->{first} );
-            return { first => $_[1], last => $_[3]->{last} };
+            $_[0]->{USER}{GRAPH}->add_edge( $_[1]->{last}, $_[3] );
+            $_[1]->{last} = $_[3];
+            return $_[1];
         }
-     | atom dot chain
-        { return $_[3] }
+     | chain '.' atom
+        { return { last => $_[3], first => $_[3] } }
      | chain '(' chain ')'
         {
             $_[0]->{USER}{GRAPH}->add_edge( $_[1]->{last}, $_[3]->{first} );
@@ -43,161 +45,25 @@ chain: atom
             return $_[2];
         }
      | chain '(' '.' chain ')'
+
+     # According to the specification of OpenSMILES, ring bonds are
+     # allowed only before the branch enumeration. However, I think this
+     # is too strict.
+
+     | chain ringbond
+        {
+            $_[0]->_add_ring_bond( $_[1]->{last}, $_[2] );
+            return $_[1];
+        }
+     | chain bond ringbond
+        {
+            # TODO: record the bond type
+            $_[0]->_add_ring_bond( $_[1]->{last}, $_[3] );
+            return $_[1];
+        }
      ;
 
-atom: aliphatic_organic
-        {
-            my $atom = { symbol => $_[1] };
-            $_[0]->{USER}{GRAPH}->add_vertex( $atom );
-            return $atom;
-        }
-    | aromatic_organic
-        {
-            my $atom = { symbol => $_[1] };
-            $_[0]->{USER}{GRAPH}->add_vertex( $atom );
-            return $atom;
-        }
-    | '*'
-        {
-            my $atom = { symbol => $_[1] };
-            $_[0]->{USER}{GRAPH}->add_vertex( $atom );
-            return $atom;
-        }
-    | bracket_atom
-
-    # According to the specification of OpenSMILES, ring bonds are
-    # allowed only before the branch enumeration. However, I think this
-    # is too strict.
-
-    | atom digit
-        { $_[0]->_add_ring_bond( $_[1], $_[2] ) }
-    | atom '%' digit digit
-        { $_[0]->_add_ring_bond( $_[1], $_[3] . $_[4] ) }
-    | atom bond digit           # TODO: record the bond type
-        { $_[0]->_add_ring_bond( $_[1], $_[3] ) }
-    | atom bond '%' digit digit # TODO: record the bond type
-        { $_[0]->_add_ring_bond( $_[1], $_[4] . $_[5] ) }
-    ;
-
-bracket_atom_incomplete: '[' number symbol
-                                {
-                                    my $atom = {
-                                                 isotope => $_[2],
-                                                 symbol  => $_[3],
-                                               };
-                                    $_[0]->{USER}{GRAPH}->add_vertex( $atom );
-                                    return $atom;
-                                }
-                       | '[' symbol
-                                {
-                                    my $atom = {
-                                                 symbol  => $_[2],
-                                               };
-                                    $_[0]->{USER}{GRAPH}->add_vertex( $atom );
-                                    return $atom;
-                                }
-                       ;
-
-bracket_atom: bracket_atom_incomplete ']'
-            | bracket_atom_incomplete class ']'
-                { $_[1]->{class}  = $_[2]; return $_[1] }
-            | bracket_atom_incomplete charge ']'
-                { $_[1]->{charge} = $_[2]; return $_[1] }
-            | bracket_atom_incomplete charge class ']'
-                { $_[1]->{charge} = $_[2]; $_[1]->{class} = $_[3]; return $_[1] }
-            | bracket_atom_incomplete hcount ']'
-                { $_[1]->{hydrogens} = $_[2]; return $_[1] }
-            | bracket_atom_incomplete hcount class ']'
-                { $_[1]->{hydrogens} = $_[2]; $_[1]->{class} = $_[3]; return $_[1] }
-            | bracket_atom_incomplete hcount charge ']'
-                { $_[1]->{hydrogens} = $_[2]; $_[1]->{charge} = $_[3]; return $_[1] }
-            | bracket_atom_incomplete hcount charge class ']'
-                { $_[1]->{hydrogens} = $_[2]; $_[1]->{charge} = $_[3]; $_[1]->{class} = $_[4]; return $_[1] }
-            | bracket_atom_incomplete chiral ']'
-                { $_[1]->{chirality} = $_[2]; return $_[1] }
-            | bracket_atom_incomplete chiral class ']'
-                { $_[1]->{chirality} = $_[2]; $_[1]->{class} = $_[3]; return $_[1] }
-            | bracket_atom_incomplete chiral charge ']'
-                { $_[1]->{chirality} = $_[2]; $_[1]->{charge} = $_[3]; return $_[1] }
-            | bracket_atom_incomplete chiral charge class ']'
-                { $_[1]->{chirality} = $_[2]; $_[1]->{charge} = $_[3]; $_[1]->{class} = $_[4]; return $_[1] }
-            | bracket_atom_incomplete chiral hcount ']'
-                { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3]; return $_[1] }
-            | bracket_atom_incomplete chiral hcount class ']'
-                { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3]; $_[1]->{class} = $_[4]; return $_[1] }
-            | bracket_atom_incomplete chiral hcount charge ']'
-                { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3]; $_[1]->{charge} = $_[4]; return $_[1] }
-            | bracket_atom_incomplete chiral hcount charge class ']'
-                { $_[1]->{chirality} = $_[2]; $_[1]->{hydrogens} = $_[3]; $_[1]->{charge} = $_[4]; $_[1]->{class} = $_[5]; return $_[1] }
-            ;
-
-hcount: 'H'
-            { return 1 }
-      | 'H' digit
-            { return int( $_[2] ) }
-      ;
-
-charge: '-'
-        { return -1 }
-      | '-' '-'
-        { return -2 }
-      | '+'
-        { return  1 }
-      | '+' '+'
-        { return  2 }
-      | '-' digit
-        { return -int( $_[2] ) }
-      | '-' digit digit
-        { return -int( $_[2] * 10 + $_[1] ) }
-      | '+' digit
-        { return  int( $_[2] ) }
-      | '+' digit digit
-        { return  int( $_[2] * 10 + $_[1] ) }
-      ;
-
-class: ':' number
-        { return $_[2] }
-      ;
-
 bond: '-' | '=' | '#' | '$' | ':' | '/' | '\\' ;
-
-number: digit
-        { return int( $_[1] ) }
-      | number digit
-        { return $_[1] * 10 + int( $_[2] ) }
-      ;
-
-digit: '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' ;
-
-aliphatic_organic: 'C' 'l'
-                    { return $_[1] . $_[2] }
-                 | 'B' 'r'
-                    { return $_[1] . $_[2] }
-                 | 'B' | 'C' | 'I' | 'N' | 'O' | 'P' | 'S' | 'F' ;
-
-aromatic_organic: 'b' | 'c' | 'n' | 'o' | 'p' | 's' ;
-
-symbol: aromatic_symbol | element_symbol | '*' ;
-
-aromatic_symbol: aromatic_organic
-               | 'a' 's'
-                    { return $_[1] . $_[2] }
-               | 's' 'e'
-                    { return $_[1] . $_[2] }
-               ;
-
-element_symbol: uppercase_letter lowercase_letter
-                    { return $_[1] . $_[2] }
-              | uppercase_letter
-              ;
-
-uppercase_letter: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I'
-                | 'J' | 'K' | 'L' | 'M' | 'N' | 'O' | 'P' | 'Q' | 'R'
-                | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z' ;
-
-lowercase_letter: 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i'
-                | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r'
-                | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z' ;
 
 %%
 
@@ -234,14 +100,33 @@ sub _Lexer
     $self->YYData->{INPUT} =~ s/^(\s+)//;
     $self->{USER}{CHARNO} += length( $1 ) if defined $1;
 
-    # Chirality
-    if( $self->YYData->{INPUT} =~ s/^(@(
-                                        (TH|AL)[12]       |
-                                        SP     [123]      |
-                                        (TB|OH)[0-9]{1,2} |
-                                        @?
-                                        ))//x ) {
-        return ( 'chiral', $1 );
+    # Bracket atoms
+    if( $self->YYData->{INPUT} =~ s/^\[ (?<isotope>[0-9]+)?
+                                        (?<symbol>[A-Za-z][a-z]?|\*)
+                                        (?<chirality>@(
+                                         (TH|AL)[12]       |
+                                         SP     [123]      |
+                                         (TB|OH)[0-9]{1,2} |
+                                         @?
+                                         ))?
+                                        (?<hcount>H[0-9]?)?
+                                        (?<charge>--|\+\+|[-+][0-9]{0,2})?
+                                        (?<class>[0-9]+)? \]//x ) {
+        my $atom = { %+ };
+        $self->{USER}{GRAPH}->add_vertex( $atom );
+        return ( 'atom', $atom );
+    }
+
+    # Bracketless atoms
+    if( $self->YYData->{INPUT} =~ s/^(Br|Cl|[BCINOPSFbcnops])// ) {
+        my $atom = { symbol => $1 };
+        $self->{USER}{GRAPH}->add_vertex( $atom );
+        return ( 'atom', $atom );
+    }
+
+    # Ring bonds
+    if( $self->YYData->{INPUT} =~ s/^(?:%([0-9]))([0-9])// ) {
+        return ( 'ringbond', int( $1 . $2 ) );
     }
 
     my $char = substr( $self->YYData->{INPUT}, 0, 1 );
@@ -254,13 +139,17 @@ sub _Lexer
 
 sub parse
 {
-    my( $self, $string ) = @_;
+    my( $self, $string, $options ) = @_;
+    $options = {} unless $options;
+
     $self->YYData->{INPUT} = $string;
     $self->{USER}{GRAPH}     = Graph::Undirected->new;
     $self->{USER}{RINGBONDS} = {};
     $self->{USER}{LINENO} = 0;
     $self->{USER}{CHARNO} = 0;
-    $self->YYParse( yylex => \&_Lexer, yyerror => \&_Error );
+    $self->YYParse( yylex => \&_Lexer,
+                    yyerror => \&_Error,
+                    yydebug => $options->{debug} );
     return $self->{USER}{GRAPH};
 }
 
