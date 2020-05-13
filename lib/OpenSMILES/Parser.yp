@@ -17,16 +17,24 @@ use Graph::Undirected;
 smiles: chain ;
 
 chain: atom
-        { return { first => $_[1], last => $_[1] } }
+        {
+            my $g = Graph::Undirected->new;
+            $g->add_vertex( $_[1] );
+            push @{$_[0]->{USER}{GRAPHS}}, $g;
+            return { first => $_[1],
+                     last => $_[1],
+                     graph => $g,
+                     index => @{$_[0]->{USER}{GRAPHS}}-1 };
+        }
      | chain atom
         {
-            $_[0]->{USER}{GRAPH}->add_edge( $_[1]->{last}, $_[2] );
+            $_[1]->{graph}->add_edge( $_[1]->{last}, $_[2] );
             $_[1]->{last} = $_[2];
             return $_[1];
         }
      | chain bond atom
         {
-            $_[0]->{USER}{GRAPH}->set_edge_attribute( $_[1]->{last}, $_[3], 'bond', $_[2] );
+            $_[1]->{graph}->set_edge_attribute( $_[1]->{last}, $_[3], 'bond', $_[2] );
             $_[1]->{last} = $_[3];
             return $_[1];
         }
@@ -34,12 +42,14 @@ chain: atom
         { return $_[3] }
      | chain '(' chain ')'
         {
-            $_[0]->{USER}{GRAPH}->add_edge( $_[1]->{last}, $_[3]->{first} );
+            _merge_graphs( $_[1]->{graph}, $_[3]->{graph} );
+            $_[1]->{graph}->add_edge( $_[1]->{last}, $_[3]->{first} );
             return $_[1];
         }
      | chain '(' bond chain ')'
         {
-            $_[0]->{USER}{GRAPH}->set_edge_attribute( $_[1]->{last}, $_[4]->{first}, 'bond', $_[3] );
+            _merge_graphs( $_[1]->{graph}, $_[4]->{graph} );
+            $_[1]->{graph}->set_edge_attribute( $_[1]->{last}, $_[4]->{first}, 'bond', $_[3] );
             return $_[1];
         }
      | chain '(' '.' chain ')'
@@ -50,11 +60,13 @@ chain: atom
 
      | chain ringbond
         {
+            # FIXME: merge graphs
             $_[0]->_add_ring_bond( $_[1]->{last}, $_[2] );
             return $_[1];
         }
      | chain bond ringbond
         {
+            # FIXME: merge graphs
             $_[0]->_add_ring_bond( $_[1]->{last}, $_[3], $_[2] );
             return $_[1];
         }
@@ -114,14 +126,12 @@ sub _Lexer
         # Atom class is an arbitrary number, 0 by default
         $atom->{class} = exists $atom->{class} ? int $atom->{class} : 0;
 
-        $self->{USER}{GRAPH}->add_vertex( $atom );
         return ( 'atom', $atom );
     }
 
     # Bracketless atoms
     if( $self->YYData->{INPUT} =~ s/^(Br|Cl|[BCINOPSFbcnops])// ) {
         my $atom = { symbol => $1 };
-        $self->{USER}{GRAPH}->add_vertex( $atom );
         return ( 'atom', $atom );
     }
 
@@ -144,15 +154,15 @@ sub parse
     my( $self, $string, $options ) = @_;
     $options = {} unless $options;
 
-    $self->YYData->{INPUT} = $string;
-    $self->{USER}{GRAPH}     = Graph::Undirected->new;
+    $self->YYData->{INPUT}   = $string;
+    $self->{USER}{GRAPHS}    = [];
     $self->{USER}{RINGBONDS} = {};
     $self->{USER}{LINENO} = 0;
     $self->{USER}{CHARNO} = 0;
     $self->YYParse( yylex => \&_Lexer,
                     yyerror => \&_Error,
                     yydebug => $options->{debug} );
-    return $self->{USER}{GRAPH};
+    return @{$self->{USER}{GRAPHS}};
 }
 
 sub _add_ring_bond
@@ -182,6 +192,16 @@ sub _add_ring_bond
             { atom => $atom,
               $bond ? ( bond => $bond ) : () };
     }
+}
+
+sub _merge_graphs
+{
+    my( $g1, $g2 ) = @_;
+    return if $g1 eq $g2;
+
+    $g1->add_vertices( $g2->vertices );
+    $g1->add_edges( $g2->edges );
+    # FIXME: do we have to add properties?
 }
 
 sub _sprint_atom

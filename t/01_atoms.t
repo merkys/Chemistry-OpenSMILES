@@ -16,8 +16,8 @@ my @cases = qw(
 plan tests => 2 * scalar @cases;
 
 for (@cases) {
-    my $parser = OpenSMILES::Parser->new;
-    my $graph = $parser->parse( $_ );
+    my $parser   = OpenSMILES::Parser->new;
+    my( $graph ) = $parser->parse( $_ );
     is( $graph->vertices, 1 );
     $_ = "[$_]" unless /^\[/;
     is( join( '', map { OpenSMILES::Parser::_sprint_atom( $_ ) }
