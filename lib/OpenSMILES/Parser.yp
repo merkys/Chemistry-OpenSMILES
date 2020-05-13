@@ -43,12 +43,16 @@ chain: atom
      | chain '(' chain ')'
         {
             _merge_graphs( $_[1]->{graph}, $_[3]->{graph} );
+            $_[0]->{USER}{GRAPHS}[$_[3]->{index}] = undef;
+
             $_[1]->{graph}->add_edge( $_[1]->{last}, $_[3]->{first} );
             return $_[1];
         }
      | chain '(' bond chain ')'
         {
             _merge_graphs( $_[1]->{graph}, $_[4]->{graph} );
+            $_[0]->{USER}{GRAPHS}[$_[4]->{index}] = undef;
+
             $_[1]->{graph}->set_edge_attribute( $_[1]->{last}, $_[4]->{first}, 'bond', $_[3] );
             return $_[1];
         }
@@ -162,7 +166,7 @@ sub parse
     $self->YYParse( yylex => \&_Lexer,
                     yyerror => \&_Error,
                     yydebug => $options->{debug} );
-    return @{$self->{USER}{GRAPHS}};
+    return grep { defined } @{$self->{USER}{GRAPHS}};
 }
 
 sub _add_ring_bond
