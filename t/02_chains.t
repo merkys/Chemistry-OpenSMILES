@@ -36,6 +36,10 @@ my %cases = (
     'C1CCCCC%01'        => [  6,  6 ],
     'C12(CCCCC1)CCCCC2' => [ 11, 12 ],
 
+    # The following case is not allowed by OpenSMILES specification,
+    # however, it is easier to support it than forbid.
+    'C(CCCCC1)12CCCCC2' => [ 11, 12 ],
+
     '[Na+].[Cl-]'             => [ 2,  2,  0 ],
     'c1cc(O.NCCO)ccc1'        => [ 2, 11, 10 ],
     'Oc1cc(.NCCO)ccc1'        => [ 2, 11, 10 ],
