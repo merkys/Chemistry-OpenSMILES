@@ -6,6 +6,8 @@ use warnings;
 # VERSION
 # ABSTRACT: OpenSMILES format reader
 
+1;
+
 __END__
 
 =head1 SYNOPSIS
@@ -61,4 +63,4 @@ perl(1)
 
 Andrius Merkys, E<lt>merkys@cpan.orgE<gt>
 
-1;
+=cut
