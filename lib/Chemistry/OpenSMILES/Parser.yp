@@ -102,6 +102,13 @@ sub _Error
 {
     my( $self ) = @_;
     close $self->{USER}{FILEIN} if $self->{USER}{FILEIN};
+
+    if( ${$self->{TOKEN}} eq '' &&
+        grep { defined $_ && !ref $_ && $_ eq '(' }
+        map { $_->[1] } @{$self->{STACK}} ) {
+        die "$0: syntax error: missing closing parenthesis\n";
+    }
+
     my $msg = "$0: syntax error at position $self->{USER}{CHARNO}";
     if( $self->YYData->{INPUT} ) {
         $self->YYData->{INPUT} =~ s/\n$//;
