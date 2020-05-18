@@ -102,8 +102,7 @@ sub _Error
 {
     my( $self ) = @_;
     close $self->{USER}{FILEIN} if $self->{USER}{FILEIN};
-    my $msg = "$0: syntax error at line $self->{USER}{LINENO}, " .
-              "position $self->{USER}{CHARNO}";
+    my $msg = "$0: syntax error at position $self->{USER}{CHARNO}";
     if( $self->YYData->{INPUT} ) {
         $self->YYData->{INPUT} =~ s/\n$//;
         die "$msg: '" . $self->YYData->{INPUT} . "'.\n";
@@ -121,8 +120,6 @@ sub _Lexer
     if( !$self->YYData->{INPUT} && $self->{USER}{FILEIN} ) {
         my $filein = $self->{USER}{FILEIN};
         $self->YYData->{INPUT} = <$filein>;
-        $self->{USER}{LINENO} = -1 unless exists $self->{USER}{LINENO};
-        $self->{USER}{LINENO}++;
         $self->{USER}{CHARNO} = 0;
     }
 
@@ -185,7 +182,6 @@ sub parse
     $self->YYData->{INPUT}   = $string;
     $self->{USER}{GRAPHS}    = [];
     $self->{USER}{RINGBONDS} = {};
-    $self->{USER}{LINENO} = 0;
     $self->{USER}{CHARNO} = 0;
     $self->YYParse( yylex => \&_Lexer,
                     yyerror => \&_Error,
