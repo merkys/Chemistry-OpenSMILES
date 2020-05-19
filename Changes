@@ -4,6 +4,7 @@
     - Detecting and reporting unclosed ring bonds.
     - Fixing position pointers in error messages, removing line numbers.
     - Adding versioned dependency on Module::Build::Parse::Yapp v0.1.2.
+    - Fixing the POD.
 
 0.1.2 2020-05-17
 

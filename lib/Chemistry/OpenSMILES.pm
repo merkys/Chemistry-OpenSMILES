@@ -3,12 +3,18 @@ package Chemistry::OpenSMILES;
 use strict;
 use warnings;
 
-# VERSION
 # ABSTRACT: OpenSMILES format reader
+# VERSION
 
 1;
 
 __END__
+
+=pod
+
+=head1 NAME
+
+Chemistry::OpenSMILES - OpenSMILES format reader
 
 =head1 SYNOPSIS
 
@@ -59,7 +65,7 @@ it before attempting reading with Chemistry::OpenSMILES::Parser.
 
 perl(1)
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Andrius Merkys, E<lt>merkys@cpan.orgE<gt>
 
