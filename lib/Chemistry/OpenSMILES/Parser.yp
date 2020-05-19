@@ -106,7 +106,7 @@ sub _Error
     if( ${$self->{TOKEN}} eq '' &&
         grep { defined $_ && !ref $_ && $_ eq '(' }
         map { $_->[1] } @{$self->{STACK}} ) {
-        die "$0: syntax error: missing closing parenthesis\n";
+        die "$0: syntax error: missing closing parenthesis.\n";
     }
 
     my $msg = "$0: syntax error at position $self->{USER}{CHARNO}";
