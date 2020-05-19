@@ -7,6 +7,8 @@ use Test::More;
 
 my %cases = (
     'C(CC' => 't/04_errors.t: syntax error: missing closing parenthesis.',
+    'CC)C' => 't/04_errors.t: syntax error: unbalanced parentheses.',
+    'CCC)' => 't/04_errors.t: syntax error: unbalanced parentheses.',
     'C#=O' => 't/04_errors.t: syntax error at position 3: \'O\'.',
 );
 
