@@ -10,6 +10,7 @@ my %cases = (
     'CC)C'  => 't/04_errors.t: syntax error: unbalanced parentheses.',
     'CCC)'  => 't/04_errors.t: syntax error: unbalanced parentheses.',
     'C#=O'  => 't/04_errors.t: syntax error at position 3: \'O\'.',
+    'C..O'  => 't/04_errors.t: syntax error at position 3: \'O\'.',
     'CCC1'  => 't/04_errors.t: unclosed ring bond(s) detected: 1.',
     'C2%12' => 't/04_errors.t: unclosed ring bond(s) detected: 2, 12.',
 );
