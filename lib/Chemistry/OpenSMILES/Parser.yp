@@ -218,9 +218,11 @@ sub parse
     }
 
     my @graphs = grep { defined } @{$self->{USER}{GRAPHS}};
-    if( !$options->{raw} ) {
-        for my $graph (@graphs) {
-            for my $atom ($graph->vertices) {
+    for my $graph (@graphs) {
+        for my $atom ($graph->vertices) {
+            delete $atom->{graph};
+            delete $atom->{index};
+            if( !$options->{raw} ) {
                 next unless exists $atom->{hcount};
                 for (1..$atom->{hcount}) {
                     $graph->add_edge( $atom, { symbol => 'H' } );
