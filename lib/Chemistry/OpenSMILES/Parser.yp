@@ -198,6 +198,12 @@ sub parse
                     yyerror => \&_Error,
                     yydebug => $options->{debug} );
 
+    if( scalar keys %{$self->{USER}{RINGBONDS}} ) {
+        die "$0: unclosed ring bond(s) detected: " .
+            join( ', ', sort { $a <=> $b } keys %{$self->{USER}{RINGBONDS}} ) .
+            ".\n";
+    }
+
     my @graphs = grep { defined } @{$self->{USER}{GRAPHS}};
     if( !$options->{raw} ) {
         for my $graph (@graphs) {
