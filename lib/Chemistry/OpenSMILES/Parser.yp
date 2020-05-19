@@ -3,6 +3,7 @@
 %{
 
 use warnings;
+use 5.0100;
 
 use Graph::Undirected;
 

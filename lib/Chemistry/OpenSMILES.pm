@@ -2,6 +2,7 @@ package Chemistry::OpenSMILES;
 
 use strict;
 use warnings;
+use 5.0100;
 
 # ABSTRACT: OpenSMILES format reader
 # VERSION
