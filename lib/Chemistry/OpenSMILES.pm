@@ -80,7 +80,7 @@ in OpenSMILES specification.
 Element symbols in square brackets are not limited to the ones known to
 chemistry. Currently any single or two-letter symbol is allowed.
 
-Deprecated charge notations ('--' and '++') are supported.
+Deprecated charge notations (C<--> and C<++>) are supported.
 
 OpenSMILES specification mandates a strict order of ring bonds and
 branches:
