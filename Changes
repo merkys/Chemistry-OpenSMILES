@@ -1,6 +1,7 @@
 0.1.4 unreleased
 
     - Fixing an issue with graph merging.
+    - Unifying the representation of single bonds.
 
 0.1.3 2020-05-19
 

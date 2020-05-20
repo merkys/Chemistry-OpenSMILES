@@ -44,10 +44,14 @@ chain: atom
             $_[3]->{graph} = $_[1]->{last}{graph};
             $_[3]->{index} = $_[1]->{last}{index};
 
-            $_[3]->{graph}->set_edge_attribute( $_[1]->{last},
-                                                $_[3],
-                                                'bond',
-                                                $_[2] );
+            if( $_[2] ne '-' ) {
+                $_[3]->{graph}->set_edge_attribute( $_[1]->{last},
+                                                    $_[3],
+                                                    'bond',
+                                                    $_[2] );
+            } else {
+                $_[3]->{graph}->add_edge( $_[1]->{last}, $_[3] );
+            }
             $_[1]->{last} = $_[3];
 
             return $_[1];
@@ -81,10 +85,16 @@ chain: atom
                                       $_[4]->{first}{index} );
             }
 
-            $_[1]->{last}{graph}->set_edge_attribute( $_[1]->{last},
-                                                      $_[4]->{first},
-                                                      'bond',
-                                                      $_[3] );
+            if( $_[3] ne '-' ) {
+                $_[1]->{last}{graph}->set_edge_attribute( $_[1]->{last},
+                                                          $_[4]->{first},
+                                                          'bond',
+                                                          $_[3] );
+            } else {
+                $_[1]->{last}{graph}->add_edge( $_[1]->{last},
+                                                $_[4]->{first} );
+            }
+
             return $_[1];
         }
      | chain '(' '.' chain ')'
@@ -248,7 +258,7 @@ sub _add_ring_bond
         }
         ( $bond ) = grep { defined }
                          ( $bond, $self->{USER}{RINGBONDS}{$ring_bond}{bond} );
-        if( $bond ) {
+        if( $bond && $bond ne '-' ) {
             $atom->{graph}->set_edge_attribute( $self->{USER}{RINGBONDS}{$ring_bond}{atom},
                                                 $atom,
                                                 'bond',
