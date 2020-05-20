@@ -276,10 +276,16 @@ sub _merge_graphs
         $_->{graph} = $g1;
         $_->{index} = $index1;
     }
-
     $g1->add_vertices( $g2->vertices );
-    $g1->add_edges( $g2->edges );
-    # FIXME: do we have to add properties?
+
+    for ($g2->edges) {
+        my  $attributes = $g2->get_edge_attributes( @$_ );
+        if( $attributes ) {
+            $g1->set_edge_attributes( @$_, $attributes );
+        } else {
+            $g1->add_edge( @$_ );
+        }
+    }
 
     $self->{USER}{GRAPHS}[$index2] = undef;
 }
