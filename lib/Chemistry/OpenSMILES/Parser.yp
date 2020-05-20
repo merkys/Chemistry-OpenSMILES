@@ -244,7 +244,7 @@ sub _add_ring_bond
 
         if( $bond && $self->{USER}{RINGBONDS}{$ring_bond}{bond} &&
             $bond ne $self->{USER}{RINGBONDS}{$ring_bond}{bond} ) {
-            die "ring bond types for ring bond '$ring_bond' do not match";
+            die "$0: ring bond types for ring bond $ring_bond do not match.\n";
         }
         ( $bond ) = grep { defined }
                          ( $bond, $self->{USER}{RINGBONDS}{$ring_bond}{bond} );
