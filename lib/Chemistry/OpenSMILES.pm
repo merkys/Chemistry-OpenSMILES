@@ -44,6 +44,37 @@ inference heuristics, thus it plainly returns properties which it gets
 from the SMILES descriptor. That means numbers of implicit hydrogens and
 standard aromaticity representation are left for the user to derive.
 
+=head2 Molecular graph
+
+Disconnected parts of a compound are represented as separate
+L<Graph::Undirected|Graph::Undirected> objects. Atoms are represented
+as vertices, and bonds are represented as edges.
+
+=head3 Atoms
+
+Atoms, or vertices of a molecular graph, are represented as hash
+references:
+
+    {
+        "symbol"    => "C",
+        "isotope"   => "13",
+        "chirality" => "@@",
+        "hcount"    => 3,
+        "charge"    => "+",
+        "class"     => 0,
+    }
+
+Except for C<symbol> and C<class>, all keys of hash are optional. Per
+OpenSMIILES specification, default value for C<class> is 0.
+
+=head3 Bonds
+
+Bonds, or edges of a molecular graph, rely completely on
+L<Graph::Undirected|Graph::Undirected> internal representation. Bond
+orders other than sinlge (C<->, which is also a default) are represented
+as values of edge attribute C<bond>. They correspond to the symbols used
+in OpenSMILES specification.
+
 =head1 CAVEATS
 
 Element symbols in square brackets are not limited to the ones known to
