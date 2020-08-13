@@ -1,6 +1,6 @@
 0.2.1 unreleased
 
-    - Adding 'index' atom field to store atom positions in the initial
+    - Adding 'number' atom field to store atom positions in the initial
       SMILES string.
     - Making 'class' atom field mandatory.
     - Making 'isotope' atom field an integer.

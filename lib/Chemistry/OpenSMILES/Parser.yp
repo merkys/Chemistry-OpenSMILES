@@ -172,7 +172,7 @@ sub _Lexer
                                         (?<hcount>H[0-9]?)?
                                         (?<charge>--|\+\+|[-+][0-9]{0,2})?
                                         (:(?<class>[0-9]+))? \]//x ) {
-        my $atom = { %+, index => $self->{USER}{ATOMNO} };
+        my $atom = { %+, number => $self->{USER}{ATOMNO} };
         $self->{USER}{ATOMNO} ++;
         $self->{USER}{CHARNO} += length $&;
 
@@ -195,7 +195,7 @@ sub _Lexer
     if( $self->YYData->{INPUT} =~ s/^(Br|Cl|[BCINOPSFbcnops])// ) {
         my $atom = { symbol => $1,
                      class  => 0,
-                     index => $self->{USER}{ATOMNO} };
+                     number => $self->{USER}{ATOMNO} };
         $self->{USER}{ATOMNO} ++;
         $self->{USER}{CHARNO} += length $&;
         return ( 'atom', $atom );
@@ -247,7 +247,7 @@ sub parse
                     $graph->add_edge( $atom,
                                       { symbol => 'H',
                                         class  => 0,
-                                        index  => $self->{USER}{ATOMNO} } );
+                                        number => $self->{USER}{ATOMNO} } );
                     $self->{USER}{ATOMNO} ++;
                 }
                 delete $atom->{hcount};

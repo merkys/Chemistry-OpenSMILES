@@ -62,10 +62,10 @@ references:
         "hcount"    => 3,
         "charge"    => "+",
         "class"     => 0,
-        "index"     => 0,
+        "number"    => 0,
     }
 
-Except for C<symbol>, C<class> and C<index>, all keys of hash are
+Except for C<symbol>, C<class> and C<number>, all keys of hash are
 optional. Per OpenSMIILES specification, default value for C<class> is
 0.
 
