@@ -1,4 +1,4 @@
-0.2.1 unreleased
+0.2.1 2020-08-13
 
     - Adding 'number' atom field to store atom positions in the initial
       SMILES string.
