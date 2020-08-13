@@ -62,6 +62,7 @@ references:
         "hcount"    => 3,
         "charge"    => "+",
         "class"     => 0,
+        "index"     => 0,
     }
 
 Except for C<symbol> and C<class>, all keys of hash are optional. Per
