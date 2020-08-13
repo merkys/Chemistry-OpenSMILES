@@ -181,6 +181,10 @@ sub _Lexer
             $atom->{hcount} = $atom->{hcount} ? int $atom->{hcount} : 1;
         }
 
+        if( $atom->{isotope} ) {
+            $atom->{isotope} = int $atom->{isotope};
+        }
+
         # Atom class is an arbitrary number, 0 by default
         $atom->{class} = exists $atom->{class} ? int $atom->{class} : 0;
 

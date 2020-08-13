@@ -57,7 +57,7 @@ references:
 
     {
         "symbol"    => "C",
-        "isotope"   => "13",
+        "isotope"   => 13,
         "chirality" => "@@",
         "hcount"    => 3,
         "charge"    => "+",
