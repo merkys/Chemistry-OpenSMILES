@@ -192,7 +192,7 @@ sub _Lexer
     }
 
     # Bracketless atoms
-    if( $self->YYData->{INPUT} =~ s/^(Br|Cl|[BCINOPSFbcnops])// ) {
+    if( $self->YYData->{INPUT} =~ s/^(Br|Cl|[BCINOPSFbcnops*])// ) {
         my $atom = { symbol => $1,
                      class  => 0,
                      number => $self->{USER}{ATOMNO} };
