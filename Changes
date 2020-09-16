@@ -1,6 +1,8 @@
 0.3.0 unreleased
 
     - Deriving counts of implicit hydrogen atoms.
+    - Default number of attached hydrogen atoms for atoms in square
+      brackets is 0.
     - Supporting bracketless '*' atom.
 
 0.2.1 2020-08-13

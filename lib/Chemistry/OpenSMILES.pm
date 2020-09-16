@@ -63,8 +63,8 @@ references:
     }
 
 Except for C<symbol>, C<class> and C<number>, all keys of hash are
-optional. Per OpenSMIILES specification, default value for C<class> is
-0.
+optional. Per OpenSMIILES specification, default values for C<hcount>
+and C<class> are 0.
 
 =head3 Bonds
 
