@@ -35,7 +35,7 @@ Chemistry::OpenSMILES - OpenSMILES format reader
 
 Chemistry::OpenSMILES provides support for SMILES chemical identifiers
 conforming to OpenSMILES v1.0 specification
-(E<lt>http://opensmiles.org/opensmiles.htmlE<gt>).
+(L<http://opensmiles.org/opensmiles.html>).
 
 Chemistry::OpenSMILES::Parser reads in SMILES strings and returns them
 parsed to arrays of L<Graph::Undirected|Graph::Undirected> objects. Each
