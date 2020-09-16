@@ -43,6 +43,8 @@ my %cases = (
     'C=C' => 6,
     'C#C' => 4,
     'C$C' => 2,
+
+    'C1=CC=CC=C1' => 12,
 );
 
 plan tests => scalar keys %cases;
