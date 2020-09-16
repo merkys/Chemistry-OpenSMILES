@@ -37,6 +37,12 @@ my %cases = (
     'O([O])'           => 3,
     'O([O])([O])'      => 3,
     'O([O])([O])([O])' => 4,
+
+    'CC'  => 8,
+    'C-C' => 8,
+    'C=C' => 6,
+    'C#C' => 4,
+    'C$C' => 2,
 );
 
 plan tests => scalar keys %cases;

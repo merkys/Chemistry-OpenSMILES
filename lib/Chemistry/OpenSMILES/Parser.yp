@@ -6,6 +6,7 @@ use warnings;
 use 5.0100;
 
 use Graph::Undirected;
+use List::Util qw(sum);
 
 my %normal_valence = (
     B  => [ 3 ],
@@ -18,6 +19,13 @@ my %normal_valence = (
     Cl => [ 1 ],
     Br => [ 1 ],
     I  => [ 1 ],
+);
+
+my %bond_order = (
+    '-' => 1,
+    '=' => 2,
+    '#' => 3,
+    '$' => 4,
 );
 
 %}
@@ -259,7 +267,12 @@ sub parse
             if( !$options->{raw} ) {
                 if( !exists $atom->{hcount} ) {
                     next if !exists $normal_valence{$atom->{symbol}};
-                    my $degree = $graph->degree( $atom );
+                    my $degree = sum map { $bond_order{$_} }
+                                     map { $graph->has_edge_attribute( $atom, $_, 'bond' )
+                                            ? $graph->get_edge_attribute( $atom, $_, 'bond' )
+                                            : '-' }
+                                         $graph->neighbours( $atom );
+                    $degree = 0 unless $degree;
                     my( $valence ) = grep { $degree <= $_ }
                                           @{$normal_valence{$atom->{symbol}}};
                     next if !defined $valence;
