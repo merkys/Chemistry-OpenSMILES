@@ -8,7 +8,6 @@ use Test::More;
 my %cases = (
     'C'    => 5,
     'C[U]' => 5,
-    'c'    => 1,
     'N'    => 4,
     'Cl'   => 2,
     '[U]'  => 1,
@@ -45,6 +44,9 @@ my %cases = (
     'C$C' => 2,
 
     'C1=CC=CC=C1' => 12,
+    'c1ccccc1'    => 12,
+
+    'c1cncnc1'    => 10,
 );
 
 plan tests => scalar keys %cases;

@@ -19,6 +19,8 @@ my %normal_valence = (
     Cl => [ 1 ],
     Br => [ 1 ],
     I  => [ 1 ],
+
+    c  => [ 3 ],
 );
 
 my %bond_order = (
