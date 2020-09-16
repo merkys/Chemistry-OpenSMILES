@@ -6,9 +6,10 @@ use Chemistry::OpenSMILES::Parser;
 use Test::More;
 
 my %cases = (
-    'C'    => 1,
-    'N'    => 1,
-    'Cl'   => 1,
+    'C'    => 5,
+    'N'    => 4,
+    'Cl'   => 2,
+    'c'    => 1,
     '[U]'  => 1,
     '[Pb]' => 1,
     '[He]' => 1,

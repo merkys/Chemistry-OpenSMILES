@@ -7,6 +7,19 @@ use 5.0100;
 
 use Graph::Undirected;
 
+my %normal_valence = (
+    B  => [ 3 ],
+    C  => [ 4 ],
+    N  => [ 3, 5 ],
+    O  => [ 2 ],
+    P  => [ 3, 5 ],
+    S  => [ 2, 4, 6 ],
+    F  => [ 1 ],
+    Cl => [ 1 ],
+    Br => [ 1 ],
+    I  => [ 1 ],
+);
+
 %}
 
 %%
@@ -179,6 +192,8 @@ sub _Lexer
         if( $atom->{hcount} ) {
             $atom->{hcount} =~ s/^H//;
             $atom->{hcount} = $atom->{hcount} ? int $atom->{hcount} : 1;
+        } else {
+            $atom->{hcount} = 0;
         }
 
         if( $atom->{isotope} ) {
@@ -242,7 +257,14 @@ sub parse
             delete $atom->{graph};
             delete $atom->{index};
             if( !$options->{raw} ) {
-                next unless exists $atom->{hcount};
+                if( !exists $atom->{hcount} ) {
+                    next if !exists $normal_valence{$atom->{symbol}};
+                    my $degree = $graph->degree( $atom );
+                    my( $valence ) = grep { $degree <= $_ }
+                                          @{$normal_valence{$atom->{symbol}}};
+                    next if !defined $valence;
+                    $atom->{hcount} = $valence - $degree;
+                }
                 for (1..$atom->{hcount}) {
                     $graph->add_edge( $atom,
                                       { symbol => 'H',
@@ -319,7 +341,7 @@ sub _sprint_atom
     return '[' . (exists $atom->{isotope}   ? $atom->{isotope}   : '') .
                  $atom->{symbol} .
                  (exists $atom->{chirality} ? $atom->{chirality} : '') .
-                 (exists $atom->{hcount}    ? 'H' . $atom->{hcount} : '') .
+                 ($atom->{hcount} ? 'H' . $atom->{hcount} : '') .
                  (exists $atom->{charge}    ? $atom->{charge}    : '') .
                  (exists $atom->{class} && $atom->{class}
                     ? ':' . $atom->{class} : '') .
