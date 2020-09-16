@@ -1,4 +1,4 @@
-0.3.0 unreleased
+0.3.0 2020-09-16
 
     - Deriving counts of implicit hydrogen atoms.
     - Default number of attached hydrogen atoms for atoms in square
