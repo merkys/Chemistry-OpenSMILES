@@ -269,7 +269,7 @@ sub parse
             if( !$options->{raw} ) {
                 if( !exists $atom->{hcount} ) {
                     next if !exists $normal_valence{$atom->{symbol}};
-                    my $degree = sum map { $bond_order{$_} }
+                    my $degree = sum map { exists $bond_order{$_} ? $bond_order{$_} : 1 }
                                      map { $graph->has_edge_attribute( $atom, $_, 'bond' )
                                             ? $graph->get_edge_attribute( $atom, $_, 'bond' )
                                             : '-' }
