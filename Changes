@@ -1,5 +1,6 @@
-0.2.2 unreleased
+0.3.0 unreleased
 
+    - Deriving counts of implicit hydrogen atoms.
     - Supporting bracketless '*' atom.
 
 0.2.1 2020-08-13

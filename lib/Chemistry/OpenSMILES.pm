@@ -39,10 +39,7 @@ conforming to OpenSMILES v1.0 specification
 
 Chemistry::OpenSMILES::Parser reads in SMILES strings and returns them
 parsed to arrays of L<Graph::Undirected|Graph::Undirected> objects. Each
-atom is represented by a hash. The parser does not have any chemical
-inference heuristics, thus it plainly returns properties which it gets
-from the SMILES descriptor. That means numbers of implicit hydrogens and
-standard aromaticity representation are left for the user to derive.
+atom is represented by a hash.
 
 =head2 Molecular graph
 
