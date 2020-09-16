@@ -92,6 +92,10 @@ structure, where ring bonds follow branch descriptions.
 Whitespace is not supported yet. SMILES descriptors must be cleaned of
 it before attempting reading with Chemistry::OpenSMILES::Parser.
 
+The derivation of implicit hydrogen counts for aromatic atoms is not
+unambiguously defined in the OpenSMILES specification. Thus only
+aromatic carbon is accounted for as if having valence of 3.
+
 =head1 SEE ALSO
 
 perl(1)
