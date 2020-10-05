@@ -1,4 +1,4 @@
-0.3.2 unreleased
+0.3.2 2020-10-05
 
     - Explicitly setting bond order to ':' on bonds between aromatic
       atoms.
