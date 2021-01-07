@@ -21,8 +21,12 @@ sub write
         tree_edge     => sub { push @symbols, _tree_edge( @_ ) },
         non_tree_edge => sub { return if $seen_rings{join '|', sort @_[0..1]};
                                $nrings++;
-                               ${$vertex_symbols{$_[0]}} .= $nrings;
-                               ${$vertex_symbols{$_[1]}} .= $nrings;
+                               ${$vertex_symbols{$_[0]}} .=
+                                    _depict_bond( @_[0..1], $graph ) .
+                                    $nrings;
+                               ${$vertex_symbols{$_[1]}} .=
+                                    _depict_bond( @_[0..1], $graph ) .
+                                    $nrings;
                                $seen_rings{join '|', sort @_[0..1]} = 1; },
 
         pre  => sub { push @symbols, _pre_vertex( @_ );
@@ -39,11 +43,7 @@ sub _tree_edge
 {
     my( $u, $v, $self ) = @_;
 
-    my $graph = $self->graph;
-    return '(' unless $graph->has_edge_attribute( $u, $v, 'bond' );
-
-    # CAVEAT: '/' and '\' bonds are problematic
-    return '(' . $graph->get_edge_attribute( $u, $v, 'bond' );
+    return '(' . _depict_bond( $u, $v, $self->graph );
 }
 
 sub _pre_vertex
@@ -51,6 +51,16 @@ sub _pre_vertex
     my( $vertex, $self ) = @_;
 
     return $vertex->{symbol};
+}
+
+sub _depict_bond
+{
+    my( $u, $v, $graph ) = @_;
+
+    # CAVEAT: '/' and '\' bonds are problematic
+    return $graph->has_edge_attribute( $u, $v, 'bond' )
+         ? $graph->get_edge_attribute( $u, $v, 'bond' )
+         : '';
 }
 
 1;
