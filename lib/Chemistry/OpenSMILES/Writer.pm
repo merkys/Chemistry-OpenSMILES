@@ -21,33 +21,40 @@ sub write
     };
 
     my $traversal = Graph::Traversal::DFS->new( $graph, %$operations );
+    print '(';
     $traversal->dfs;
 }
 
 sub _tree_edge
 {
-    my( $u, $v, $graph ) = @_;
+    my( $u, $v, $self ) = @_;
 
-    # print $u->{symbol} . ' -> ' . $v->{symbol} . " (tree node)\n";
+    print '(';
+
+    my $graph = $self->graph;
+    return unless $graph->has_edge_attribute( $u, $v, 'bond' );
+
+    # CAVEAT: '/' and '\' bonds are problematic
+    print $graph->get_edge_attribute( $u, $v, 'bond' );
 }
 
 sub _non_tree_edge
 {
-    my( $u, $v, $graph ) = @_;
+    my( $u, $v, $self ) = @_;
 
-    # print $u->{symbol} . ' -> ' . $v->{symbol} . " (non tree node)\n";
+    # TODO: handle rings
 }
 
 sub _pre_vertex
 {
-    my( $vertex, $graph ) = @_;
+    my( $vertex, $self ) = @_;
 
-    print '(' . $vertex->{symbol};
+    print $vertex->{symbol};
 }
 
 sub _post_vertex
 {
-    my( $vertex, $graph ) = @_;
+    my( $vertex, $self ) = @_;
 
     print ')';
 }
