@@ -1,5 +1,7 @@
 0.3.3 unreleased
 
+    - Adding Chemistry::OpenSMILES::Writer, implementing a SMILES writer
+      for the data structures built by Chemistry::OpenSMILES::Parser.
     - Converting atom charge to integer.
 
 0.3.2 2020-10-05
