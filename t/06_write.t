@@ -7,15 +7,24 @@ use Chemistry::OpenSMILES::Writer;
 use Test::More;
 
 my @cases = (
-    [ 'C=1=C=C=C=1', '(C=1(=C(=C(=C=1))))' ],
+    [ 'C=1=C=C=C=1', 'C=1(=C(=C(=C=1)))' ],
 );
 
-plan tests => scalar @cases;
+plan tests => 2 * scalar @cases;
 
 for my $case (@cases) {
-    my $parser = Chemistry::OpenSMILES::Parser->new;
-    my @moieties = $parser->parse( $case->[0], { raw => 1 } );
+    my $parser;
+    my @moieties;
+    my $result;
 
-    my $result = Chemistry::OpenSMILES::Writer::write( \@moieties );
+    $parser = Chemistry::OpenSMILES::Parser->new;
+    @moieties = $parser->parse( $case->[0], { raw => 1 } );
+    $result = Chemistry::OpenSMILES::Writer::write( \@moieties );
     is( $result, $case->[1] );
+
+    $parser = Chemistry::OpenSMILES::Parser->new;
+    @moieties = $parser->parse( $result, { raw => 1 } );
+    $result = Chemistry::OpenSMILES::Writer::write( \@moieties );
+    is( $result, $case->[1] );
+    
 }

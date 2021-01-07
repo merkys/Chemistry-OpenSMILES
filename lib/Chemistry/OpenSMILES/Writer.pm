@@ -51,7 +51,8 @@ sub write
         $traversal->dfs;
 
         next unless @symbols;
-        push @components, '(' . join '', @symbols;
+        pop @symbols;
+        push @components, join '', @symbols;
     }
 
     return join '.', @components;
