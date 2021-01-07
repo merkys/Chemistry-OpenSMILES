@@ -10,10 +10,12 @@ use Graph::Traversal::DFS;
 
 sub write
 {
-    my( $what ) = @_;
+    my( $what, $order_sub ) = @_;
 
     my @moieties = ref $what eq 'ARRAY' ? @$what : ( $what );
     my @components;
+
+    $order_sub = \&_order unless $order_sub;
 
     for my $graph (@moieties) {
         my @symbols;
@@ -37,6 +39,13 @@ sub write
                           $vertex_symbols{$_[0]} = \$symbols[-1] },
             post => sub { push @symbols, ')' },
         };
+
+        if( $order_sub ) {
+            $operations->{first_root} =
+                sub { return $order_sub->( $_[1], $_[0]->graph ) };
+            $operations->{next_successor} =
+                sub { return $order_sub->( $_[1], $_[0]->graph ) };
+        }
 
         my $traversal = Graph::Traversal::DFS->new( $graph, %$operations );
         $traversal->dfs;
@@ -71,6 +80,14 @@ sub _depict_bond
     return $graph->has_edge_attribute( $u, $v, 'bond' )
          ? $graph->get_edge_attribute( $u, $v, 'bond' )
          : '';
+}
+
+sub _order
+{
+    my( $vertices ) = @_;
+    my @sorted = sort { $vertices->{$a}{number} <=>
+                        $vertices->{$b}{number} } keys %$vertices;
+    return $vertices->{shift @sorted};
 }
 
 1;
