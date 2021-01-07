@@ -7,6 +7,8 @@ use Chemistry::OpenSMILES::Writer;
 use Test::More;
 
 my @cases = (
+    [ 'C', 'C' ],
+    [ 'C=C', 'C(=C)' ],
     [ 'C=1=C=C=C=1', 'C=1(=C(=C(=C=1)))' ],
 );
 

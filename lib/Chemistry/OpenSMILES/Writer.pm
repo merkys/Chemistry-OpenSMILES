@@ -69,8 +69,36 @@ sub _pre_vertex
 {
     my( $vertex, $self ) = @_;
 
-    # FIXME: proper atom depiction is required
-    return $vertex->{symbol};
+    my $atom = $vertex->{symbol};
+    my $is_simple = $atom =~ /^[bcnosp]$/i ||
+                    $atom =~ /^(F|Cl|Br|I|\*)$/;
+
+    if( exists $vertex->{isotope} ) {
+        $atom = $vertex->{isotope} . $atom;
+        $is_simple = 0;
+    }
+
+    if( exists $vertex->{chirality} ) {
+        $atom .= $vertex->{chirality};
+        $is_simple = 0;
+    }
+
+    if( $vertex->{hcount} ) { # if non-zero
+        $atom .= 'H' . ($vertex->{hcount} == 1 ? '' : $vertex->{hcount});
+        $is_simple = 0;
+    }
+
+    if( $vertex->{charge} ) { # if non-zero
+        $atom .= ($vertex->{charge} > 0 ? '+' : '') . $vertex->{charge};
+        $is_simple = 0;
+    }
+
+    if( $vertex->{class} ) { # if non-zero
+        $atom .= ':' . $vertex->{class};
+        $is_simple = 0;
+    }
+
+    return $is_simple ? $atom : "[$atom]";
 }
 
 sub _depict_bond
