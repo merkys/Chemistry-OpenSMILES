@@ -218,6 +218,12 @@ sub _Lexer
         $self->{USER}{ATOMNO} ++;
         $self->{USER}{CHARNO} += length $&;
 
+        if( $atom->{charge} ) {
+            $atom->{charge} =~ s/^([-+])$/${1}1/;
+            $atom->{charge} =~ s/^([-+])\1$/${1}2/;
+            $atom->{charge} = int $atom->{charge};
+        }
+
         if( $atom->{hcount} ) {
             $atom->{hcount} =~ s/^H//;
             $atom->{hcount} = $atom->{hcount} ? int $atom->{hcount} : 1;
