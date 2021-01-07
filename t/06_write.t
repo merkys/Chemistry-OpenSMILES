@@ -10,6 +10,7 @@ my @cases = (
     [ 'C', 'C' ],
     [ 'C=C', 'C(=C)' ],
     [ 'C=1=C=C=C=1', 'C=1(=C(=C(=C=1)))' ],
+    [ 'C#C.c1ccccc1', 'C(#C).c:1(:c(:c(:c(:c(:c:1)))))' ],
 );
 
 plan tests => 2 * scalar @cases;
