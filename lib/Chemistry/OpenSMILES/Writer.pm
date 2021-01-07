@@ -10,33 +10,42 @@ use Graph::Traversal::DFS;
 
 sub write
 {
-    my( $graph ) = @_;
+    my( $what ) = @_;
 
-    my @symbols = ( '(' );
-    my %vertex_symbols;
-    my $nrings = 0;
-    my %seen_rings;
+    my @moieties = ref $what eq 'ARRAY' ? @$what : ( $what );
+    my @components;
 
-    my $operations = {
-        tree_edge     => sub { push @symbols, _tree_edge( @_ ) },
-        non_tree_edge => sub { return if $seen_rings{join '|', sort @_[0..1]};
-                               $nrings++;
-                               ${$vertex_symbols{$_[0]}} .=
-                                    _depict_bond( @_[0..1], $graph ) .
-                                    $nrings;
-                               ${$vertex_symbols{$_[1]}} .=
-                                    _depict_bond( @_[0..1], $graph ) .
-                                    $nrings;
-                               $seen_rings{join '|', sort @_[0..1]} = 1; },
+    for my $graph (@moieties) {
+        my @symbols;
+        my %vertex_symbols;
+        my $nrings = 0;
+        my %seen_rings;
 
-        pre  => sub { push @symbols, _pre_vertex( @_ );
-                      $vertex_symbols{$_[0]} = \$symbols[-1] },
-        post => sub { push @symbols, ')' },
-    };
+        my $operations = {
+            tree_edge     => sub { push @symbols, _tree_edge( @_ ) },
+            non_tree_edge => sub { return if $seen_rings{join '|', sort @_[0..1]};
+                                   $nrings++;
+                                   ${$vertex_symbols{$_[0]}} .=
+                                        _depict_bond( @_[0..1], $graph ) .
+                                        $nrings;
+                                   ${$vertex_symbols{$_[1]}} .=
+                                        _depict_bond( @_[0..1], $graph ) .
+                                        $nrings;
+                                   $seen_rings{join '|', sort @_[0..1]} = 1; },
 
-    my $traversal = Graph::Traversal::DFS->new( $graph, %$operations );
-    $traversal->dfs;
-    return join '', @symbols;
+            pre  => sub { push @symbols, _pre_vertex( @_ );
+                          $vertex_symbols{$_[0]} = \$symbols[-1] },
+            post => sub { push @symbols, ')' },
+        };
+
+        my $traversal = Graph::Traversal::DFS->new( $graph, %$operations );
+        $traversal->dfs;
+
+        next unless @symbols;
+        push @components, '(' . join '', @symbols;
+    }
+
+    return join '.', @components;
 }
 
 sub _tree_edge
@@ -50,6 +59,7 @@ sub _pre_vertex
 {
     my( $vertex, $self ) = @_;
 
+    # FIXME: proper atom depiction is required
     return $vertex->{symbol};
 }
 
