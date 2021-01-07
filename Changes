@@ -1,3 +1,7 @@
+0.3.3 unreleased
+
+    - Converting atom charge to integer.
+
 0.3.2 2020-10-05
 
     - Explicitly setting bond order to ':' on bonds between aromatic
