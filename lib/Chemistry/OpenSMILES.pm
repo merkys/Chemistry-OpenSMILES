@@ -64,7 +64,7 @@ references:
         "isotope"   => 13,
         "chirality" => "@@",
         "hcount"    => 3,
-        "charge"    => "+",
+        "charge"    => 1,
         "class"     => 0,
         "number"    => 0,
     }
