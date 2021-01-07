@@ -386,17 +386,4 @@ sub _merge_graphs
     $self->{USER}{GRAPHS}[$index2] = undef;
 }
 
-sub _sprint_atom
-{
-    my( $atom ) = @_;
-    return '[' . (exists $atom->{isotope}   ? $atom->{isotope}   : '') .
-                 $atom->{symbol} .
-                 (exists $atom->{chirality} ? $atom->{chirality} : '') .
-                 ($atom->{hcount} ? 'H' . $atom->{hcount} : '') .
-                 (exists $atom->{charge}    ? $atom->{charge}    : '') .
-                 (exists $atom->{class} && $atom->{class}
-                    ? ':' . $atom->{class} : '') .
-           ']';
-}
-
 1;
