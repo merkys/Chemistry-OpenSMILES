@@ -10,13 +10,16 @@ my @cases = qw(
     C       N      Cl     *
     [U]     [Pb]   [He]
     [CH4]   [ClH]
-    [Cl-]   [OH1-] [OH-1] [Cu+2] [Cu++]
+    [Cl-]   [Cu+2]
     [13CH4] [2H+]  [238U]
 );
 
 my %cases = (
     '[*]'    => '*',
     '[ClH1]' => '[ClH]',
+    '[Cu++]' => '[Cu+2]',
+    '[OH-1]' => '[OH-]',
+    '[OH1-]' => '[OH-]',
     map { $_ => $_ } @cases,
 );
 

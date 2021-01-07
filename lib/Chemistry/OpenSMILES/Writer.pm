@@ -90,6 +90,7 @@ sub _pre_vertex
 
     if( $vertex->{charge} ) { # if non-zero
         $atom .= ($vertex->{charge} > 0 ? '+' : '') . $vertex->{charge};
+        $atom =~ s/([-+])1$/$1/;
         $is_simple = 0;
     }
 
