@@ -27,16 +27,16 @@ sub write
             tree_edge     => sub { push @symbols, _tree_edge( @_ ) },
             non_tree_edge => sub { return if $seen_rings{join '|', sort @_[0..1]};
                                    $nrings++;
-                                   ${$vertex_symbols{$_[0]}} .=
+                                   $symbols[$vertex_symbols{$_[0]}] .=
                                         _depict_bond( @_[0..1], $graph ) .
                                         ($nrings < 10 ? '' : '%') . $nrings;
-                                   ${$vertex_symbols{$_[1]}} .=
+                                   $symbols[$vertex_symbols{$_[1]}] .=
                                         _depict_bond( @_[0..1], $graph ) .
                                         ($nrings < 10 ? '' : '%') . $nrings;
                                    $seen_rings{join '|', sort @_[0..1]} = 1; },
 
             pre  => sub { push @symbols, _pre_vertex( @_ );
-                          $vertex_symbols{$_[0]} = \$symbols[-1] },
+                          $vertex_symbols{$_[0]} = $#symbols },
             post => sub { push @symbols, ')' },
         };
 
