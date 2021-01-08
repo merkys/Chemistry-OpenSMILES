@@ -23,17 +23,15 @@ sub write
         my $nrings = 0;
         my %seen_rings;
 
+        my $rings = {};
+
         my $operations = {
             tree_edge     => sub { push @symbols, _tree_edge( @_ ) },
-            non_tree_edge => sub { return if $seen_rings{join '|', sort @_[0..1]};
-                                   $nrings++;
-                                   $symbols[$vertex_symbols{$_[0]}] .=
-                                        _depict_bond( @_[0..1], $graph ) .
-                                        ($nrings < 10 ? '' : '%') . $nrings;
-                                   $symbols[$vertex_symbols{$_[1]}] .=
-                                        _depict_bond( @_[0..1], $graph ) .
-                                        ($nrings < 10 ? '' : '%') . $nrings;
-                                   $seen_rings{join '|', sort @_[0..1]} = 1; },
+            non_tree_edge => sub { my @sorted = sort { $a <=> $b }
+                                                     map { $vertex_symbols{$_} }
+                                                         @_[0..1];
+                                   $rings->{$sorted[0]}{$sorted[1]} =
+                                        _depict_bond( @_[0..1], $graph ); },
 
             pre  => sub { push @symbols, _pre_vertex( @_ );
                           $vertex_symbols{$_[0]} = $#symbols },
@@ -52,6 +50,27 @@ sub write
 
         next unless @symbols;
         pop @symbols;
+
+        my @ring_ids = 1..99;
+        my @ring_ends;
+        for my $i (0..$#symbols) {
+            if( $rings->{$i} ) {
+                for my $j (sort { $a <=> $b } keys %{$rings->{$i}}) {
+                    $symbols[$i] .= $rings->{$i}{$j} .
+                                    ($ring_ids[0] < 10 ? '' : '%') .
+                                     $ring_ids[0];
+                    $symbols[$j] .= $rings->{$i}{$j} .
+                                    ($ring_ids[0] < 10 ? '' : '%') .
+                                     $ring_ids[0];
+                    push @{$ring_ends[$j]}, shift @ring_ids;
+                }
+            }
+            if( $ring_ends[$i] ) {
+                @ring_ids = sort { $a <=> $b }
+                                 (@{$ring_ends[$i]}, @ring_ids);
+            }
+        }
+
         push @components, join '', @symbols;
     }
 
