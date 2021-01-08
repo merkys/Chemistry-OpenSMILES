@@ -12,6 +12,8 @@ my @cases = (
     [ 'C=1=C=C=C=1', 'C=1(=C(=C(=C=1)))' ],
     [ 'C#C.c1ccccc1', 'C(#C).c:1(:c(:c(:c(:c(:c:1)))))' ],
     [ 'C1CC2CCCCC2CC1', 'C1(C(C2(C(C(C(C(C2(C(C1)))))))))' ],
+    # A strange way to write fused rings:
+    [ 'C1(CCCCC11)(CCCC1)', 'C12(C(C(C(C(C1(C(C(C(C2)))))))))' ],
 );
 
 plan tests => 2 * scalar @cases;
