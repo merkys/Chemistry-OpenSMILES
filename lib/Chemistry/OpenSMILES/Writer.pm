@@ -29,10 +29,10 @@ sub write
                                    $nrings++;
                                    ${$vertex_symbols{$_[0]}} .=
                                         _depict_bond( @_[0..1], $graph ) .
-                                        $nrings;
+                                        ($nrings < 10 ? '' : '%') . $nrings;
                                    ${$vertex_symbols{$_[1]}} .=
                                         _depict_bond( @_[0..1], $graph ) .
-                                        $nrings;
+                                        ($nrings < 10 ? '' : '%') . $nrings;
                                    $seen_rings{join '|', sort @_[0..1]} = 1; },
 
             pre  => sub { push @symbols, _pre_vertex( @_ );
