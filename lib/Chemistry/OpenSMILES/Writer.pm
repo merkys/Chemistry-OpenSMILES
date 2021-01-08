@@ -51,11 +51,17 @@ sub write
         next unless @symbols;
         pop @symbols;
 
-        my @ring_ids = 1..99;
+        my @ring_ids = ( 1..99, 0 );
         my @ring_ends;
         for my $i (0..$#symbols) {
             if( $rings->{$i} ) {
                 for my $j (sort { $a <=> $b } keys %{$rings->{$i}}) {
+                    if( !@ring_ids ) {
+                        # All 100 rings are open now. There is no other
+                        # solution but to terminate the program.
+                        die 'cannot represent more than 100 open ring' .
+                            ' bonds';
+                    }
                     $symbols[$i] .= $rings->{$i}{$j} .
                                     ($ring_ids[0] < 10 ? '' : '%') .
                                      $ring_ids[0];
@@ -66,7 +72,8 @@ sub write
                 }
             }
             if( $ring_ends[$i] ) {
-                @ring_ids = sort { $a <=> $b }
+                # Ring bond '0' must stay in the end
+                @ring_ids = sort { ($a == 0) - ($b == 0) || $a <=> $b }
                                  (@{$ring_ends[$i]}, @ring_ids);
             }
         }
