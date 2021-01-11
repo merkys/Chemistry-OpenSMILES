@@ -30,7 +30,7 @@ my %bond_order = (
     '$' => 4,
 );
 
-sub _is_organic($);
+sub _is_aromatic($);
 
 %}
 
@@ -61,7 +61,7 @@ chain: atom
 
             $_[2]->{graph}->add_edge( $_[1]->{last}, $_[2] );
 
-            if( _is_organic $_[1]->{last} && _is_organic $_[1]->{last} ) {
+            if( _is_aromatic $_[1]->{last} && _is_aromatic $_[1]->{last} ) {
                 $_[2]->{graph}->set_edge_attribute( $_[1]->{last},
                                                     $_[2],
                                                     'bond',
@@ -111,7 +111,7 @@ chain: atom
             $_[1]->{last}{graph}->add_edge( $_[1]->{last}, $_[3]->{first} );
 
 
-            if( _is_organic $_[1]->{last} && _is_organic $_[3]->{first} ) {
+            if( _is_aromatic $_[1]->{last} && _is_aromatic $_[3]->{first} ) {
                 $_[1]->{last}{graph}->set_edge_attribute( $_[1]->{last},
                                                           $_[3]->{first},
                                                           'bond',
@@ -334,8 +334,8 @@ sub _add_ring_bond
         ( $bond ) = grep { defined }
                          ( $bond, $self->{USER}{RINGBONDS}{$ring_bond}{bond} );
         if( !$bond &&
-            _is_organic $self->{USER}{RINGBONDS}{$ring_bond}{atom} &&
-            _is_organic $atom ) {
+            _is_aromatic $self->{USER}{RINGBONDS}{$ring_bond}{atom} &&
+            _is_aromatic $atom ) {
             $bond = ':';
         }
         if( $bond && $bond ne '-' ) {
@@ -354,7 +354,7 @@ sub _add_ring_bond
     }
 }
 
-sub _is_organic($)
+sub _is_aromatic($)
 {
     my( $atom ) = @_;
     return $atom->{symbol} ne ucfirst $atom->{symbol};
