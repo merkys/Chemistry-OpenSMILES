@@ -1,4 +1,4 @@
-0.3.3 unreleased
+0.4.0 unreleased
 
     - Adding Chemistry::OpenSMILES::Writer, implementing a SMILES writer
       for the data structures built by Chemistry::OpenSMILES::Parser.
