@@ -5,6 +5,7 @@
 use warnings;
 use 5.0100;
 
+use Chemistry::OpenSMILES qw(is_aromatic);
 use Graph::Undirected;
 use List::Util qw(sum);
 
@@ -29,8 +30,6 @@ my %bond_order = (
     '#' => 3,
     '$' => 4,
 );
-
-sub _is_aromatic($);
 
 %}
 
@@ -61,7 +60,7 @@ chain: atom
 
             $_[2]->{graph}->add_edge( $_[1]->{last}, $_[2] );
 
-            if( _is_aromatic $_[1]->{last} && _is_aromatic $_[1]->{last} ) {
+            if( is_aromatic $_[1]->{last} && is_aromatic $_[1]->{last} ) {
                 $_[2]->{graph}->set_edge_attribute( $_[1]->{last},
                                                     $_[2],
                                                     'bond',
@@ -111,7 +110,7 @@ chain: atom
             $_[1]->{last}{graph}->add_edge( $_[1]->{last}, $_[3]->{first} );
 
 
-            if( _is_aromatic $_[1]->{last} && _is_aromatic $_[3]->{first} ) {
+            if( is_aromatic $_[1]->{last} && is_aromatic $_[3]->{first} ) {
                 $_[1]->{last}{graph}->set_edge_attribute( $_[1]->{last},
                                                           $_[3]->{first},
                                                           'bond',
@@ -334,8 +333,8 @@ sub _add_ring_bond
         ( $bond ) = grep { defined }
                          ( $bond, $self->{USER}{RINGBONDS}{$ring_bond}{bond} );
         if( !$bond &&
-            _is_aromatic $self->{USER}{RINGBONDS}{$ring_bond}{atom} &&
-            _is_aromatic $atom ) {
+            is_aromatic $self->{USER}{RINGBONDS}{$ring_bond}{atom} &&
+            is_aromatic $atom ) {
             $bond = ':';
         }
         if( $bond && $bond ne '-' ) {
@@ -352,12 +351,6 @@ sub _add_ring_bond
         $self->{USER}{RINGBONDS}{$ring_bond} =
             { atom => $atom, $bond ? ( bond => $bond ) : () };
     }
-}
-
-sub _is_aromatic($)
-{
-    my( $atom ) = @_;
-    return $atom->{symbol} ne ucfirst $atom->{symbol};
 }
 
 sub _merge_graphs

@@ -7,6 +7,18 @@ use 5.0100;
 # ABSTRACT: OpenSMILES format reader and writer
 # VERSION
 
+require Exporter;
+our @ISA = qw( Exporter );
+our @EXPORT_OK = qw(
+    is_aromatic
+);
+
+sub is_aromatic($)
+{
+    my( $atom ) = @_;
+    return $atom->{symbol} ne ucfirst $atom->{symbol};
+}
+
 1;
 
 __END__

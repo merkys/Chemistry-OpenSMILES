@@ -3,6 +3,7 @@
     - Adding Chemistry::OpenSMILES::Writer, implementing a SMILES writer
       for the data structures built by Chemistry::OpenSMILES::Parser.
     - Converting atom charge to integer.
+    - Exporting Chemistry::OpenSMILES::is_aromatic().
 
 0.3.2 2020-10-05
 
