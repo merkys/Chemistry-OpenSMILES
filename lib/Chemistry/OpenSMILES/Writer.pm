@@ -3,6 +3,7 @@ package Chemistry::OpenSMILES::Writer;
 use strict;
 use warnings;
 
+use Chemistry::OpenSMILES qw(is_aromatic);
 use Graph::Traversal::DFS;
 
 # ABSTRACT: OpenSMILES format writer
@@ -135,7 +136,7 @@ sub _depict_bond
     # CAVEAT: '/' and '\' bonds are problematic
     return $graph->has_edge_attribute( $u, $v, 'bond' )
          ? $graph->get_edge_attribute( $u, $v, 'bond' )
-         : '';
+         : is_aromatic $u && is_aromatic $v ? '-' : '';
 }
 
 sub _order

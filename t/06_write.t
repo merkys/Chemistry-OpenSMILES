@@ -14,6 +14,7 @@ my @cases = (
     [ 'C1CC2CCCCC2CC1', 'C1(C(C2(C(C(C(C(C2(C(C1)))))))))' ],
     # A strange way to write fused rings:
     [ 'C1(CCCCC11)(CCCC1)', 'C12(C(C(C(C(C1(C(C(C(C2)))))))))' ],
+    [ 'c1cc-ccc1', 'c:1(:c(:c(-c(:c(:c:1)))))' ],
 );
 
 plan tests => 2 * scalar @cases;
