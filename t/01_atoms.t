@@ -30,7 +30,6 @@ for (sort keys %cases) {
     my( $graph ) = $parser->parse( $_, { raw => 1 } );
     is( $graph->vertices, 1 );
 
-    # s/H([\]\-])/H1$1/;
     is( join( '', map { Chemistry::OpenSMILES::Writer::_pre_vertex( $_ ) }
                       $graph->vertices ),
         $cases{$_} );
