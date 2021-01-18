@@ -9,9 +9,21 @@ use Graph::Traversal::DFS;
 # ABSTRACT: OpenSMILES format writer
 # VERSION
 
-sub write
+require Exporter;
+our @ISA = qw( Exporter );
+our @EXPORT_OK = qw(
+    write_SMILES
+);
+
+sub write_SMILES
 {
     my( $what, $order_sub ) = @_;
+
+    if( ref $what eq 'HASH' ) {
+        # subroutine will also accept and properly represent a single
+        # atom:
+        return _pre_vertex( $what );
+    }
 
     my @moieties = ref $what eq 'ARRAY' ? @$what : ( $what );
     my @components;
@@ -85,6 +97,12 @@ sub write
     return join '.', @components;
 }
 
+# DEPRECATED
+sub write
+{
+    &write_SMILES;
+}
+
 sub _tree_edge
 {
     my( $u, $v, $self ) = @_;
@@ -94,7 +112,7 @@ sub _tree_edge
 
 sub _pre_vertex
 {
-    my( $vertex, $self ) = @_;
+    my( $vertex ) = @_;
 
     my $atom = $vertex->{symbol};
     my $is_simple = $atom =~ /^[bcnosp]$/i ||
