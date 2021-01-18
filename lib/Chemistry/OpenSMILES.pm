@@ -43,9 +43,9 @@ Chemistry::OpenSMILES - OpenSMILES format reader and writer
         print scalar $moiety->edges;
     }
 
-    use Chemistry::OpenSMILES::Writer;
+    use Chemistry::OpenSMILES::Writer qw(write_SMILES);
 
-    print Chemistry::OpenSMILES::Writer::write( \@moieties );
+    print write_SMILES( \@moieties );
 
 =head1 DESCRIPTION
 
