@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Chemistry::OpenSMILES::Parser;
-use Chemistry::OpenSMILES::Writer;
+use Chemistry::OpenSMILES::Writer qw(write_SMILES);
 use Test::More;
 
 my @cases = (
@@ -26,12 +26,11 @@ for my $case (@cases) {
 
     $parser = Chemistry::OpenSMILES::Parser->new;
     @moieties = $parser->parse( $case->[0], { raw => 1 } );
-    $result = Chemistry::OpenSMILES::Writer::write( \@moieties );
+    $result = write_SMILES( \@moieties );
     is( $result, $case->[1] );
 
     $parser = Chemistry::OpenSMILES::Parser->new;
     @moieties = $parser->parse( $result, { raw => 1 } );
-    $result = Chemistry::OpenSMILES::Writer::write( \@moieties );
+    $result = write_SMILES( \@moieties );
     is( $result, $case->[1] );
-    
 }
