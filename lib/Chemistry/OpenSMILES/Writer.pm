@@ -46,8 +46,12 @@ sub write_SMILES
                                    $rings->{$sorted[0]}{$sorted[1]} =
                                         _depict_bond( @_[0..1], $graph ); },
 
-            pre  => sub { push @symbols, _pre_vertex( @_ );
-                          $vertex_symbols{$_[0]} = $#symbols },
+            pre  => sub { my( $vertex, $graph ) = @_;
+                          push @symbols,
+                         _pre_vertex( { map { $_ => $vertex->{$_} }
+                                        grep { $_ ne 'chirality' }
+                                        keys %$vertex }, $graph );
+                          $vertex_symbols{$vertex} = $#symbols },
             post => sub { push @symbols, ')' },
         };
 
