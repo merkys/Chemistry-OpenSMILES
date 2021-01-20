@@ -19,6 +19,21 @@ sub is_aromatic($)
     return $atom->{symbol} ne ucfirst $atom->{symbol};
 }
 
+sub _validate($)
+{
+    my( $moiety ) = @_;
+
+    for my $atom (sort { $a->{number} <=> $b->{number} } $moiety->vertices) {
+        next if !$atom->{chirality} || $atom->{chirality} !~ /^@@?$/;
+        next if $moiety->degree($atom) == 4;
+        warn sprintf 'tetrahedral center %s(%d) has %d bonds instead ' .
+                     'of 4' . "\n",
+                     $atom->{symbol},
+                     $atom->{number},
+                     $moiety->degree($atom);
+    }
+}
+
 1;
 
 __END__
