@@ -25,14 +25,31 @@ sub _validate($)
 
     for my $atom (sort { $a->{number} <=> $b->{number} } $moiety->vertices) {
         # TODO: TH and AL chiral centers also have to be checked
-        next if !$atom->{chirality} || $atom->{chirality} !~ /^@@?$/;
-        next if $moiety->degree($atom) >= 4;
-        # FIXME: tetrahedral allenes are false-positives
-        warn sprintf 'chiral center %s(%d) has %d bonds while ' .
-                     'at least 4 is required' . "\n",
-                     $atom->{symbol},
-                     $atom->{number},
-                     $moiety->degree($atom);
+        if( $atom->{chirality} && $atom->{chirality} =~ /^@@?$/ &&
+            $moiety->degree($atom) < 4 ) {
+            # FIXME: tetrahedral allenes are false-positives
+            warn sprintf 'chiral center %s(%d) has %d bonds while ' .
+                         'at least 4 is required' . "\n",
+                         $atom->{symbol},
+                         $atom->{number},
+                         $moiety->degree($atom);
+        }
+
+        my %bond_types;
+        for my $neighbour ($moiety->neighbours($atom)) {
+            next if !$moiety->has_edge_attribute( $atom, $neighbour, 'bond' );
+            $bond_types{$moiety->get_edge_attribute( $atom, $neighbour, 'bond' )}++;
+        }
+        for ('/', '\\') {
+            if( $bond_types{$_} && $bond_types{$_} > 1 ) {
+                warn sprintf 'atom %s(%d) has %d bonds of type \'%s\', ' .
+                             'cis/trans definitions must not conflict' . "\n",
+                             $atom->{symbol},
+                             $atom->{number},
+                             $bond_types{$_},
+                             $_;
+            }
+        }
     }
 
     # TODO: cis/trans bond not next to a double bond
