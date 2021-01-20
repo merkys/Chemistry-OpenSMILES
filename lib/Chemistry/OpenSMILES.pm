@@ -24,6 +24,7 @@ sub _validate($)
     my( $moiety ) = @_;
 
     for my $atom (sort { $a->{number} <=> $b->{number} } $moiety->vertices) {
+        # TODO: TH and AL chiral centers also have to be checked
         next if !$atom->{chirality} || $atom->{chirality} !~ /^@@?$/;
         next if $moiety->degree($atom) >= 4;
         # FIXME: tetrahedral allenes are false-positives
@@ -33,6 +34,9 @@ sub _validate($)
                      $atom->{number},
                      $moiety->degree($atom);
     }
+
+    # TODO: cis/trans bond not next to a double bond
+    # TODO: SP, TB, OH chiral centers
 }
 
 1;
