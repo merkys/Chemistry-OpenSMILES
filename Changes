@@ -1,3 +1,10 @@
+0.4.2 2021-01-20
+
+    - Exporting Chemistry::OpenSMILES::Writer::write_SMILES().
+    - Removing chirality information from written SMILES, as code to
+      write this reliably is not yet available.
+    - Fixing writing of cis/trans bonds.
+
 0.4.1 2021-01-12
 
     - Fixing an issue with 'scalar %hash' in t/01_atoms.t.
