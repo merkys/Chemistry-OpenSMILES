@@ -25,9 +25,10 @@ sub _validate($)
 
     for my $atom (sort { $a->{number} <=> $b->{number} } $moiety->vertices) {
         next if !$atom->{chirality} || $atom->{chirality} !~ /^@@?$/;
-        next if $moiety->degree($atom) == 4;
-        warn sprintf 'tetrahedral center %s(%d) has %d bonds instead ' .
-                     'of 4' . "\n",
+        next if $moiety->degree($atom) >= 4;
+        # FIXME: tetrahedral allenes are false-positives
+        warn sprintf 'chiral center %s(%d) has %d bonds while ' .
+                     'at least 4 is required' . "\n",
                      $atom->{symbol},
                      $atom->{number},
                      $moiety->degree($atom);
