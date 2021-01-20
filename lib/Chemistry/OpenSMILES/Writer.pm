@@ -39,12 +39,16 @@ sub write_SMILES
         my $rings = {};
 
         my $operations = {
-            tree_edge     => sub { push @symbols, _tree_edge( @_ ) },
-            non_tree_edge => sub { my @sorted = sort { $a <=> $b }
-                                                     map { $vertex_symbols{$_} }
-                                                         @_[0..1];
-                                   $rings->{$sorted[0]}{$sorted[1]} =
-                                        _depict_bond( @_[0..1], $graph ); },
+            tree_edge     => sub { if( $vertex_symbols{$_[1]} ) {
+                                       @_ = ( $_[1], $_[0], $_[2] );
+                                   }
+                                   push @symbols, _tree_edge( @_ ) },
+            non_tree_edge => sub { my @sorted = sort { $vertex_symbols{$a} <=>
+                                                       $vertex_symbols{$b} }
+                                                     @_[0..1];
+                                   $rings->{$vertex_symbols{$sorted[0]}}
+                                           {$vertex_symbols{$sorted[1]}} =
+                                        _depict_bond( @sorted, $graph ); },
 
             pre  => sub { my( $vertex, $graph ) = @_;
                           push @symbols,
@@ -155,10 +159,14 @@ sub _depict_bond
 {
     my( $u, $v, $graph ) = @_;
 
-    # CAVEAT: '/' and '\' bonds are problematic
-    return $graph->has_edge_attribute( $u, $v, 'bond' )
-         ? $graph->get_edge_attribute( $u, $v, 'bond' )
-         : is_aromatic $u && is_aromatic $v ? '-' : '';
+    if( !$graph->has_edge_attribute( $u, $v, 'bond' ) ) {
+        return is_aromatic $u && is_aromatic $v ? '-' : '';
+    }
+
+    my $bond = $graph->get_edge_attribute( $u, $v, 'bond' );
+    return $bond if $bond ne '/' && $bond ne '\\';
+    return $bond if $u->{number} < $v->{number};
+    return $bond eq '/' ? '\\' : '/';
 }
 
 sub _order
