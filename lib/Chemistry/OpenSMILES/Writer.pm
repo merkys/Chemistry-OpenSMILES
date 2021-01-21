@@ -43,6 +43,7 @@ sub write_SMILES
                                        @_ = ( $_[1], $_[0], $_[2] );
                                    }
                                    push @symbols, _tree_edge( @_ ) },
+
             non_tree_edge => sub { my @sorted = sort { $vertex_symbols{$a} <=>
                                                        $vertex_symbols{$b} }
                                                      @_[0..1];
@@ -56,6 +57,7 @@ sub write_SMILES
                                         grep { $_ ne 'chirality' }
                                         keys %$vertex }, $graph );
                           $vertex_symbols{$vertex} = $#symbols },
+
             post => sub { push @symbols, ')' },
         };
 
