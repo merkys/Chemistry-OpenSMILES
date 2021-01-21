@@ -15,12 +15,14 @@ my @cases = qw(
 );
 
 my %cases = (
-    '[*]'    => '*',
-    '[ClH1]' => '[ClH]',
-    '[Cu++]' => '[Cu+2]',
-    '[OH-1]' => '[OH-]',
-    '[OH1-]' => '[OH-]',
-    map { $_ => $_ } @cases,
+    '[*]'     => '*',
+    '[ClH1]'  => '[ClH]',
+    '[Cu++]'  => '[Cu+2]',
+    '[OH-1]'  => '[OH-]',
+    '[OH1-]'  => '[OH-]',
+    '[C@TH1]' => '[C@]',
+    '[C@TH2]' => '[C@@]',
+    map { $_  => $_ } @cases,
 );
 
 plan tests => 2 * scalar keys %cases;
