@@ -35,6 +35,7 @@ sub write_SMILES
         my %vertex_symbols;
         my $nrings = 0;
         my %seen_rings;
+        my @chiral;
 
         my $rings = {};
 
@@ -51,11 +52,16 @@ sub write_SMILES
                                            {$vertex_symbols{$sorted[1]}} =
                                         _depict_bond( @sorted, $graph ); },
 
-            pre  => sub { my( $vertex, $graph ) = @_;
+            pre  => sub { my( $vertex, $dfs ) = @_;
+                          if( $vertex->{chirality} &&
+                              $vertex->{chirality} =~ /^@@?$/ &&
+                              $dfs->graph->degree( $vertex ) == 4 ) {
+                              push @chiral, $vertex;
+                          }
                           push @symbols,
-                         _pre_vertex( { map { $_ => $vertex->{$_} }
-                                        grep { $_ ne 'chirality' }
-                                        keys %$vertex }, $graph );
+                          _pre_vertex( { map { $_ => $vertex->{$_} }
+                                         grep { $_ ne 'chirality' }
+                                         keys %$vertex } );
                           $vertex_symbols{$vertex} = $#symbols },
 
             post => sub { push @symbols, ')' },
