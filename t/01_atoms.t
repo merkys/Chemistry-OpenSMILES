@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Chemistry::OpenSMILES::Parser;
-use Chemistry::OpenSMILES::Writer;
+use Chemistry::OpenSMILES::Writer qw( write_SMILES );
 use Test::More;
 
 my @cases = qw(
@@ -32,7 +32,6 @@ for (sort keys %cases) {
     my( $graph ) = $parser->parse( $_, { raw => 1 } );
     is( $graph->vertices, 1 );
 
-    is( join( '', map { Chemistry::OpenSMILES::Writer::_pre_vertex( $_ ) }
-                      $graph->vertices ),
+    is( join( '', map { write_SMILES( $_ ) } $graph->vertices ),
         $cases{$_} );
 }
