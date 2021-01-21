@@ -171,6 +171,38 @@ sub _depict_bond
     return $bond eq '/' ? '\\' : '/';
 }
 
+# Invert the tetrahedral chirality sign if the order of attachments
+# has changed from clockwise to counter-clockwise and vice versa.
+sub _tetrahedral_chirality
+{
+    my( $chirality, @numbers ) = @_;
+
+    # Translating the numbers to range of 0..3
+    my @indices = sort { $numbers[$a] <=> $numbers[$b] } 0..3;
+    foreach (0..3) {
+        $numbers[$indices[$_]] = $_;
+    }
+
+    # First attachment is written on left hand side of the chiral
+    # center, here it is called $direction
+    my $direction = shift @numbers;
+
+    # Cyclically sorting the rest of the attachments
+    while( $numbers[0] > $numbers[1] || $numbers[0] > $numbers[2] ) {
+        push @numbers, shift @numbers;
+    }
+
+    # Checking whether the direction has been changed
+    if( ($direction == 0 && $numbers[1] == 2) ||
+        ($direction == 1 && $numbers[1] == 3) ||
+        ($direction == 2 && $numbers[1] == 1) ||
+        ($direction == 3 && $numbers[1] == 2) ) {
+        return $chirality;
+    } else {
+        return $chirality eq '@' ? '@@' : '@';
+    }
+}
+
 sub _order
 {
     my( $vertices ) = @_;
