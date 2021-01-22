@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Chemistry::OpenSMILES qw(is_aromatic);
+use Chemistry::OpenSMILES::Parser;
 use Graph::Traversal::DFS;
 
 # ABSTRACT: OpenSMILES format writer
@@ -80,6 +81,24 @@ sub write_SMILES
         next unless @symbols;
         pop @symbols;
 
+        # Dealing with chirality
+        for my $atom (@chiral) {
+            my @neighbours = map { $_->{number} }
+                             sort { $vertex_symbols{$a} <=>
+                                    $vertex_symbols{$b} }
+                             $graph->neighbours($atom);
+            my $chirality_now = _tetrahedral_chirality( $atom->{chirality},
+                                                        @neighbours );
+            my $parser = Chemistry::OpenSMILES::Parser->new;
+            my( $graph_reparsed ) = $parser->parse( $symbols[$vertex_symbols{$atom}],
+                                                    { raw => 1 } );
+            my( $atom_reparsed ) = $graph_reparsed->vertices;
+            $atom_reparsed->{chirality} = $chirality_now;
+            $symbols[$vertex_symbols{$atom}] =
+                write_SMILES( $atom_reparsed );
+        }
+
+        # Adding ring numbers
         my @ring_ids = ( 1..99, 0 );
         my @ring_ends;
         for my $i (0..$#symbols) {
