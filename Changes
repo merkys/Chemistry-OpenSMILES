@@ -1,3 +1,11 @@
+0.4.3 unreleased
+
+    - Supporting tetrahedral chirality in
+      Chemistry::OpenSMILES::Writer::write_SMILES().
+    - Chiralities @TH1 and @TH2 are the same as @ and @@, respectively.
+    - Specifying the requirement of Graph v0.97 or later.
+    - Fixing issue with homepage.
+
 0.4.2 2021-01-20
 
     - Exporting Chemistry::OpenSMILES::Writer::write_SMILES().
