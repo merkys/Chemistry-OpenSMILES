@@ -7,7 +7,6 @@ use Chemistry::OpenSMILES::Parser;
 use Test::More;
 
 my %cases = (
-    'C[C@](C)(C)(C)' => undef,
     '[C@]' => 'chiral center C(0) has 0 bonds while at least 4 is required',
     'C/C(\O)=C(/C)(\O)' => 'atom C(1) has 2 bonds of type \'\\\', cis/trans definitions must not conflict',
 );
