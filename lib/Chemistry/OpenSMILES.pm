@@ -37,6 +37,8 @@ sub _validate($@)
                 my %colors = map { ($color_sub->( $_ ) => 1) }
                                  $moiety->neighbours($atom);
                 if( scalar keys %colors != 4 ) {
+                    # FIXME: anomers are false-positives, see COD entry
+                    # 7111036
                     warn sprintf 'tetrahedral chiral setting for %s(%d) ' .
                                  'is not needed as not all 4 neighbours ' .
                                  'are distinct' . "\n",
