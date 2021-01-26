@@ -19,7 +19,7 @@ sub is_aromatic($)
     return $atom->{symbol} ne ucfirst $atom->{symbol};
 }
 
-sub _validate($)
+sub _validate($@)
 {
     my( $moiety, $color_sub ) = @_;
 

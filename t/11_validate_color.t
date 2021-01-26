@@ -7,9 +7,8 @@ use Chemistry::OpenSMILES::Parser;
 use Test::More;
 
 my %cases = (
-    'C[C@](C)(C)(C)' => undef,
-    '[C@]' => 'chiral center C(0) has 0 bonds while at least 4 is required',
-    'C/C(\O)=C(/C)(\O)' => 'atom C(1) has 2 bonds of type \'\\\', cis/trans definitions must not conflict',
+    'C[C@](C)(C)(C)' => 'tetrahedral chiral setting for C(1) is not needed as not all 4 neighbours are distinct',
+    'C[C@](Cl)(F)(O)' => undef,
 );
 
 plan tests => scalar keys %cases;
@@ -20,7 +19,8 @@ for (sort keys %cases) {
 
     my $parser   = Chemistry::OpenSMILES::Parser->new;
     my( $graph ) = $parser->parse( $_ );
-    Chemistry::OpenSMILES::_validate( $graph );
+    Chemistry::OpenSMILES::_validate( $graph,
+                                      sub { return $_[0]->{symbol} } );
     $warning =~ s/\n$// if defined $warning;
     is( $warning, $cases{$_} );
 }
