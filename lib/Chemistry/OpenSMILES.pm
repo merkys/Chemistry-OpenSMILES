@@ -21,18 +21,29 @@ sub is_aromatic($)
 
 sub _validate($)
 {
-    my( $moiety ) = @_;
+    my( $moiety, $color_sub ) = @_;
 
     for my $atom (sort { $a->{number} <=> $b->{number} } $moiety->vertices) {
         # TODO: TH and AL chiral centers also have to be checked
-        if( $atom->{chirality} && $atom->{chirality} =~ /^@@?$/ &&
-            $moiety->degree($atom) < 4 ) {
-            # FIXME: tetrahedral allenes are false-positives
-            warn sprintf 'chiral center %s(%d) has %d bonds while ' .
-                         'at least 4 is required' . "\n",
-                         $atom->{symbol},
-                         $atom->{number},
-                         $moiety->degree($atom);
+        if( $atom->{chirality} && $atom->{chirality} =~ /^@@?$/ ) {
+            if( $moiety->degree($atom) < 4 ) {
+                # FIXME: tetrahedral allenes are false-positives
+                warn sprintf 'chiral center %s(%d) has %d bonds while ' .
+                             'at least 4 is required' . "\n",
+                             $atom->{symbol},
+                             $atom->{number},
+                             $moiety->degree($atom);
+            } elsif( $moiety->degree($atom) == 4 && $color_sub ) {
+                my %colors = map { ($color_sub->( $_ ) => 1) }
+                                 $moiety->neighbours($atom);
+                if( scalar keys %colors != 4 ) {
+                    warn sprintf 'tetrahedral chiral setting for %s(%d) ' .
+                                 'is not needed as not all 4 neighbours ' .
+                                 'are distinct' . "\n",
+                                 $atom->{symbol},
+                                 $atom->{number};
+                }
+            }
         }
 
         # FIXME: this code yields false-positives, see COD entries
