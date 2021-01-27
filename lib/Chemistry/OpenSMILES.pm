@@ -24,7 +24,7 @@ sub _validate($@)
     my( $moiety, $color_sub ) = @_;
 
     for my $atom (sort { $a->{number} <=> $b->{number} } $moiety->vertices) {
-        # TODO: TH and AL chiral centers also have to be checked
+        # TODO: AL chiral centers also have to be checked
         if( $atom->{chirality} && $atom->{chirality} =~ /^@@?$/ ) {
             if( $moiety->degree($atom) < 4 ) {
                 # FIXME: tetrahedral allenes are false-positives
