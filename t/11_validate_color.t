@@ -9,6 +9,7 @@ use Test::More;
 my %cases = (
     'C[C@](C)(C)(C)' => 'tetrahedral chiral setting for C(1) is not needed as not all 4 neighbours are distinct',
     'C[C@](Cl)(F)(O)' => undef,
+    'C(Cl)(F)(O)' => 'atom C(0) has 4 distinct neighbours, but does not have a chiral setting',
 );
 
 plan tests => scalar keys %cases;

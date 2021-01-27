@@ -48,6 +48,22 @@ sub _validate($@)
             }
         }
 
+        # Warn about unmarked tetrahedral chiral centers
+        if( !$atom->{chirality} && $moiety->degree($atom) == 4 ) {
+            my $color_sub_local = $color_sub;
+            if( !$color_sub_local ) {
+                $color_sub_local = sub { return $_[0]->{symbol} };
+            }
+            my %colors = map { ($color_sub_local->( $_ ) => 1) }
+                             $moiety->neighbours($atom);
+            if( scalar keys %colors == 4 ) {
+                warn sprintf 'atom %s(%d) has 4 distinct neighbours, ' .
+                             'but does not have a chiral setting' . "\n",
+                             $atom->{symbol},
+                             $atom->{number};
+            }
+        }
+
         # FIXME: this code yields false-positives, see COD entries
         # 1100780 and 1547257
         my %bond_types;
