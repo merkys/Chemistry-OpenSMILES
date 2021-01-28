@@ -92,7 +92,7 @@ sub _validate($@)
 
     # FIXME: establish deterministic order
     for my $bond ($moiety->edges) {
-        my( $A, $B ) = @$bond;
+        my( $A, $B ) = sort { $a->{number} <=> $b->{number} } @$bond;
         if( $A eq $B ) {
             warn sprintf 'atom %s(%d) has bond to itself' . "\n",
                          $A->{symbol},
@@ -103,40 +103,32 @@ sub _validate($@)
             my $bond_type = $moiety->get_edge_attribute( @$bond, 'bond' );
             if( $bond_type eq '=' ) {
                 # Test cis/trans bonds
+                # FIXME: Not sure how to check which definition belongs to
+                # which of the double bonds. See COD entry 1547257.
                 for my $atom (@$bond) {
-                    my %bond_types;
-                    for my $neighbour ($moiety->neighbours($atom)) {
-                        next if !$moiety->has_edge_attribute( $atom, $neighbour, 'bond' );
-                        my  $bond_type = $moiety->get_edge_attribute( $atom, $neighbour, 'bond' );
-                        if( $bond_type =~ /^[\\\/]$/ &&
-                            $atom->{number} > $neighbour->{number} ) {
-                            $bond_type = $bond_type eq '\\' ? '/' : '\\';
-                        }
-                        $bond_types{$bond_type}++;
-                    }
+                    my %bond_types = _neighbours_per_bond_type( $moiety,
+                                                                $atom );
                     foreach ('/', '\\') {
-                        if( $bond_types{$_} && $bond_types{$_} > 1 ) {
+                        if( $bond_types{$_} && @{$bond_types{$_}} > 1 ) {
                             warn sprintf 'atom %s(%d) has %d bonds of type \'%s\', ' .
                                          'cis/trans definitions must not conflict' . "\n",
                                          $atom->{symbol},
                                          $atom->{number},
-                                         $bond_types{$_},
+                                         scalar @{$bond_types{$_}},
                                          $_;
                         }
                     }
                 }
             } elsif( $bond_type =~ /^[\\\/]$/ ) {
-                # Test if next to a double bond
+                # Test if next to a double bond.
+                # FIXME: Yields false-positives for delocalised bonds,
+                # see COD entry 1501863.
                 my %bond_types;
                 for my $atom (@$bond) {
-                    for my $neighbour ($moiety->neighbours($atom)) {
-                        next if !$moiety->has_edge_attribute( $atom, $neighbour, 'bond' );
-                        my  $bond_type = $moiety->get_edge_attribute( $atom, $neighbour, 'bond' );
-                        if( $bond_type =~ /^[\\\/]$/ &&
-                            $atom->{number} > $neighbour->{number} ) {
-                            $bond_type = $bond_type eq '\\' ? '/' : '\\';
-                        }
-                        $bond_types{$bond_type}++;
+                    my %bond_types_now = _neighbours_per_bond_type( $moiety,
+                                                                    $atom );
+                    for my $key (keys %bond_types_now) {
+                        push @{$bond_types{$key}}, @{$bond_types_now{$key}};
                     }
                 }
                 if( !$bond_types{'='} ) {
@@ -153,6 +145,26 @@ sub _validate($@)
     }
 
     # TODO: SP, TB, OH chiral centers
+}
+
+sub _neighbours_per_bond_type
+{
+    my( $moiety, $atom ) = @_;
+    my %bond_types;
+    for my $neighbour ($moiety->neighbours($atom)) {
+        my $bond_type;
+        if( $moiety->has_edge_attribute( $atom, $neighbour, 'bond' ) ) {
+            $bond_type = $moiety->get_edge_attribute( $atom, $neighbour, 'bond' );
+        } else {
+            $bond_type = '';
+        }
+        if( $bond_type =~ /^[\\\/]$/ &&
+            $atom->{number} > $neighbour->{number} ) {
+            $bond_type = $bond_type eq '\\' ? '/' : '\\';
+        }
+        push @{$bond_types{$bond_type}}, $neighbour;
+    }
+    return %bond_types;
 }
 
 1;
