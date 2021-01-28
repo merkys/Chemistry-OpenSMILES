@@ -88,6 +88,16 @@ sub _validate($@)
         }
     }
 
+    # FIXME: establish deterministic order
+    for my $bond ($moiety->vertices) {
+        my( $A, $B ) = @$bond;
+        if( $A eq $B ) {
+            warn sprintf 'atom %s(%d) has bond to itself' . "\n",
+                         $atom->{symbol},
+                         $atom->{number};
+        }
+    }
+
     # TODO: cis/trans bond not next to a double bond
     # TODO: SP, TB, OH chiral centers
 }
