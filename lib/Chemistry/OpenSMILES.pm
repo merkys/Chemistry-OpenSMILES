@@ -89,12 +89,12 @@ sub _validate($@)
     }
 
     # FIXME: establish deterministic order
-    for my $bond ($moiety->vertices) {
+    for my $bond ($moiety->edges) {
         my( $A, $B ) = @$bond;
         if( $A eq $B ) {
             warn sprintf 'atom %s(%d) has bond to itself' . "\n",
-                         $atom->{symbol},
-                         $atom->{number};
+                         $A->{symbol},
+                         $A->{number};
         }
     }
 

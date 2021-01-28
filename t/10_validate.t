@@ -10,6 +10,7 @@ my %cases = (
     '[C@]' => 'chiral center C(0) has 0 bonds while at least 4 is required',
     'C/C(\O)=C(/C)(\O)' => 'atom C(1) has 2 bonds of type \'\\\', cis/trans definitions must not conflict',
     'C(Cl)(F)(O)' => 'atom C(0) has 4 distinct neighbours, but does not have a chiral setting',
+    'C11' => 'atom C(0) has bond to itself',
 );
 
 plan tests => scalar keys %cases;
