@@ -63,31 +63,6 @@ sub _validate($@)
                              $atom->{number};
             }
         }
-
-        next;
-
-        # FIXME: this code yields false-positives, see COD entries
-        # 1100780 and 1547257
-        my %bond_types;
-        for my $neighbour ($moiety->neighbours($atom)) {
-            next if !$moiety->has_edge_attribute( $atom, $neighbour, 'bond' );
-            my  $bond_type = $moiety->get_edge_attribute( $atom, $neighbour, 'bond' );
-            if( $bond_type =~ /^[\\\/]$/ &&
-                $atom->{number} > $neighbour->{number} ) {
-                $bond_type = $bond_type eq '\\' ? '/' : '\\';
-            }
-            $bond_types{$bond_type}++;
-        }
-        foreach ('/', '\\') {
-            if( $bond_types{$_} && $bond_types{$_} > 1 ) {
-                warn sprintf 'atom %s(%d) has %d bonds of type \'%s\', ' .
-                             'cis/trans definitions must not conflict' . "\n",
-                             $atom->{symbol},
-                             $atom->{number},
-                             $bond_types{$_},
-                             $_;
-            }
-        }
     }
 
     # FIXME: establish deterministic order
