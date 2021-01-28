@@ -123,6 +123,7 @@ sub _validate($@)
                 # Test if next to a double bond.
                 # FIXME: Yields false-positives for delocalised bonds,
                 # see COD entry 1501863.
+                # FIXME: What about triple bond? See COD entry 4103591.
                 my %bond_types;
                 for my $atom (@$bond) {
                     my %bond_types_now = _neighbours_per_bond_type( $moiety,
