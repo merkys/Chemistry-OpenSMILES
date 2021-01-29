@@ -43,8 +43,8 @@ smiles: chain ;
 
 chain: atom
         {
-            # FIXME: multiedged graphs have to be used for polymers
-            my $g = Graph::Undirected->new;
+            my $g = Graph::Undirected->new( multiedged =>
+                                                $_[0]->{USER}{OPTIONS}{polymer} );
             $g->add_vertex( $_[1] );
             push @{$_[0]->{USER}{GRAPHS}}, $g;
 
@@ -59,15 +59,10 @@ chain: atom
             $_[2]->{graph} = $_[1]->{last}{graph};
             $_[2]->{index} = $_[1]->{last}{index};
 
-            $_[2]->{graph}->add_edge( $_[1]->{last}, $_[2] );
-
-            if( is_aromatic $_[1]->{last} && is_aromatic $_[1]->{last} ) {
-                $_[2]->{graph}->set_edge_attribute( $_[1]->{last},
-                                                    $_[2],
-                                                    'bond',
-                                                    ':' );
-            }
-
+            _add_bond( $_[2]->{graph},
+                       $_[1]->{last},
+                       $_[2],
+                       is_aromatic $_[1]->{last} && is_aromatic $_[1]->{last} ? ':' : undef );
             $_[1]->{last} = $_[2];
 
             return $_[1];
@@ -77,21 +72,18 @@ chain: atom
             $_[3]->{graph} = $_[1]->{last}{graph};
             $_[3]->{index} = $_[1]->{last}{index};
 
-            if( $_[2] ne '-' ) {
-                $_[3]->{graph}->set_edge_attribute( $_[1]->{last},
-                                                    $_[3],
-                                                    'bond',
-                                                    $_[2] );
-            } else {
-                $_[3]->{graph}->add_edge( $_[1]->{last}, $_[3] );
-            }
+            _add_bond( $_[3]->{graph},
+                       $_[1]->{last},
+                       $_[3],
+                       $_[2] ne '-' ? $_[2] : undef );
             $_[1]->{last} = $_[3];
 
             return $_[1];
         }
      | chain '.' atom
         {
-            my $g = Graph::Undirected->new;
+            my $g = Graph::Undirected->new( multiedged =>
+                                                $_[0]->{USER}{OPTIONS}{polymer} );
             $g->add_vertex( $_[3] );
             push @{$_[0]->{USER}{GRAPHS}}, $g;
 
@@ -108,15 +100,10 @@ chain: atom
                                       $_[3]->{first}{index} );
             }
 
-            $_[1]->{last}{graph}->add_edge( $_[1]->{last}, $_[3]->{first} );
-
-
-            if( is_aromatic $_[1]->{last} && is_aromatic $_[3]->{first} ) {
-                $_[1]->{last}{graph}->set_edge_attribute( $_[1]->{last},
-                                                          $_[3]->{first},
-                                                          'bond',
-                                                          ':' );
-            }
+            _add_bond( $_[1]->{last}{graph},
+                       $_[1]->{last},
+                       $_[3]->{first},
+                       is_aromatic $_[1]->{last} && is_aromatic $_[3]->{first} ? ':' : undef );
 
             return $_[1];
         }
@@ -127,15 +114,10 @@ chain: atom
                                       $_[4]->{first}{index} );
             }
 
-            if( $_[3] ne '-' ) {
-                $_[1]->{last}{graph}->set_edge_attribute( $_[1]->{last},
-                                                          $_[4]->{first},
-                                                          'bond',
-                                                          $_[3] );
-            } else {
-                $_[1]->{last}{graph}->add_edge( $_[1]->{last},
-                                                $_[4]->{first} );
-            }
+            _add_bond( $_[1]->{last}{graph},
+                       $_[1]->{last},
+                       $_[4]->{first},
+                       $_[3] ne '-' ? $_[3] : undef );
 
             return $_[1];
         }
@@ -302,7 +284,8 @@ sub parse
     $self->{USER}{RINGBONDS} = {};
     $self->{USER}{ATOMNO}    = 0;
     $self->{USER}{CHARNO}    = 0;
-    $self->YYParse( yylex => \&_Lexer,
+    $self->{USER}{OPTIONS}   = $options;
+    $self->YYParse( yylex   => \&_Lexer,
                     yyerror => \&_Error,
                     yydebug => $options->{debug} );
 
@@ -346,6 +329,23 @@ sub parse
     return @graphs;
 }
 
+sub _add_bond
+{
+    my( $graph, $A, $B, $type ) = @_;
+
+    if( $type ) {
+        if( $graph->multiedged ) {
+            # FIXME: This seems to add the same edge twice
+            my $id = $graph->add_edge_get_id( $A, $B );
+            $graph->set_edge_attribute_by_id( $A, $B, $id, 'bond', $type );
+        } else {
+            $graph->set_edge_attribute( $A, $B, 'bond', $type );
+        }
+    } else {
+        $graph->add_edge( $A, $B );
+    }
+}
+
 sub _add_ring_bond
 {
     my( $self, $atom, $ring_bond, $bond, $options ) = @_;
@@ -371,14 +371,10 @@ sub _add_ring_bond
             is_aromatic $atom ) {
             $bond = ':';
         }
-        if( $bond && $bond ne '-' ) {
-            $atom->{graph}->set_edge_attribute( $bonds->{$ring_bond}{atom},
-                                                $atom,
-                                                'bond',
-                                                $bond );
-        } else {
-            $atom->{graph}->add_edge( $bonds->{$ring_bond}{atom}, $atom );
-        }
+        _add_bond( $atom->{graph},
+                   $bonds->{$ring_bond}{atom},
+                   $atom,
+                   $bond && $bond ne '-' ? $bond : undef );
         delete $bonds->{$ring_bond} unless $allow_reuse;
     } else {
         $bonds->{$ring_bond} =
