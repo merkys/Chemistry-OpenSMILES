@@ -6,6 +6,9 @@ use List::Util qw(sum);
 use Chemistry::OpenSMILES::Parser;
 use Test::More;
 
+eval 'use Graph 0.9712';
+plan skip_all => 'Graph 0.9712 required' if $@;
+
 my %cases = (
     'c1ccccc1C&1&1&1' => [ 7, 9 ], # polystyrene
     'C&1&1&1&1&1'     => [ 1, 4 ], # diamond
