@@ -154,6 +154,19 @@ chain: atom
             $_[0]->_add_ring_bond( $_[1]->{last}, $_[3], $_[2] );
             return $_[1];
         }
+
+     # Polymer bonds
+
+     | chain polybond
+        {
+            $_[0]->_add_poly_bond( $_[1]->{last}, $_[2] );
+            return $_[1];
+        }
+     | chain bond polybond
+        {
+            $_[0]->_add_poly_bond( $_[1]->{last}, $_[3], $_[2] );
+            return $_[1];
+        }
      ;
 
 bond: '-' | '=' | '#' | '$' | ':' | '/' | '\\' ;
@@ -262,6 +275,13 @@ sub _Lexer
         return ( 'ringbond', int $1 );
     }
 
+    # Polymer bonds
+    # TODO: accept this only if requested via options
+    if( $self->YYData->{INPUT} =~ s/^&([0-9])// ) {
+        $self->{USER}{CHARNO} += length $&;
+        return ( 'polybond', int $1 );
+    }
+
     my $char = substr( $self->YYData->{INPUT}, 0, 1 );
     if( $char ne '' ) {
         $self->YYData->{INPUT} = substr( $self->YYData->{INPUT}, 1 );
@@ -278,6 +298,7 @@ sub parse
     $self->YYData->{INPUT}   = $string;
     $self->{USER}{GRAPHS}    = [];
     $self->{USER}{RINGBONDS} = {};
+    $self->{USER}{POLYBONDS} = {};
     $self->{USER}{ATOMNO}    = 0;
     $self->{USER}{CHARNO}    = 0;
     $self->YYParse( yylex => \&_Lexer,
@@ -326,36 +347,52 @@ sub parse
 
 sub _add_ring_bond
 {
-    my( $self, $atom, $ring_bond, $bond ) = @_;
-    if( $self->{USER}{RINGBONDS}{$ring_bond} ) {
-        $self->_merge_graphs( $self->{USER}{RINGBONDS}{$ring_bond}{atom}{index},
+    my( $self, $atom, $ring_bond, $bond, $options ) = @_;
+
+    $options = {} unless $options;
+    my( $storage_name, $allow_reuse ) =
+        ( $options->{storage_name}, $options->{allow_reuse} );
+    $storage_name = 'ring' unless $storage_name;
+
+    my $bonds = $self->{USER}{uc $storage_name . 'BONDS'};
+
+    if( $bonds->{$ring_bond} ) {
+        $self->_merge_graphs( $bonds->{$ring_bond}{atom}{index},
                               $atom->{index} );
 
-        if( $bond && $self->{USER}{RINGBONDS}{$ring_bond}{bond} &&
-            $bond ne $self->{USER}{RINGBONDS}{$ring_bond}{bond} ) {
+        if( $bond && $bonds->{$ring_bond}{bond} &&
+            $bond ne $bonds->{$ring_bond}{bond} ) {
             die "$0: ring bond types for ring bond $ring_bond do not match.\n";
         }
         ( $bond ) = grep { defined }
-                         ( $bond, $self->{USER}{RINGBONDS}{$ring_bond}{bond} );
-        if( !$bond &&
-            is_aromatic $self->{USER}{RINGBONDS}{$ring_bond}{atom} &&
+                         ( $bond, $bonds->{$ring_bond}{bond} );
+        if( !$bond && is_aromatic $bonds->{$ring_bond}{atom} &&
             is_aromatic $atom ) {
             $bond = ':';
         }
         if( $bond && $bond ne '-' ) {
-            $atom->{graph}->set_edge_attribute( $self->{USER}{RINGBONDS}{$ring_bond}{atom},
+            $atom->{graph}->set_edge_attribute( $bonds->{$ring_bond}{atom},
                                                 $atom,
                                                 'bond',
                                                 $bond );
         } else {
-            $atom->{graph}->add_edge( $self->{USER}{RINGBONDS}{$ring_bond}{atom},
-                                      $atom );
+            $atom->{graph}->add_edge( $bonds->{$ring_bond}{atom}, $atom );
         }
-        delete $self->{USER}{RINGBONDS}{$ring_bond};
+        delete $bonds->{$ring_bond} unless $allow_reuse;
     } else {
-        $self->{USER}{RINGBONDS}{$ring_bond} =
+        $bonds->{$ring_bond} =
             { atom => $atom, $bond ? ( bond => $bond ) : () };
     }
+}
+
+sub _add_poly_bond
+{
+    my( $self, $atom, $poly_bond, $bond ) = @_;
+    return $self->_add_ring_bond( $atom,
+                                  $poly_bond,
+                                  $bond,
+                                  { storage_name => 'poly',
+                                    allow_reuse  => 1 } );
 }
 
 sub _merge_graphs
