@@ -335,7 +335,8 @@ sub _add_bond
 
     if( $type ) {
         if( $graph->multiedged ) {
-            # FIXME: This seems to add the same edge twice
+            # CAVEAT: This code does not seem to work correctly with
+            # Graph releases prior to 0.9712.
             my $id = $graph->add_edge_get_id( $A, $B );
             $graph->set_edge_attribute_by_id( $A, $B, $id, 'bond', $type );
         } else {
