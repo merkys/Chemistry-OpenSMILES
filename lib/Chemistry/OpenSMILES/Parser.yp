@@ -138,7 +138,8 @@ chain: atom
             return $_[1];
         }
 
-     # Polymer bonds
+     # Polymer bonds. Implementation slightly differs from the OpenSMILES
+     # specification, as the specification is not quite clear there.
 
      | chain polybond
         {
@@ -258,11 +259,12 @@ sub _Lexer
         return ( 'ringbond', int $1 );
     }
 
-    # Polymer bonds
-    # TODO: accept this only if requested via options
-    if( $self->YYData->{INPUT} =~ s/^&([0-9])// ) {
-        $self->{USER}{CHARNO} += length $&;
-        return ( 'polybond', int $1 );
+    # Polymer bonds. Must be requested via options.
+    if( $self->{USER}{OPTIONS}{polymer} ) {
+        if( $self->YYData->{INPUT} =~ s/^&([0-9])// ) {
+            $self->{USER}{CHARNO} += length $&;
+            return ( 'polybond', int $1 );
+        }
     }
 
     my $char = substr( $self->YYData->{INPUT}, 0, 1 );
