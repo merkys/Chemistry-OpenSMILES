@@ -43,6 +43,7 @@ smiles: chain ;
 
 chain: atom
         {
+            # FIXME: multiedged graphs have to be used for polymers
             my $g = Graph::Undirected->new;
             $g->add_vertex( $_[1] );
             push @{$_[0]->{USER}{GRAPHS}}, $g;
@@ -297,8 +298,8 @@ sub parse
 
     $self->YYData->{INPUT}   = $string;
     $self->{USER}{GRAPHS}    = [];
-    $self->{USER}{RINGBONDS} = {};
     $self->{USER}{POLYBONDS} = {};
+    $self->{USER}{RINGBONDS} = {};
     $self->{USER}{ATOMNO}    = 0;
     $self->{USER}{CHARNO}    = 0;
     $self->YYParse( yylex => \&_Lexer,
