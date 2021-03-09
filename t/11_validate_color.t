@@ -10,6 +10,7 @@ my %cases = (
     'C[C@](C)(C)(C)' => 'tetrahedral chiral setting for C(1) is not needed as not all 4 neighbours are distinct',
     'C[C@](Cl)(F)(O)' => undef,
     'C(Cl)(F)(O)' => 'atom C(0) has 4 distinct neighbours, but does not have a chiral setting',
+    'N[C@@]12NC(N[C@]2(NC(N1))N)' => 'tetrahedral chiral setting for C(5) is not needed as not all 4 neighbours are distinct',
 );
 
 plan tests => 3 * scalar keys %cases;
@@ -28,8 +29,8 @@ for (sort keys %cases) {
     # Unnecessary chiral centers should be removed
     my @affected = clean_chiral_centers( $graph,
                                          sub { return $_[0]->{symbol} } );
-    is( scalar @affected,
-        ($cases{$_} && $cases{$_} =~ /not needed/) + 0 );
+    is( @affected != 0,
+        defined $cases{$_} && $cases{$_} =~ /not needed/ );
 
     # After removal, validation should pass
     undef $warning;
