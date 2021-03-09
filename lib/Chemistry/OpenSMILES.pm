@@ -10,8 +10,31 @@ use 5.0100;
 require Exporter;
 our @ISA = qw( Exporter );
 our @EXPORT_OK = qw(
+    clean_chiral_centers
     is_aromatic
 );
+
+# Removes chiral setting from tetrahedral chiral centers with less than
+# four distinct neighbours. Returns the affected atoms.
+#
+# CAVEAT: disregards anomers
+# TODO: check other chiral centers
+sub clean_chiral_centers($$)
+{
+    my( $moiety, $color_sub ) = @_;
+
+    my @affected;
+    for my $atom ($moiety->vertices) {
+        next if !$atom->{chirality};
+        next if $moiety->degree($atom) != 4;
+        my %colors = map { ($color_sub->( $_ ) => 1) }
+                         $moiety->neighbours($atom);
+        next if scalar keys %colors == 4;
+        delete $atom->{chirality};
+        push @affected, $atom;
+    }
+    return @affected;
+}
 
 sub is_aromatic($)
 {
