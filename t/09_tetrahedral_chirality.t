@@ -11,7 +11,7 @@ my @cases = (
     [ 'Br[C@](O)(N)C', 'Br([C@](O)(N)(C))', 'C([C@](N)(O)(Br))' ],
     [ 'O[C@](Br)(C)N', 'O([C@](Br)(C)(N))', 'N([C@](C)(Br)(O))' ],
     [ 'Br[C@](C)(O)N', 'Br([C@](C)(O)(N))', 'N([C@](O)(C)(Br))' ],
-    [ '[C@](Br)(N)O', 'C(Br)(N)(O)', 'O(C(N)(Br))' ], # FIXME: not OK
+    [ 'C[C@](Br)(N)O', 'C([C@](Br)(N)(O))', 'O([C@](N)(Br)(C))' ],
     [ 'Br[C@](N)(C)O', 'Br([C@](N)(C)(O))', 'O([C@](C)(N)(Br))' ],
     [ 'C[C@@](Br)(O)N', 'C([C@@](Br)(O)(N))', 'N([C@@](O)(Br)(C))' ],
     [ 'Br[C@@](N)(O)C', 'Br([C@@](N)(O)(C))', 'C([C@@](O)(N)(Br))' ],
