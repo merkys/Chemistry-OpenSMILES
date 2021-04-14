@@ -113,7 +113,9 @@ sub write_SMILES
                     $symbols[$i] .= $rings->{$i}{$j} .
                                     ($ring_ids[0] < 10 ? '' : '%') .
                                      $ring_ids[0];
-                    $symbols[$j] .= $rings->{$i}{$j} .
+                    $symbols[$j] .= ($rings->{$i}{$j} eq '/'  ? '\\' :
+                                     $rings->{$i}{$j} eq '\\' ? '/'  :
+                                     $rings->{$i}{$j}) .
                                     ($ring_ids[0] < 10 ? '' : '%') .
                                      $ring_ids[0];
                     push @{$ring_ends[$j]}, shift @ring_ids;
