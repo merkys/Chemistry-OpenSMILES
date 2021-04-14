@@ -7,6 +7,8 @@ use 5.0100;
 # ABSTRACT: OpenSMILES format reader and writer
 # VERSION
 
+use Set::Tiny;
+
 require Exporter;
 our @ISA = qw( Exporter );
 our @EXPORT_OK = qw(
@@ -35,6 +37,40 @@ sub clean_chiral_centers($$)
         push @affected, $atom;
     }
     return @affected;
+}
+
+sub find_cycles($$)
+{
+    my( $moiety, $ring_bonds ) = @_;
+
+    $moiety->delete_edges( @$ring_bonds ); # ensuring deletion
+
+    my @proper_ring_bonds;
+    for my $bond (@$ring_bonds) {
+        my( $a, $b ) = @$bond;
+        if( $moiety->connected_component_by_vertex( $a ) ==
+            $moiety->connected_component_by_vertex( $b ) ) {
+            # this is a real ring bond
+            push @proper_ring_bonds, $bond;
+        } else {
+            $moiety->add_edge( $a, $b );
+        }
+    }
+
+    my $apsp = $moiety->APSP_Floyd_Warshall;
+    my @cycles;
+    for my $bond (@proper_ring_bonds) {
+        push @cycles, Set::Tiny->new( $apsp->path_vertices( @$bond ) );
+    }
+
+    my @reduced_cycles;
+    for my $cycle (@cycles) {
+        for (@reduced_cycles) {
+            next unless $_->is_subset( $cycle );
+            $cycle = $cycle->difference( $_ )->union( $cycle->intersection( $_ ) );
+        }
+        push @reduced_cycles, $cycle;
+    }
 }
 
 sub is_aromatic($)
