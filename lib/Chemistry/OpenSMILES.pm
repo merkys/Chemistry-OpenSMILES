@@ -19,7 +19,6 @@ our @EXPORT_OK = qw(
 #
 # CAVEAT: disregards anomers
 # TODO: check other chiral centers
-# TODO: take hcount into consideration, see GH#2
 sub clean_chiral_centers($$)
 {
     my( $moiety, $color_sub ) = @_;
@@ -27,9 +26,13 @@ sub clean_chiral_centers($$)
     my @affected;
     for my $atom ($moiety->vertices) {
         next if !$atom->{chirality};
-        next if $moiety->degree($atom) != 4;
+
+        my $hcount = exists $atom->{hcount} ? $atom->{hcount} : 0;
+        next if $moiety->degree($atom) + $hcount != 4;
+
         my %colors = map { ($color_sub->( $_ ) => 1) }
-                         $moiety->neighbours($atom);
+                         $moiety->neighbours($atom),
+                         ( { symbol => 'H' } ) x $hcount;
         next if scalar keys %colors == 4;
         delete $atom->{chirality};
         push @affected, $atom;
@@ -43,7 +46,7 @@ sub is_aromatic($)
     return $atom->{symbol} ne ucfirst $atom->{symbol};
 }
 
-# CAVEAT: requires output from non-raw parsing due to GH#2
+# CAVEAT: requires output from non-raw parsing due issue similar to GH#2
 sub _validate($@)
 {
     my( $moiety, $color_sub ) = @_;
