@@ -1,3 +1,9 @@
+0.4.7 unreleased
+
+    - Handling raw parsing output in
+      Chemistry::OpenSMILES::clean_chiral_centers().
+    - Fixing a bug in position counting due to $1 pollution.
+
 0.4.6 2021-04-14
 
     - Fixing reading/writing of cis/trans ring bonds.
