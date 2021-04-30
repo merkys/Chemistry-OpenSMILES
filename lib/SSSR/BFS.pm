@@ -25,22 +25,25 @@ sub get_SSSR
                 next if $visited{$vertex}; # might be already visited
                 $visited{$vertex} = 1;
                 for my $neighbour ($graph->neighbours($vertex)) {
+                    # Avoiding cycles of length 2
+                    next if $neighbour eq $paths{$vertex}[0][-2];
                     print "\t$vertex -> $neighbour";
                     if( $visited{$neighbour} ) {
-                        print ">>> ALREADY VISITED";
+                        print "\t\tALREADY VISITED";
                         for my $path (@{$paths{$neighbour}}) {
                             my @common = common( $paths{$vertex}[0], $path );
                             next if scalar @common != 1;
                             push @cycles,
                                  [ @{$paths{$vertex}[0]}, reverse @$path ]; # really?
                             pop @{$cycles[-1]};
+                            print "\t\t\t@{$cycles[-1]}";
                         }
                         # Recording a new path to the vertex
                         push @{$paths{$neighbour}},
                              [ @{$paths{$vertex}[0]}, $neighbour ];
                     } else {
                         if( $opened{$neighbour} ) {
-                            print ">>> ALREADY OPENED";
+                            print "\t\tALREADY OPENED";
                             for my $path (@{$paths{$neighbour}}) {
                                 my @common = common( $paths{$vertex}[0],
                                                      $path );
@@ -48,6 +51,7 @@ sub get_SSSR
                                 push @cycles,
                                      [ @{$paths{$vertex}[0]}, reverse @$path ];
                                 pop @{$cycles[-1]};
+                                print "\t\t\t@{$cycles[-1]}";
                             }
                             # No need to visit anything past this point
                             $visited{$neighbour} = 1;
@@ -74,9 +78,6 @@ sub get_SSSR
 sub common
 {
     my( $A, $B ) = @_;
-
-    use Data::Dumper;
-    print Dumper [ $A, $B ];
 
     my @A = sort @$A;
     my @B = sort @$B;
