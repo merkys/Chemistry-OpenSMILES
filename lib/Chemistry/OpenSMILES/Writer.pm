@@ -66,6 +66,7 @@ sub write_SMILES
                           $vertex_symbols{$vertex} = $#symbols },
 
             post => sub { push @symbols, ')' },
+            next_root => undef,
         };
 
         if( $order_sub ) {
