@@ -3,6 +3,7 @@
     - Handling raw parsing output in
       Chemistry::OpenSMILES::clean_chiral_centers().
     - Fixing a bug in position counting due to $1 pollution.
+    - Detecting and reporting disconnected parts of moieties.
 
 0.4.6 2021-04-14
 
