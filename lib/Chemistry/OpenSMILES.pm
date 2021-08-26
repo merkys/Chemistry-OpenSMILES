@@ -12,7 +12,12 @@ our @ISA = qw( Exporter );
 our @EXPORT_OK = qw(
     clean_chiral_centers
     is_aromatic
+    is_chiral
 );
+
+use List::Util qw(any);
+
+sub is_chiral($);
 
 # Removes chiral setting from tetrahedral chiral centers with less than
 # four distinct neighbours. Returns the affected atoms.
@@ -25,7 +30,7 @@ sub clean_chiral_centers($$)
 
     my @affected;
     for my $atom ($moiety->vertices) {
-        next if !$atom->{chirality};
+        next unless is_chiral( $atom );
 
         my $hcount = exists $atom->{hcount} ? $atom->{hcount} : 0;
         next if $moiety->degree($atom) + $hcount != 4;
@@ -46,6 +51,16 @@ sub is_aromatic($)
     return $atom->{symbol} ne ucfirst $atom->{symbol};
 }
 
+sub is_chiral($)
+{
+    my( $what ) = @_;
+    if( ref $what eq 'HASH' ) { # Single atom
+        return exists $what->{chirality};
+    } else {                    # Graph representing moiety
+        return any { is_chiral( $_ ) } $what->vertices;
+    }
+}
+
 # CAVEAT: requires output from non-raw parsing due issue similar to GH#2
 sub _validate($@)
 {
@@ -53,7 +68,7 @@ sub _validate($@)
 
     for my $atom (sort { $a->{number} <=> $b->{number} } $moiety->vertices) {
         # TODO: AL chiral centers also have to be checked
-        if( $atom->{chirality} && $atom->{chirality} =~ /^@@?$/ ) {
+        if( is_chiral( $atom ) && $atom->{chirality} =~ /^@@?$/ ) {
             if( $moiety->degree($atom) < 4 ) {
                 # FIXME: tetrahedral allenes are false-positives
                 warn sprintf 'chiral center %s(%d) has %d bonds while ' .
@@ -77,7 +92,7 @@ sub _validate($@)
         }
 
         # Warn about unmarked tetrahedral chiral centers
-        if( !$atom->{chirality} && $moiety->degree($atom) == 4 ) {
+        if( !is_chiral( $atom ) && $moiety->degree( $atom ) == 4 ) {
             my $color_sub_local = $color_sub;
             if( !$color_sub_local ) {
                 $color_sub_local = sub { return $_[0]->{symbol} };

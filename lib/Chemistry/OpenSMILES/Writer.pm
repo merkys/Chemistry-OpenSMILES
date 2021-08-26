@@ -3,7 +3,7 @@ package Chemistry::OpenSMILES::Writer;
 use strict;
 use warnings;
 
-use Chemistry::OpenSMILES qw(is_aromatic);
+use Chemistry::OpenSMILES qw( is_aromatic is_chiral );
 use Chemistry::OpenSMILES::Parser;
 use Graph::Traversal::DFS;
 
@@ -54,7 +54,7 @@ sub write_SMILES
                                         _depict_bond( @sorted, $graph ); },
 
             pre  => sub { my( $vertex, $dfs ) = @_;
-                          if( $vertex->{chirality} &&
+                          if( is_chiral( $vertex ) &&
                               $vertex->{chirality} =~ /^@@?$/ &&
                               $dfs->graph->degree( $vertex ) == 4 ) {
                               push @chiral, $vertex;
@@ -166,7 +166,7 @@ sub _pre_vertex
         $is_simple = 0;
     }
 
-    if( exists $vertex->{chirality} ) {
+    if( is_chiral( $vertex ) ) {
         $atom .= $vertex->{chirality};
         $is_simple = 0;
     }
