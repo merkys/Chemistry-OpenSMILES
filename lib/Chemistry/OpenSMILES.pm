@@ -31,6 +31,7 @@ sub clean_chiral_centers($$)
     my @affected;
     for my $atom ($moiety->vertices) {
         next unless is_chiral( $atom );
+        next unless $atom->{chirality} =~ /^@@?$/;
 
         my $hcount = exists $atom->{hcount} ? $atom->{hcount} : 0;
         next if $moiety->degree($atom) + $hcount != 4;

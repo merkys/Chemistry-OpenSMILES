@@ -6,6 +6,8 @@
     - Detecting and reporting disconnected parts of moieties.
     - Introducing Chemistry::OpenSMILES::is_chiral() to detect both chiral
       atoms and moieties.
+    - Fixing bug in Chemistry::OpenSMILES::clean_chiral_centers() which
+      caused removal of all chiral centers, not just tetrahedral.
 
 0.4.6 2021-04-14
 
