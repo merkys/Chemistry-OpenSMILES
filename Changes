@@ -8,8 +8,10 @@
       atoms and moieties.
     - Fixing bug in Chemistry::OpenSMILES::clean_chiral_centers() which
       caused removal of all chiral centers, not just tetrahedral.
-    - Introducing Chemistry::OpenSMILES::mirror() to invert chiral enters,
+    - Introducing Chemistry::OpenSMILES::mirror() to invert chiral centers,
       currently only tetrahedral.
+    - Fixing bug in printing of chiral centers, previously only tetrahedral
+      centers were printed.
 
 0.4.6 2021-04-14
 

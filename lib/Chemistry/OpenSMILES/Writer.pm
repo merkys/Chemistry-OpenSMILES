@@ -54,11 +54,7 @@ sub write_SMILES
                                         _depict_bond( @sorted, $graph ); },
 
             pre  => sub { my( $vertex, $dfs ) = @_;
-                          if( is_chiral( $vertex ) &&
-                              $vertex->{chirality} =~ /^@@?$/ &&
-                              $dfs->graph->degree( $vertex ) == 4 ) {
-                              push @chiral, $vertex;
-                          }
+                          push @chiral, $vertex if is_chiral( $vertex );
                           push @symbols,
                           _pre_vertex( { map { $_ => $vertex->{$_} }
                                          grep { $_ ne 'chirality' }
@@ -89,6 +85,9 @@ sub write_SMILES
 
         # Dealing with chirality
         for my $atom (@chiral) {
+            next unless $atom->{chirality} =~ /^@@?/;
+            next unless $graph->neighbours( $atom ) == 4;
+
             my @neighbours = map { $_->{number} }
                              sort { $vertex_symbols{$a} <=>
                                     $vertex_symbols{$b} }
