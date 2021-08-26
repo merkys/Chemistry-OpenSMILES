@@ -13,11 +13,14 @@ our @EXPORT_OK = qw(
     clean_chiral_centers
     is_aromatic
     is_chiral
+    mirror
 );
 
 use List::Util qw(any);
 
 sub is_chiral($);
+sub is_chiral_tetrahedral($);
+sub mirror($);
 
 # Removes chiral setting from tetrahedral chiral centers with less than
 # four distinct neighbours. Returns the affected atoms.
@@ -30,8 +33,7 @@ sub clean_chiral_centers($$)
 
     my @affected;
     for my $atom ($moiety->vertices) {
-        next unless is_chiral( $atom );
-        next unless $atom->{chirality} =~ /^@@?$/;
+        next unless is_chiral_tetrahedral( $atom );
 
         my $hcount = exists $atom->{hcount} ? $atom->{hcount} : 0;
         next if $moiety->degree($atom) + $hcount != 4;
@@ -62,6 +64,31 @@ sub is_chiral($)
     }
 }
 
+sub is_chiral_tetrahedral($)
+{
+    my( $what ) = @_;
+    if( ref $what eq 'HASH' ) { # Single atom
+        return $what->{chirality} && $what->{chirality} =~ /^@@?$/
+    } else {                    # Graph representing moiety
+        return any { is_chiral_tetrahedral( $_ ) } $what->vertices;
+    }
+}
+
+sub mirror($)
+{
+    my( $what ) = @_;
+    if( ref $what eq 'HASH' ) { # Single atom
+        # FIXME: currently dealing only with tetrahedral chiral centers
+        if( is_chiral_tetrahedral( $what ) ) {
+            $what->{chirality} = $what->{chirality} eq '@' ? '@@' : '@';
+        }
+    } else {
+        for ($what->vertices) {
+            mirror( $_ );
+        }
+    }
+}
+
 # CAVEAT: requires output from non-raw parsing due issue similar to GH#2
 sub _validate($@)
 {
@@ -69,7 +96,7 @@ sub _validate($@)
 
     for my $atom (sort { $a->{number} <=> $b->{number} } $moiety->vertices) {
         # TODO: AL chiral centers also have to be checked
-        if( is_chiral( $atom ) && $atom->{chirality} =~ /^@@?$/ ) {
+        if( is_chiral_tetrahedral( $atom ) ) {
             if( $moiety->degree($atom) < 4 ) {
                 # FIXME: tetrahedral allenes are false-positives
                 warn sprintf 'chiral center %s(%d) has %d bonds while ' .
