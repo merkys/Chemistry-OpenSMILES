@@ -86,12 +86,13 @@ sub write_SMILES
         # Dealing with chirality
         for my $atom (@chiral) {
             next unless $atom->{chirality} =~ /^@@?/;
-            next unless $graph->neighbours( $atom ) == 4;
 
             my @neighbours = map { $_->{number} }
                              sort { $vertex_symbols{$a} <=>
                                     $vertex_symbols{$b} }
                              $graph->neighbours($atom);
+            next unless scalar @neighbours == 4;
+
             my $chirality_now = _tetrahedral_chirality( $atom->{chirality},
                                                         @neighbours );
             my $parser = Chemistry::OpenSMILES::Parser->new;
