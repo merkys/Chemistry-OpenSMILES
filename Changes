@@ -1,3 +1,8 @@
+0.5.2 2021-10-11
+
+    - Creating explicitly refvertexed Graph objects to get around all the
+      problems caused by interpreting them as scalar values.
+
 0.5.1 2021-08-29
 
     - Working around an incompatibility with Graph v0.9721.
