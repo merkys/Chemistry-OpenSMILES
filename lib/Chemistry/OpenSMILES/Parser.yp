@@ -317,6 +317,11 @@ sub parse
 
                 # Unify the representation of chirality
                 if( $atom->{chirality} ) {
+                    if( $atom->{chirality} =~ /^@@?$/ &&
+                        $graph->degree( $atom ) == 2 ) {
+                        $atom->{chirality} =~ s/@+/'@AL' . length $&/e;
+                    }
+
                     $atom->{chirality} =~ s/^\@TH1$/@/;
                     $atom->{chirality} =~ s/^\@TH2$/@@/;
                 }

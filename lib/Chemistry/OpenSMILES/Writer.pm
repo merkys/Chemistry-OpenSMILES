@@ -85,7 +85,7 @@ sub write_SMILES
 
         # Dealing with chirality
         for my $atom (@chiral) {
-            next unless $atom->{chirality} =~ /^@@?/;
+            next unless $atom->{chirality} =~ /^@@?$/;
 
             my @neighbours = map { $_->{number} }
                              sort { $vertex_symbols{$a} <=>

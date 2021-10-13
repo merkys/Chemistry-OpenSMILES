@@ -68,7 +68,7 @@ sub is_chiral_tetrahedral($)
 {
     my( $what ) = @_;
     if( ref $what eq 'HASH' ) { # Single atom
-        # FIXME: allenal configurations also may have @ and @@
+        # CAVEAT: will fail for allenal configurations of @/@@ in raw mode
         return $what->{chirality} && $what->{chirality} =~ /^@@?$/
     } else {                    # Graph representing moiety
         return any { is_chiral_tetrahedral( $_ ) } $what->vertices;
