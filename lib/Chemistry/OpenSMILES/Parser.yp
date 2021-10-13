@@ -224,11 +224,6 @@ sub _Lexer
             $atom->{charge} = int $atom->{charge};
         }
 
-        if( $atom->{chirality} ) {
-            $atom->{chirality} =~ s/^\@TH1$/@/;
-            $atom->{chirality} =~ s/^\@TH2$/@@/;
-        }
-
         if( $atom->{hcount} ) {
             $atom->{hcount} =~ s/^H//;
             $atom->{hcount} = $atom->{hcount} ? int $atom->{hcount} : 1;
@@ -297,6 +292,7 @@ sub parse
             delete $atom->{graph};
             delete $atom->{index};
             if( !$options->{raw} ) {
+                # Promote implicit hydrogen atoms into explicit ones
                 if( !exists $atom->{hcount} ) {
                     next if !exists $normal_valence{$atom->{symbol}};
                     my $degree = sum map { exists $bond_order{$_} ? $bond_order{$_} : 1 }
@@ -318,6 +314,12 @@ sub parse
                     $self->{USER}{ATOMNO} ++;
                 }
                 delete $atom->{hcount};
+
+                # Unify the representation of chirality
+                if( $atom->{chirality} ) {
+                    $atom->{chirality} =~ s/^\@TH1$/@/;
+                    $atom->{chirality} =~ s/^\@TH2$/@@/;
+                }
             }
         }
     }
