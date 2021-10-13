@@ -91,7 +91,13 @@ sub write_SMILES
                              sort { $vertex_symbols{$a} <=>
                                     $vertex_symbols{$b} }
                              $graph->neighbours($atom);
-            next unless scalar @neighbours == 4;
+            if( scalar @neighbours != 4 ) {
+                # TODO: process also configurations other than tetrahedral
+                warn "chirality '$atom->{chirality}' observed for atom " .
+                     'with ' . scalar @neighbours . ' neighbours, can only ' .
+                     'process tetrahedral chiral centers' . "\n";
+                next;
+            }
 
             my $chirality_now = _tetrahedral_chirality( $atom->{chirality},
                                                         @neighbours );
