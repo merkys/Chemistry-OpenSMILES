@@ -278,7 +278,7 @@ references:
     }
 
 Except for C<symbol>, C<class> and C<number>, all keys of hash are
-optional. Per OpenSMIILES specification, default values for C<hcount>
+optional. Per OpenSMILES specification, default values for C<hcount>
 and C<class> are 0.
 
 =head3 Bonds
@@ -288,6 +288,29 @@ L<Graph::Undirected|Graph::Undirected> internal representation. Bond
 orders other than single (C<->, which is also a default) are represented
 as values of edge attribute C<bond>. They correspond to the symbols used
 in OpenSMILES specification.
+
+=head2 Options
+
+C<parse> accepts the following options for key-value pairs in an
+anonymous hash for its second parameter:
+
+=over
+
+=item C<max_hydrogen_count_digits>
+
+In OpenSMILES specification the number of attached hydrogen atoms for
+atoms in square brackets is limited to 9. IUPAC SMILES+ has increased
+this number to 99. With the value of C<max_hydrogen_count_digits> the
+parser could be instructed to allow other than 1 digit for attached
+hydrogen count.
+
+=item C<raw>
+
+With C<raw> set to anything evaluating to false, the parser will not
+convert neither implicit nor explicit hydrogen atoms in square brackets
+to atom hashes of their own.
+
+=back
 
 =head1 CAVEATS
 
