@@ -309,7 +309,9 @@ hydrogen count.
 With C<raw> set to anything evaluating to false, the parser will not
 convert neither implicit nor explicit hydrogen atoms in square brackets
 to atom hashes of their own. Moreover, it will not attempt to unify the
-representations of chirality.
+representations of chirality. It should be noted, though, that many of
+subroutines of Chemistry::OpenSMILES expect non-raw data structures,
+thus processing raw output may produce weird results.
 
 =back
 
