@@ -1,3 +1,11 @@
+0.6.0 unreleased
+
+    - Allowing multi-digit hydrogen counts if enabled via parser option.
+    - Standardizing chiral markers for allenal carbons.
+    - Not standardizing chiral markers in raw output.
+    - Reporting '@' and '@@' chiralities with other than 4 neighbours as
+      they cannot be processed right now.
+
 0.5.2 2021-10-11
 
     - Creating explicitly refvertexed Graph objects to get around all the
