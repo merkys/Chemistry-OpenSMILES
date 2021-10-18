@@ -202,6 +202,12 @@ sub _Lexer
         $self->{USER}{CHARNO} += length $1;
     }
 
+    my $hcount_re = 'H[0-9]?';
+    if( defined $self->{USER}{OPTIONS}{max_hydrogen_count_digits} ) {
+        $hcount_re = sprintf 'H[0-9]{0,%d}',
+                             $self->{USER}{OPTIONS}{max_hydrogen_count_digits};
+    }
+
     # Bracket atoms
     if( $self->YYData->{INPUT} =~ s/^\[ (?<isotope>[0-9]+)?
                                         (?<symbol>[A-Za-z][a-z]?|\*)
@@ -211,7 +217,7 @@ sub _Lexer
                                          (TB|OH)[0-9]{1,2} |
                                          @?
                                          ))?
-                                        (?<hcount>H[0-9]?)?
+                                        (?<hcount> $hcount_re)?
                                         (?<charge>--|\+\+|[-+][0-9]{0,2})?
                                         (:(?<class>[0-9]+))? \]//x ) {
         my $atom = { %+, number => $self->{USER}{ATOMNO} };
@@ -276,6 +282,7 @@ sub parse
     $self->{USER}{RINGBONDS} = {};
     $self->{USER}{ATOMNO}    = 0;
     $self->{USER}{CHARNO}    = 0;
+    $self->{USER}{OPTIONS}   = $options;
     $self->YYParse( yylex => \&_Lexer,
                     yyerror => \&_Error,
                     yydebug => $options->{debug} );
