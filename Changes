@@ -1,4 +1,4 @@
-0.6.0 unreleased
+0.6.0 2021-10-18
 
     - Allowing multi-digit hydrogen counts if enabled via parser option.
     - Standardizing chiral markers for allenal carbons.
