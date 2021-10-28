@@ -37,6 +37,7 @@ sub write_SMILES
         my $nrings = 0;
         my %seen_rings;
         my @chiral;
+        my %chirality_reference_new;
 
         my $rings = {};
 
@@ -47,7 +48,7 @@ sub write_SMILES
                                    }
                                    push @symbols, _tree_edge( $seen, $unseen, $self, $order_sub );
                                    if( is_chiral $unseen ) {
-                                       $unseen->{chirality_reference_new} = $seen;
+                                       $chirality_reference_new{$unseen} = $seen;
                                    } },
 
             non_tree_edge => sub { my @sorted = sort { $vertex_symbols{$a} <=>
@@ -109,12 +110,12 @@ sub write_SMILES
                 $indices{$order_old[$_]} = $_;
             }
 
-            my @order_new = ( ( $atom->{chirality_reference_new} ?
-                                $atom->{chirality_reference_new} : () ),
+            my @order_new = ( ( $chirality_reference_new{$atom} ?
+                                $chirality_reference_new{$atom} : () ),
                               sort { $vertex_symbols{$a} <=>
                                      $vertex_symbols{$b} }
-                              grep { !$atom->{chirality_reference_new} ||
-                                     $_ ne $atom->{chirality_reference_new} }
+                              grep { !$chirality_reference_new{$atom} ||
+                                      $chirality_reference_new{$atom} ne $_ }
                                    @neighbours );
 
             my $chirality_now = $atom->{chirality};
