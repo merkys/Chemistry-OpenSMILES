@@ -7,7 +7,7 @@ use 5.0100;
 
 use Chemistry::OpenSMILES qw( is_aromatic is_chiral );
 use Graph::Undirected;
-use List::Util qw(sum);
+use List::Util qw(any sum);
 
 my %normal_valence = (
     B  => [ 3 ],
@@ -67,7 +67,7 @@ chain: atom
                                                     ':' );
             }
 
-            _record_chirality_references( $_[1]->{last}, $_[2] );
+            _record_chirality_references( $_[0], $_[1]->{last}, $_[2] );
 
             $_[1]->{last} = $_[2];
 
@@ -87,7 +87,7 @@ chain: atom
                 $_[3]->{graph}->add_edge( $_[1]->{last}, $_[3] );
             }
 
-            _record_chirality_references( $_[1]->{last}, $_[3] );
+            _record_chirality_references( $_[0], $_[1]->{last}, $_[3] );
 
             $_[1]->{last} = $_[3];
 
@@ -121,7 +121,7 @@ chain: atom
                                                           ':' );
             }
 
-            _record_chirality_references( $_[1]->{last}, $_[3]->{first} );
+            _record_chirality_references( $_[0], $_[1]->{last}, $_[3]->{first} );
 
             return $_[1];
         }
@@ -142,7 +142,7 @@ chain: atom
                                                 $_[4]->{first} );
             }
 
-            _record_chirality_references( $_[1]->{last}, $_[4]->{first} );
+            _record_chirality_references( $_[0], $_[1]->{last}, $_[4]->{first} );
 
             return $_[1];
         }
@@ -365,23 +365,20 @@ sub _add_ring_bond
         }
         ( $bond ) = grep { defined }
                          ( $self->{USER}{RINGBONDS}{$ring_bond}{bond}, $bond );
-        if( !$bond &&
-            is_aromatic $self->{USER}{RINGBONDS}{$ring_bond}{atom} &&
-            is_aromatic $atom ) {
+        my $ring_atom = $self->{USER}{RINGBONDS}{$ring_bond}{atom};
+        if( !$bond && is_aromatic $ring_atom && is_aromatic $atom ) {
             $bond = ':';
         }
         if( $bond && $bond ne '-' ) {
-            $atom->{graph}->set_edge_attribute( $self->{USER}{RINGBONDS}{$ring_bond}{atom},
+            $atom->{graph}->set_edge_attribute( $ring_atom,
                                                 $atom,
                                                 'bond',
                                                 $bond );
         } else {
-            $atom->{graph}->add_edge( $self->{USER}{RINGBONDS}{$ring_bond}{atom},
-                                      $atom );
+            $atom->{graph}->add_edge( $ring_atom, $atom );
         }
-        _record_chirality_references( $self->{USER}{RINGBONDS}{$ring_bond}{atom},
-                                      $atom );
         delete $self->{USER}{RINGBONDS}{$ring_bond};
+        _record_chirality_references( $self, $ring_atom, $atom );
     } else {
         $self->{USER}{RINGBONDS}{$ring_bond} =
             { atom => $atom, $bond ? ( bond => $bond ) : () };
@@ -416,12 +413,16 @@ sub _merge_graphs
 
 sub _record_chirality_references
 {
-    my( $atom1, $atom2 ) = @_;
+    my( $self, $atom1, $atom2 ) = @_;
 
-    if( is_chiral $atom1 && !exists $atom1->{chirality_reference} ) {
+    if( is_chiral $atom1 && !exists $atom1->{chirality_reference} &&
+        !any { $self->{USER}{RINGBONDS}{$_}{atom} eq $atom1 }
+               keys %{$self->{USER}{RINGBONDS}} ) {
         $atom1->{chirality_reference} = $atom2;
     }
-    if( is_chiral $atom2 && !exists $atom2->{chirality_reference} ) {
+    if( is_chiral $atom2 && !exists $atom2->{chirality_reference} &&
+        !any { $self->{USER}{RINGBONDS}{$_}{atom} eq $atom2 }
+               keys %{$self->{USER}{RINGBONDS}} ) {
         $atom2->{chirality_reference} = $atom1;
     }
 }
