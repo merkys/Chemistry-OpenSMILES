@@ -264,6 +264,10 @@ sub _tetrahedral_chirality
     }
 }
 
+# Reorder a permutation of elements 0, 1, 2 and 3 by taking an element
+# and moving it two places either forward or backward in the line. This
+# subroutine is used to check whether a sign change of tetragonal
+# chirality is required or not.
 sub _permutation_order
 {
     while( $_[2] == 0 || $_[3] == 0 ) {
