@@ -5,7 +5,7 @@
 use warnings;
 use 5.0100;
 
-use Chemistry::OpenSMILES qw(is_aromatic);
+use Chemistry::OpenSMILES qw( is_aromatic is_chiral );
 use Graph::Undirected;
 use List::Util qw(sum);
 
@@ -67,6 +67,8 @@ chain: atom
                                                     ':' );
             }
 
+            _record_chirality_references( $_[1]->{last}, $_[2] );
+
             $_[1]->{last} = $_[2];
 
             return $_[1];
@@ -84,6 +86,9 @@ chain: atom
             } else {
                 $_[3]->{graph}->add_edge( $_[1]->{last}, $_[3] );
             }
+
+            _record_chirality_references( $_[1]->{last}, $_[3] );
+
             $_[1]->{last} = $_[3];
 
             return $_[1];
@@ -109,13 +114,14 @@ chain: atom
 
             $_[1]->{last}{graph}->add_edge( $_[1]->{last}, $_[3]->{first} );
 
-
             if( is_aromatic $_[1]->{last} && is_aromatic $_[3]->{first} ) {
                 $_[1]->{last}{graph}->set_edge_attribute( $_[1]->{last},
                                                           $_[3]->{first},
                                                           'bond',
                                                           ':' );
             }
+
+            _record_chirality_references( $_[1]->{last}, $_[3]->{first} );
 
             return $_[1];
         }
@@ -135,6 +141,8 @@ chain: atom
                 $_[1]->{last}{graph}->add_edge( $_[1]->{last},
                                                 $_[4]->{first} );
             }
+
+            _record_chirality_references( $_[1]->{last}, $_[4]->{first} );
 
             return $_[1];
         }
@@ -371,6 +379,8 @@ sub _add_ring_bond
             $atom->{graph}->add_edge( $self->{USER}{RINGBONDS}{$ring_bond}{atom},
                                       $atom );
         }
+        _record_chirality_references( $self->{USER}{RINGBONDS}{$ring_bond}{atom},
+                                      $atom );
         delete $self->{USER}{RINGBONDS}{$ring_bond};
     } else {
         $self->{USER}{RINGBONDS}{$ring_bond} =
@@ -402,6 +412,18 @@ sub _merge_graphs
     }
 
     $self->{USER}{GRAPHS}[$index2] = undef;
+}
+
+sub _record_chirality_references
+{
+    my( $atom1, $atom2 ) = @_;
+
+    if( is_chiral $atom1 && !exists $atom1->{chirality_reference} ) {
+        $atom1->{chirality_reference} = $atom2;
+    }
+    if( is_chiral $atom2 && !exists $atom2->{chirality_reference} ) {
+        $atom2->{chirality_reference} = $atom1;
+    }
 }
 
 1;
