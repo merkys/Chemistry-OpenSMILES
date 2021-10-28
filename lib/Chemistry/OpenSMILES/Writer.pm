@@ -87,10 +87,7 @@ sub write_SMILES
         for my $atom (@chiral) {
             next unless $atom->{chirality} =~ /^@@?$/;
 
-            my @neighbours = map { $_->{number} }
-                             sort { $vertex_symbols{$a} <=>
-                                    $vertex_symbols{$b} }
-                             $graph->neighbours($atom);
+            my @neighbours = $graph->neighbours($atom);
             if( scalar @neighbours != 4 ) {
                 # TODO: process also configurations other than tetrahedral
                 warn "chirality '$atom->{chirality}' observed for atom " .
@@ -99,8 +96,27 @@ sub write_SMILES
                 next;
             }
 
+            # A chiral center may have ring bonds. Some ring bonds will
+            # be formed with already seen atoms, therefore such ring
+            # bonds cannot be the first neighbours.
+            my @order;
+            my( $first ) = map { $_->{number} }
+                           sort { $vertex_symbols{$a} <=>
+                                  $vertex_symbols{$b} }
+                           grep { !exists $rings->{$vertex_symbols{$atom}}
+                                                  {$vertex_symbols{$_}} &&
+                                  !exists $rings->{$vertex_symbols{$_}}
+                                                  {$vertex_symbols{$atom}} }
+                           @neighbours;
+            push @order, $first if defined $first;
+            push @order, grep { !defined $first || $_ != $first }
+                         map { $_->{number} }
+                         sort { $vertex_symbols{$a} <=>
+                                $vertex_symbols{$b} }
+                              @neighbours;
+
             my $chirality_now = _tetrahedral_chirality( $atom->{chirality},
-                                                        @neighbours );
+                                                        @order );
             my $parser = Chemistry::OpenSMILES::Parser->new;
             my( $graph_reparsed ) = $parser->parse( $symbols[$vertex_symbols{$atom}],
                                                     { raw => 1 } );
