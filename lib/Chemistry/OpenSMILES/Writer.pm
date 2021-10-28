@@ -101,9 +101,11 @@ sub write_SMILES
                 next;
             }
 
-            my @order_old = ( $atom->{chirality_reference},
+            my @order_old = ( ( $atom->{chirality_reference} ?
+                                $atom->{chirality_reference} : () ),
                               sort { $a->{number} <=> $b->{number} }
-                              grep { $_ ne $atom->{chirality_reference} }
+                              grep { !$atom->{chirality_reference} ||
+                                      $atom->{chirality_reference} ne $_ }
                                    @neighbours );
             my %indices;
             for (0..$#order_old) {
