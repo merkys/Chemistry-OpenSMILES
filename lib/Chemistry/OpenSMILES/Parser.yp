@@ -121,6 +121,7 @@ chain: atom
                                                           ':' );
             }
 
+            delete $_[3]->{first}{chirality_reference};
             _record_chirality_references( $_[0], $_[1]->{last}, $_[3]->{first} );
 
             return $_[1];
@@ -142,6 +143,7 @@ chain: atom
                                                 $_[4]->{first} );
             }
 
+            delete $_[4]->{first}{chirality_reference};
             _record_chirality_references( $_[0], $_[1]->{last}, $_[4]->{first} );
 
             return $_[1];

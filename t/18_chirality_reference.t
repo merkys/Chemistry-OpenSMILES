@@ -15,6 +15,7 @@ my %cases = (
 	'[C@]1(Br)(Cl)CCCC(F)C1' => 8,
     'C1.[C@]1(Br)(Cl)O'      => 0,
     'C(CCCC1)[C@]1(Br)(Cl)'  => 0,
+    'C([C@](Br)(Cl)O)C'      => 0,
 );
 
 plan tests => 3 * scalar keys %cases;
