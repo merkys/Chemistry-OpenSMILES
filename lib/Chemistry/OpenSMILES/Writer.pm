@@ -41,10 +41,14 @@ sub write_SMILES
         my $rings = {};
 
         my $operations = {
-            tree_edge     => sub { if( $vertex_symbols{$_[1]} ) {
-                                       @_ = ( $_[1], $_[0], $_[2] );
+            tree_edge     => sub { my( $seen, $unseen, $self ) = @_;
+                                   if( $vertex_symbols{$unseen} ) {
+                                       ( $seen, $unseen ) = ( $unseen, $seen );
                                    }
-                                   push @symbols, _tree_edge( @_ ) },
+                                   push @symbols, _tree_edge( $seen, $unseen, $self, $order_sub );
+                                   if( is_chiral $unseen ) {
+                                       $unseen->{chirality_reference_new} = $seen;
+                                   } },
 
             non_tree_edge => sub { my @sorted = sort { $vertex_symbols{$a} <=>
                                                        $vertex_symbols{$b} }
@@ -96,27 +100,29 @@ sub write_SMILES
                 next;
             }
 
-            # A chiral center may have ring bonds. Some ring bonds will
-            # be formed with already seen atoms, therefore such ring
-            # bonds cannot be the first neighbours.
-            my @order;
-            my( $first ) = map { $_->{number} }
-                           sort { $vertex_symbols{$a} <=>
-                                  $vertex_symbols{$b} }
-                           grep { !exists $rings->{$vertex_symbols{$atom}}
-                                                  {$vertex_symbols{$_}} &&
-                                  !exists $rings->{$vertex_symbols{$_}}
-                                                  {$vertex_symbols{$atom}} }
-                           @neighbours;
-            push @order, $first if defined $first;
-            push @order, grep { !defined $first || $_ != $first }
-                         map { $_->{number} }
-                         sort { $vertex_symbols{$a} <=>
-                                $vertex_symbols{$b} }
-                              @neighbours;
+            my @order_old = ( $atom->{chirality_reference},
+                              sort { $a->{number} <=> $b->{number} }
+                              grep { $_ ne $atom->{chirality_reference} }
+                                   @neighbours );
+            my %indices;
+            for (0..$#order_old) {
+                $indices{$order_old[$_]} = $_;
+            }
 
-            my $chirality_now = _tetrahedral_chirality( $atom->{chirality},
-                                                        @order );
+            my @order_new = ( ( $atom->{chirality_reference_new} ?
+                                $atom->{chirality_reference_new} : () ),
+                              sort { $vertex_symbols{$a} <=>
+                                     $vertex_symbols{$b} }
+                              grep { !$atom->{chirality_reference_new} ||
+                                     $_ ne $atom->{chirality_reference_new} }
+                                   @neighbours );
+
+            my $chirality_now = $atom->{chirality};
+            if( join( '', _permutation_order( map { $indices{$_} } @order_new ) ) ne
+                '0123' ) {
+                $chirality_now = $chirality_now eq '@' ? '@@' : '@';
+            }
+
             my $parser = Chemistry::OpenSMILES::Parser->new;
             my( $graph_reparsed ) = $parser->parse( $symbols[$vertex_symbols{$atom}],
                                                     { raw => 1 } );
@@ -256,6 +262,20 @@ sub _tetrahedral_chirality
     } else {
         return $chirality eq '@' ? '@@' : '@';
     }
+}
+
+sub _permutation_order
+{
+    while( $_[2] == 0 || $_[3] == 0 ) {
+        @_ = ( $_[0], @_[2..3], $_[1] );
+    }
+    if( $_[0] != 0 ) {
+        @_ = ( @_[1..2], $_[0], $_[3] );
+    }
+    while( $_[1] != 1 ) {
+        @_[1..3] = ( @_[2..3], $_[1] );
+    }
+    return @_;
 }
 
 sub _order
