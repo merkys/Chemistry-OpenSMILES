@@ -1,3 +1,8 @@
+0.7.0 2021-10-30
+
+    - Fixing important issue with representing tetrahedral chiral centers
+      by introducing 'chirality_neighbours' key to atom hashes.
+
 0.6.0 2021-10-18
 
     - Allowing multi-digit hydrogen counts if enabled via parser option.
