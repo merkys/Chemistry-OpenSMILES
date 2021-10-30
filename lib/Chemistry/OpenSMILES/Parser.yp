@@ -70,9 +70,8 @@ chain: atom
 
             delete $_[2]->{first_of_chain};
 
-            # _record_chirality_references( $_[0], $_[1]->{last}, $_[2] );
-            _push_chirality_neighbour( $_[0], $_[1]->{last}, $_[2] );
-            _push_chirality_neighbour( $_[0], $_[2], $_[1]->{last} );
+            _push_chirality_neighbour( $_[1]->{last}, $_[2] );
+            _push_chirality_neighbour( $_[2], $_[1]->{last} );
 
             $_[1]->{last} = $_[2];
 
@@ -94,9 +93,8 @@ chain: atom
 
             delete $_[3]->{first_of_chain};
 
-            # _record_chirality_references( $_[0], $_[1]->{last}, $_[3] );
-            _push_chirality_neighbour( $_[0], $_[1]->{last}, $_[3] );
-            _push_chirality_neighbour( $_[0], $_[3], $_[1]->{last} );
+            _push_chirality_neighbour( $_[1]->{last}, $_[3] );
+            _push_chirality_neighbour( $_[3], $_[1]->{last} );
 
             $_[1]->{last} = $_[3];
 
@@ -133,10 +131,8 @@ chain: atom
 
             delete $_[3]->{first}{first_of_chain};
 
-            # delete $_[3]->{first}{chirality_reference};
-            # _record_chirality_references( $_[0], $_[1]->{last}, $_[3]->{first} );
-            _push_chirality_neighbour( $_[0], $_[1]->{last}, $_[3]->{first} );
-            _unshift_chirality_neighbour( $_[0], $_[3]->{first}, $_[1]->{last} );
+            _push_chirality_neighbour( $_[1]->{last}, $_[3]->{first} );
+            _unshift_chirality_neighbour( $_[3]->{first}, $_[1]->{last} );
 
             return $_[1];
         }
@@ -159,10 +155,8 @@ chain: atom
 
             delete $_[4]->{first}{first_of_chain};
 
-            # delete $_[4]->{first}{chirality_reference};
-            # _record_chirality_references( $_[0], $_[1]->{last}, $_[4]->{first} );
-            _push_chirality_neighbour( $_[0], $_[1]->{last}, $_[4]->{first} );
-            _unshift_chirality_neighbour( $_[0], $_[4]->{first}, $_[1]->{last} );
+            _push_chirality_neighbour( $_[1]->{last}, $_[4]->{first} );
+            _unshift_chirality_neighbour( $_[4]->{first}, $_[1]->{last} );
 
             return $_[1];
         }
@@ -348,9 +342,9 @@ sub parse
                     $graph->add_edge( $atom, $hydrogen );
                     $self->{USER}{ATOMNO} ++;
                     if( $atom->{first_of_chain} ) {
-                        _unshift_chirality_neighbour( $graph, $atom, $hydrogen );
+                        _unshift_chirality_neighbour( $atom, $hydrogen );
                     } else {
-                        _push_chirality_neighbour( $graph, $atom, $hydrogen );
+                        _push_chirality_neighbour( $atom, $hydrogen );
                     }
                 }
                 delete $atom->{hcount};
@@ -411,14 +405,14 @@ sub _add_ring_bond
                               0..$#{$ring_atom->{chirality_neighbours}};
             $ring_atom->{chirality_neighbours}[$pos] = $atom if defined $pos;
         }
-        _push_chirality_neighbour( $self, $atom, $ring_atom );
+        _push_chirality_neighbour( $atom, $ring_atom );
     } else {
         $self->{USER}{RINGBONDS}{$ring_bond} =
             { atom => $atom, $bond ? ( bond => $bond ) : () };
 
         # Record a placeholder for later addition of real chirality
         # neighbour, which will be identified by the ring bond number
-        _push_chirality_neighbour( $self, $atom, $ring_bond );
+        _push_chirality_neighbour( $atom, $ring_bond );
     }
 }
 
@@ -450,14 +444,14 @@ sub _merge_graphs
 
 sub _push_chirality_neighbour
 {
-    my( $self, $atom1, $atom2 ) = @_;
+    my( $atom1, $atom2 ) = @_;
     return unless is_chiral $atom1;
     push @{$atom1->{chirality_neighbours}}, $atom2;
 }
 
 sub _unshift_chirality_neighbour
 {
-    my( $self, $atom1, $atom2 ) = @_;
+    my( $atom1, $atom2 ) = @_;
     return unless is_chiral $atom1;
     unshift @{$atom1->{chirality_neighbours}}, $atom2;
 }
