@@ -281,6 +281,9 @@ Except for C<symbol>, C<class> and C<number>, all keys of hash are
 optional. Per OpenSMILES specification, default values for C<hcount>
 and C<class> are 0.
 
+For chiral atoms, the order of its neighbours in input is preserved in
+an array added as value for C<chirality_reference> key of the atom hash.
+
 =head3 Bonds
 
 Bonds, or edges of a molecular graph, rely completely on
