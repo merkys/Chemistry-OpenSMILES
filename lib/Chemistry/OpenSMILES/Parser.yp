@@ -350,7 +350,7 @@ sub parse
                 delete $atom->{hcount};
 
                 # Unify the representation of chirality
-                if( $atom->{chirality} ) {
+                if( is_chiral $atom ) {
                     if( $atom->{chirality} =~ /^@@?$/ &&
                         $graph->degree( $atom ) == 2 ) {
                         $atom->{chirality} =~ s/@+/'@AL' . length $&/e;

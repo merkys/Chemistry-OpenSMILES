@@ -58,7 +58,7 @@ sub write_SMILES
                                         _depict_bond( @sorted, $graph ) },
 
             pre  => sub { my( $vertex, $dfs ) = @_;
-                          push @chiral, $vertex if is_chiral( $vertex );
+                          push @chiral, $vertex if is_chiral $vertex;
                           push @symbols,
                           _pre_vertex( { map { $_ => $vertex->{$_} }
                                          grep { $_ ne 'chirality' }
@@ -99,8 +99,6 @@ sub write_SMILES
                      'process tetrahedral chiral centers' . "\n";
                 next;
             }
-
-use Data::Dumper;
 
             my %indices;
             for (0..$#{$atom->{chirality_neighbours}}) {
@@ -197,7 +195,7 @@ sub _pre_vertex
         $is_simple = 0;
     }
 
-    if( is_chiral( $vertex ) ) {
+    if( is_chiral $vertex ) {
         $atom .= $vertex->{chirality};
         $is_simple = 0;
     }
