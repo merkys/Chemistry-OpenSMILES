@@ -26,6 +26,6 @@ for (sort keys %cases) {
 
     my( $chiral_center ) = grep { is_chiral $_ } $graph->vertices;
     ok( defined $chiral_center );
-    ok( exists $chiral_center->{chirality_reference} );
-    is( $chiral_center->{chirality_reference}{number}, $cases{$_} );
+    ok( exists $chiral_center->{chirality_neighbours} );
+    is( $chiral_center->{chirality_neighbours}[0]{number}, $cases{$_} );
 }

@@ -6,6 +6,7 @@ use warnings;
 use Chemistry::OpenSMILES qw( is_aromatic is_chiral );
 use Chemistry::OpenSMILES::Parser;
 use Graph::Traversal::DFS;
+use List::Util qw(all uniq);
 
 # ABSTRACT: OpenSMILES format writer
 # VERSION
@@ -37,7 +38,7 @@ sub write_SMILES
         my $nrings = 0;
         my %seen_rings;
         my @chiral;
-        my %chirality_reference_new;
+        my %discovered_from;
 
         my $rings = {};
 
@@ -47,16 +48,14 @@ sub write_SMILES
                                        ( $seen, $unseen ) = ( $unseen, $seen );
                                    }
                                    push @symbols, _tree_edge( $seen, $unseen, $self, $order_sub );
-                                   if( is_chiral $unseen ) {
-                                       $chirality_reference_new{$unseen} = $seen;
-                                   } },
+                                   $discovered_from{$unseen} = $seen },
 
             non_tree_edge => sub { my @sorted = sort { $vertex_symbols{$a} <=>
                                                        $vertex_symbols{$b} }
                                                      @_[0..1];
                                    $rings->{$vertex_symbols{$sorted[0]}}
                                            {$vertex_symbols{$sorted[1]}} =
-                                        _depict_bond( @sorted, $graph ); },
+                                        _depict_bond( @sorted, $graph ) },
 
             pre  => sub { my( $vertex, $dfs ) = @_;
                           push @chiral, $vertex if is_chiral( $vertex );
@@ -101,24 +100,25 @@ sub write_SMILES
                 next;
             }
 
-            my @order_old = ( ( $atom->{chirality_reference} ?
-                                $atom->{chirality_reference} : () ),
-                              sort { $a->{number} <=> $b->{number} }
-                              grep { !$atom->{chirality_reference} ||
-                                      $atom->{chirality_reference} ne $_ }
-                                   @neighbours );
+use Data::Dumper;
+
             my %indices;
-            for (0..$#order_old) {
-                $indices{$order_old[$_]} = $_;
+            for (0..$#{$atom->{chirality_neighbours}}) {
+                $indices{$vertex_symbols{$atom->{chirality_neighbours}[$_]}} = $_;
             }
 
-            my @order_new = ( ( $chirality_reference_new{$atom} ?
-                                $chirality_reference_new{$atom} : () ),
-                              sort { $vertex_symbols{$a} <=>
-                                     $vertex_symbols{$b} }
-                              grep { !$chirality_reference_new{$atom} ||
-                                      $chirality_reference_new{$atom} ne $_ }
-                                   @neighbours );
+            my @order_new;
+            if( $discovered_from{$atom} ) {
+                push @order_new, $vertex_symbols{$discovered_from{$atom}};
+            }
+            if( $rings->{$vertex_symbols{$atom}} ) {
+                push @order_new, sort { $a <=> $b }
+                                 keys %{$rings->{$vertex_symbols{$atom}}};
+            }
+            push @order_new, sort { $a <=> $b }
+                             map  { $vertex_symbols{$_} }
+                                  @neighbours;
+            @order_new = uniq @order_new;
 
             my $chirality_now = $atom->{chirality};
             if( join( '', _permutation_order( map { $indices{$_} } @order_new ) ) ne
@@ -241,6 +241,10 @@ sub _depict_bond
 # chirality is required or not.
 sub _permutation_order
 {
+    # Safeguard against endless cycles due to undefined values
+    return unless scalar @_ == 4;
+    return unless all { defined } @_;
+
     while( $_[2] == 0 || $_[3] == 0 ) {
         @_ = ( $_[0], @_[2..3], $_[1] );
     }
