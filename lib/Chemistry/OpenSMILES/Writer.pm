@@ -106,13 +106,18 @@ sub write_SMILES
             }
 
             my @order_new;
+            # In newly established order, the atom from which this one
+            # is discovered (left hand side) will be the first, if any
             if( $discovered_from{$atom} ) {
                 push @order_new, $vertex_symbols{$discovered_from{$atom}};
             }
+            # Second, there will be ring bonds as they are added the
+            # first of all the neighbours
             if( $rings->{$vertex_symbols{$atom}} ) {
                 push @order_new, sort { $a <=> $b }
                                  keys %{$rings->{$vertex_symbols{$atom}}};
             }
+            # Finally, all neighbours are added, uniq will remove duplicates
             push @order_new, sort { $a <=> $b }
                              map  { $vertex_symbols{$_} }
                                   @neighbours;
