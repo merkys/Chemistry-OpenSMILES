@@ -1,3 +1,8 @@
+0.7.1 unreleased
+
+    - Safeguarding against infinite cycles in
+      Chemistry::OpenSMILES::Writer::_permutation_order().
+
 0.7.0 2021-10-30
 
     - Fixing important issue with representing tetrahedral chiral centers
