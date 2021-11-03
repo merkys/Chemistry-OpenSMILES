@@ -102,6 +102,14 @@ sub write_SMILES
 
             my $chirality_now = $atom->{chirality};
             if( $atom->{chirality_neighbours} ) {
+                if( scalar @neighbours !=
+                    scalar @{$atom->{chirality_neighbours}} ) {
+                    warn 'number of neighbours does not match the length ' .
+                         "of 'chirality_neighbours' array, cannot process " .
+                         'such chiral centers' . "\n";
+                    next;
+                }
+
                 my %indices;
                 for (0..$#{$atom->{chirality_neighbours}}) {
                     $indices{$vertex_symbols{$atom->{chirality_neighbours}[$_]}} = $_;
