@@ -6,7 +6,7 @@ use warnings;
 use Chemistry::OpenSMILES qw( is_aromatic is_chiral );
 use Chemistry::OpenSMILES::Parser;
 use Graph::Traversal::DFS;
-use List::Util qw(all uniq);
+use List::Util qw( any uniq );
 
 # ABSTRACT: OpenSMILES format writer
 # VERSION
@@ -247,8 +247,13 @@ sub _depict_bond
 sub _permutation_order
 {
     # Safeguard against endless cycles due to undefined values
-    return unless scalar @_ == 4;
-    return unless all { defined } @_;
+    if( (scalar @_ != 4) ||
+        (any { !defined || !/^[0-3]$/ } @_) ||
+        (join( ',', sort @_ ) ne '0,1,2,3') ) {
+        warn '_permutation_order() accepts only permutations of numbers ' .
+             "'0', '1', '2' and '3', unexpected input received";
+        return 0..3; # Return original order
+    }
 
     while( $_[2] == 0 || $_[3] == 0 ) {
         @_ = ( $_[0], @_[2..3], $_[1] );
