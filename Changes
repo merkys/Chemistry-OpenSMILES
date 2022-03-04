@@ -2,6 +2,8 @@
 
     - Safeguarding against infinite cycles in
       Chemistry::OpenSMILES::Writer::_permutation_order().
+    - Fixing mistake in Chemistry::OpenSMILES::Parser::parse()
+      documentation.
 
 0.7.0 2021-10-30
 
