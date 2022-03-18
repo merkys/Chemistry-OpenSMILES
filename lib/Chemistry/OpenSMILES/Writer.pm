@@ -134,8 +134,9 @@ sub write_SMILES
                                       @neighbours;
                 @order_new = uniq @order_new;
 
-                if( join( '', _permutation_order( map { $indices{$_} } @order_new ) ) ne
-                    '0123' ) {
+                my $permutation =
+                    join '', _permutation_order( map { $indices{$_} } @order_new );
+                if( $permutation ne join '', 0..$#order_new ) {
                     $chirality_now = $chirality_now eq '@' ? '@@' : '@';
                 }
             }
@@ -249,30 +250,38 @@ sub _depict_bond
     return $bond eq '/' ? '\\' : '/';
 }
 
-# Reorder a permutation of elements 0, 1, 2 and 3 by taking an element
-# and moving it two places either forward or backward in the line. This
-# subroutine is used to check whether a sign change of tetragonal
-# chirality is required or not.
+# Reorder a permutation of elements 0, 1, 2 and possibly 3 by taking an
+# element and moving it two places either forward or backward in the
+# line. This subroutine is used to check whether a sign change of
+# tetragonal chirality is required or not.
 sub _permutation_order
 {
     # Safeguard against endless cycles due to undefined values
-    if( (scalar @_ != 4) ||
+    if( (scalar @_ < 3 || scalar @_ > 4) ||
         (any { !defined || !/^[0-3]$/ } @_) ||
-        (join( ',', sort @_ ) ne '0,1,2,3') ) {
+        (join( ',', sort @_ ) ne '0,1,2' &&
+         join( ',', sort @_ ) ne '0,1,2,3') ) {
         warn '_permutation_order() accepts only permutations of numbers ' .
-             "'0', '1', '2' and '3', unexpected input received";
-        return 0..3; # Return original order
+             "'0', '1', '2' and possibly '3', unexpected input received";
+        return 0..$#_; # Return original order
     }
 
-    while( $_[2] == 0 || $_[3] == 0 ) {
-        @_ = ( $_[0], @_[2..3], $_[1] );
+    if( scalar @_ == 3 ) {
+        while( $_[0] != 0 ) {
+            @_ = ( @_[1..2], $_[0] );
+        }
+    } else {
+        while( $_[2] == 0 || $_[3] == 0 ) {
+            @_ = ( $_[0], @_[2..3], $_[1] );
+        }
+        if( $_[0] != 0 ) {
+            @_ = ( @_[1..2], $_[0], $_[3] );
+        }
+        while( $_[1] != 1 ) {
+            @_[1..3] = ( @_[2..3], $_[1] );
+        }
     }
-    if( $_[0] != 0 ) {
-        @_ = ( @_[1..2], $_[0], $_[3] );
-    }
-    while( $_[1] != 1 ) {
-        @_[1..3] = ( @_[2..3], $_[1] );
-    }
+
     return @_;
 }
 
