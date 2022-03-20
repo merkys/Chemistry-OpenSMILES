@@ -13,6 +13,7 @@ sub order
 
 my $random_cases = 20;
 my @bad_cases = (
+    [ 0..2 ],
     [ 0..4 ],
     [ 1..4 ],
     [ 0..2, undef ],
@@ -37,6 +38,6 @@ for (@bad_cases) {
     my $warning;
     local $SIG{__WARN__} = sub { $warning = $_[0] };
 
-    is( order( @$_ ), join( '', 0..$#$_ ) );
+    is( order( @$_ ), '0123' );
     ok( defined $warning && $warning =~ /unexpected input received/ );
 }
