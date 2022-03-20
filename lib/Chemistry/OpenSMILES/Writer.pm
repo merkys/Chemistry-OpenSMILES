@@ -113,7 +113,12 @@ sub write_SMILES
 
                 my %indices;
                 for (0..$#{$atom->{chirality_neighbours}}) {
-                    $indices{$vertex_symbols{$atom->{chirality_neighbours}[$_]}} = $_;
+                    my $pos = $_;
+                    if( scalar @{$atom->{chirality_neighbours}} == 3 && $_ != 0 ) {
+                        # Lone pair is always second in the chiral neighbours array
+                        $pos++;
+                    }
+                    $indices{$vertex_symbols{$atom->{chirality_neighbours}[$_]}} = $pos;
                 }
 
                 my @order_new;
@@ -136,6 +141,15 @@ sub write_SMILES
                                  map  { $vertex_symbols{$_} }
                                       @neighbours;
                 @order_new = uniq @order_new;
+
+                if( scalar @order_new == 3 ) {
+                    # Accommodate the lone pair
+                    if( $discovered_from{$atom} ) {
+                        @order_new = ( $order_new[0], 1, @order_new[1..2] );
+                    } else {
+                        unshift @order_new, 1;
+                    }
+                }
 
                 if( join( '', _permutation_order( @order_new ) ) ne '0123' ) {
                     $chirality_now = $chirality_now eq '@' ? '@@' : '@';
