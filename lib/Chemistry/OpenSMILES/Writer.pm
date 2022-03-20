@@ -120,22 +120,24 @@ sub write_SMILES
                 # In newly established order, the atom from which this one
                 # is discovered (left hand side) will be the first, if any
                 if( $discovered_from{$atom} ) {
-                    push @order_new, $vertex_symbols{$discovered_from{$atom}};
+                    push @order_new,
+                         $indices{$vertex_symbols{$discovered_from{$atom}}};
                 }
                 # Second, there will be ring bonds as they are added the
                 # first of all the neighbours
                 if( $rings->{$vertex_symbols{$atom}} ) {
-                    push @order_new, sort { $a <=> $b }
+                    push @order_new, map  { $indices{$_} }
+                                     sort { $a <=> $b }
                                      keys %{$rings->{$vertex_symbols{$atom}}};
                 }
                 # Finally, all neighbours are added, uniq will remove duplicates
-                push @order_new, sort { $a <=> $b }
+                push @order_new, map  { $indices{$_} }
+                                 sort { $a <=> $b }
                                  map  { $vertex_symbols{$_} }
                                       @neighbours;
                 @order_new = uniq @order_new;
 
-                if( join( '', _permutation_order( map { $indices{$_} } @order_new ) ) ne
-                    '0123' ) {
+                if( join( '', _permutation_order( @order_new ) ) ne '0123' ) {
                     $chirality_now = $chirality_now eq '@' ? '@@' : '@';
                 }
             }
