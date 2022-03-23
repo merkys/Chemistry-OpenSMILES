@@ -23,7 +23,9 @@ sub is_chiral_tetrahedral($);
 sub mirror($);
 
 # Removes chiral setting from tetrahedral chiral centers with less than
-# four distinct neighbours. Returns the affected atoms.
+# four distinct neighbours. Only tetrahedral chiral centers with four atoms
+# are affected, thus three-atom centers (implying lone pairs) are left
+# untouched. Returns the affected atoms.
 #
 # CAVEAT: disregards anomers
 # TODO: check other chiral centers
