@@ -101,6 +101,7 @@ sub _validate($@)
         # TODO: AL chiral centers also have to be checked
         if( is_chiral_tetrahedral( $atom ) ) {
             if( $moiety->degree($atom) < 3 ) {
+                # FIXME: there should be a strict mode to forbid lone pairs
                 # FIXME: tetrahedral allenes are false-positives
                 warn sprintf 'chiral center %s(%d) has %d bonds while ' .
                              'at least 3 is required' . "\n",
