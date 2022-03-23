@@ -100,10 +100,10 @@ sub _validate($@)
     for my $atom (sort { $a->{number} <=> $b->{number} } $moiety->vertices) {
         # TODO: AL chiral centers also have to be checked
         if( is_chiral_tetrahedral( $atom ) ) {
-            if( $moiety->degree($atom) < 4 ) {
+            if( $moiety->degree($atom) < 3 ) {
                 # FIXME: tetrahedral allenes are false-positives
                 warn sprintf 'chiral center %s(%d) has %d bonds while ' .
-                             'at least 4 is required' . "\n",
+                             'at least 3 is required' . "\n",
                              $atom->{symbol},
                              $atom->{number},
                              $moiety->degree($atom);
