@@ -343,6 +343,12 @@ The derivation of implicit hydrogen counts for aromatic atoms is not
 unambiguously defined in the OpenSMILES specification. Thus only
 aromatic carbon is accounted for as if having valence of 3.
 
+Chiral atoms with three neighbours are interpreted as having a lone
+pair of electrons as the fourth chiral neighbour. The lone pair is
+always understood as being the second in the order of neighbour
+enumeration, except when the atom with the lone pair starts a chain. In
+that case lone pair is the first.
+
 =head1 SEE ALSO
 
 perl(1)
