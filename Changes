@@ -1,6 +1,7 @@
 0.8.1 unreleased
 
     - Fixing a bug with incomplete cis/trans markers on ring bonds.
+    - Introducing Chemistry::OpenSMILES::toggle_cistrans().
 
 0.8.0 2022-05-05
 

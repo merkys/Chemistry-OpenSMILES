@@ -14,6 +14,7 @@ our @EXPORT_OK = qw(
     is_aromatic
     is_chiral
     mirror
+    toggle_cistrans
 );
 
 use List::Util qw(any);
@@ -21,6 +22,7 @@ use List::Util qw(any);
 sub is_chiral($);
 sub is_chiral_tetrahedral($);
 sub mirror($);
+sub toggle_cistrans($);
 
 # Removes chiral setting from tetrahedral chiral centers with less than
 # four distinct neighbours. Only tetrahedral chiral centers with four atoms
@@ -90,6 +92,11 @@ sub mirror($)
             mirror( $_ );
         }
     }
+}
+
+sub toggle_cistrans($)
+{
+    return $_[0] eq '/' ? '\\' : '/';
 }
 
 # CAVEAT: requires output from non-raw parsing due issue similar to GH#2
@@ -211,7 +218,7 @@ sub _neighbours_per_bond_type
         }
         if( $bond_type =~ /^[\\\/]$/ &&
             $atom->{number} > $neighbour->{number} ) {
-            $bond_type = $bond_type eq '\\' ? '/' : '\\';
+            $bond_type = toggle_cistrans $bond_type;
         }
         push @{$bond_types{$bond_type}}, $neighbour;
     }

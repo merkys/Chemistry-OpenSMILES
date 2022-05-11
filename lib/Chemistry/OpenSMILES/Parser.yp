@@ -5,7 +5,11 @@
 use warnings;
 use 5.0100;
 
-use Chemistry::OpenSMILES qw( is_aromatic is_chiral );
+use Chemistry::OpenSMILES qw(
+    is_aromatic
+    is_chiral
+    toggle_cistrans
+);
 use Graph::Undirected;
 use List::Util qw(any sum);
 
@@ -399,7 +403,7 @@ sub _add_ring_bond
             !defined $self->{USER}{RINGBONDS}{$ring_bond}{bond} ) {
             # If cis/trans marker is not specified when cis/trans bond is
             # seen first, it has to be inverted:
-            $bond = $bond eq '/' ? '\\' : '/';
+            $bond = toggle_cistrans $bond;
         }
 
         my $ring_atom = $self->{USER}{RINGBONDS}{$ring_bond}{atom};
