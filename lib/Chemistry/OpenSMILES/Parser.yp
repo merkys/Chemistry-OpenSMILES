@@ -394,6 +394,14 @@ sub _add_ring_bond
         }
         ( $bond ) = grep { defined }
                          ( $self->{USER}{RINGBONDS}{$ring_bond}{bond}, $bond );
+
+        if( $bond && $bond =~ /^[\\\/]$/ &&
+            !defined $self->{USER}{RINGBONDS}{$ring_bond}{bond} ) {
+            # If cis/trans marker is not specified when cis/trans bond is
+            # seen first, it has to be inverted:
+            $bond = $bond eq '/' ? '\\' : '/';
+        }
+
         my $ring_atom = $self->{USER}{RINGBONDS}{$ring_bond}{atom};
         if( !$bond && is_aromatic $ring_atom && is_aromatic $atom ) {
             $bond = ':';
