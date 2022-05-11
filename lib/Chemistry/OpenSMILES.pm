@@ -13,6 +13,8 @@ our @EXPORT_OK = qw(
     clean_chiral_centers
     is_aromatic
     is_chiral
+    is_cis_trans_bond
+    is_single_bond
     mirror
     toggle_cistrans
 );
@@ -77,6 +79,20 @@ sub is_chiral_tetrahedral($)
     } else {                    # Graph representing moiety
         return any { is_chiral_tetrahedral( $_ ) } $what->vertices;
     }
+}
+
+sub is_cis_trans_bond($)
+{
+    my( $moiety, $a, $b ) = @_;
+    return $moiety->has_edge_attribute( $a, $b, 'bond' ) &&
+           $moiety->get_edge_attribute( $a, $b, 'bond' ) =~ /^[\\\/]$/;
+}
+
+sub is_single_bond($)
+{
+    my( $moiety, $a, $b ) = @_;
+    return !$moiety->has_edge_attribute( $a, $b, 'bond' ) ||
+            $moiety->get_edge_attribute( $a, $b, 'bond' ) eq '-';
 }
 
 sub mirror($)
