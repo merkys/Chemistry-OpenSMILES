@@ -81,14 +81,14 @@ sub is_chiral_tetrahedral($)
     }
 }
 
-sub is_cis_trans_bond($)
+sub is_cis_trans_bond($$$)
 {
     my( $moiety, $a, $b ) = @_;
     return $moiety->has_edge_attribute( $a, $b, 'bond' ) &&
            $moiety->get_edge_attribute( $a, $b, 'bond' ) =~ /^[\\\/]$/;
 }
 
-sub is_single_bond($)
+sub is_single_bond($$$)
 {
     my( $moiety, $a, $b ) = @_;
     return !$moiety->has_edge_attribute( $a, $b, 'bond' ) ||
