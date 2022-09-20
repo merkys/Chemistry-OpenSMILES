@@ -1,4 +1,4 @@
-0.8.2 unreleased
+0.8.2 2022-09-20
 
     - Adding Chemistry::OpenSMILES::Aromaticity and
       Chemistry::OpenSMILES::Stereo from smiles-scripts project v0.2.0.
