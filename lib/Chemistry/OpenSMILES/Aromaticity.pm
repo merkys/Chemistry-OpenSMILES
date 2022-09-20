@@ -3,7 +3,11 @@ package Chemistry::OpenSMILES::Aromaticity;
 use strict;
 use warnings;
 
-use Chemistry::OpenSMILES qw( is_aromatic );
+use Chemistry::OpenSMILES qw(
+    is_aromatic
+    is_double_bond
+    is_single_bond
+);
 use Graph::Traversal::DFS;
 use List::Util qw( all );
 
@@ -148,20 +152,6 @@ sub electron_cycles
         $unique{join '', sort @$_} = $_;
     }
     return values %unique;
-}
-
-# There is a bug in prototypes in Chemistry::OpenSMILES::is_single_bond(),
-# thus have to use a shortcut for now.
-sub is_single_bond
-{
-    return &Chemistry::OpenSMILES::is_single_bond;
-}
-
-sub is_double_bond
-{
-    my( $moiety, $a, $b ) = @_;
-    return $moiety->has_edge_attribute( $a, $b, 'bond' ) &&
-           $moiety->get_edge_attribute( $a, $b, 'bond' ) eq '=';
 }
 
 1;
