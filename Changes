@@ -1,5 +1,7 @@
 0.8.2 unreleased
 
+    - Adding Chemistry::OpenSMILES::Aromaticity and
+      Chemistry::OpenSMILES::Stereo from smiles-scripts project v0.2.0.
     - Fixing prototypes of recently added functions.
     - Introducing Chemistry::OpenSMILES::is_double_bond().
     - Introducing Chemistry::OpenSMILES::is_ring_bond().
