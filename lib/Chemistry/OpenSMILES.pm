@@ -21,6 +21,7 @@ our @EXPORT_OK = qw(
     toggle_cistrans
 );
 
+use Graph::Traversal::BFS;
 use List::Util qw(any);
 
 sub is_chiral($);
