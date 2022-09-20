@@ -84,7 +84,7 @@ sub is_chiral_tetrahedral($)
     }
 }
 
-sub is_cis_trans_bond($$$)
+sub is_cis_trans_bond
 {
     my( $moiety, $a, $b ) = @_;
     return $moiety->has_edge_attribute( $a, $b, 'bond' ) &&
@@ -104,7 +104,7 @@ sub is_double_bond($$$)
 # O'Boyle (2012) saying that Open Babel SMILES writer does not output
 # cis/trans markers for double bonds in rings of size 8 or less due to
 # them implicilty being cis bonds.
-sub is_ring_bond($$$@)
+sub is_ring_bond
 {
     my( $moiety, $a, $b, $max_length ) = @_;
 
@@ -138,7 +138,7 @@ sub is_ring_bond($$$@)
     return exists $distance{$b} && $distance{$b} <= $max_length;
 }
 
-sub is_single_bond($$$)
+sub is_single_bond
 {
     my( $moiety, $a, $b ) = @_;
     return !$moiety->has_edge_attribute( $a, $b, 'bond' ) ||
