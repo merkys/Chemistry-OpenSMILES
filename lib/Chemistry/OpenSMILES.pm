@@ -15,6 +15,7 @@ our @EXPORT_OK = qw(
     is_chiral
     is_cis_trans_bond
     is_double_bond
+    is_ring_bond
     is_single_bond
     mirror
     toggle_cistrans
@@ -94,6 +95,46 @@ sub is_double_bond($$$)
     my( $moiety, $a, $b ) = @_;
     return $moiety->has_edge_attribute( $a, $b, 'bond' ) &&
            $moiety->get_edge_attribute( $a, $b, 'bond' ) eq '=';
+}
+
+# A bond is deemed to be a ring bond if there is an alternative path
+# joining its atoms not including the bond in consideration and this
+# alternative path is not longer than 7 bonds. This is based on
+# O'Boyle (2012) saying that Open Babel SMILES writer does not output
+# cis/trans markers for double bonds in rings of size 8 or less due to
+# them implicilty being cis bonds.
+sub is_ring_bond($$$@)
+{
+    my( $moiety, $a, $b, $max_length ) = @_;
+
+    $max_length = 7 unless $max_length;
+
+    my $copy = $moiety->copy;
+    $copy->delete_edge( $a, $b );
+
+    my %distance = ( $a => 0 );
+    my $record_length = sub {
+        # Record number of bonds between $a and any other vertex
+        my( $u, $v ) = @_;
+        my @seen = grep { exists $distance{$_} } ( $u, $v );
+        return if @seen != 1; # Can this be 0?
+
+        my $seen = shift @seen;
+        my( $unseen ) = grep { !exists $distance{$_} } ( $u, $v );
+        $distance{$unseen} = $distance{$seen} + 1;
+    };
+
+    my $operations = {
+        start     => sub { return $a },
+        tree_edge => $record_length,
+    };
+
+    my $traversal = Graph::Traversal::BFS->new( $copy, %$operations );
+    $traversal->bfs;
+
+    # $distance{$b} is the distance in bonds. In 8-member rings adjacent
+    # ring atoms have distance of 7 bonds.
+    return exists $distance{$b} && $distance{$b} <= $max_length;
 }
 
 sub is_single_bond($$$)

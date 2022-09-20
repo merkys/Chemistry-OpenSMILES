@@ -2,6 +2,7 @@
 
     - Fixing prototypes of recently added functions.
     - Introducing Chemistry::OpenSMILES::is_double_bond().
+    - Introducing Chemistry::OpenSMILES::is_ring_bond().
 
 0.8.1 2022-05-11
 
