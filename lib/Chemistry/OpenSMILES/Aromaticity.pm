@@ -35,6 +35,16 @@ our @EXPORT_OK = qw(
     kekulise
 );
 
+=head1 METHODS
+
+=over 4
+
+=item aromatise( $moiety )
+
+Mark electron cycles as aromatic.
+
+=cut
+
 sub aromatise
 {
     my( $moiety ) = @_;
@@ -54,6 +64,13 @@ sub aromatise
         }
     }
 }
+
+=item kekulise( $moiety )
+
+Find nonfused even-length aromatic cycles consisting only of B, C, N, P, S
+and mark them with aliterating single and double bonds.
+
+=cut
 
 sub kekulise
 {
@@ -107,8 +124,14 @@ sub kekulise
     }
 }
 
-# According to "Finding Electron Cycles" algorithm from
-# https://depth-first.com/articles/2021/06/30/writing-aromatic-smiles/
+=item electron_cycles( $moiety )
+
+Find electron cycles according to "Finding Electron Cycles" algorithm from
+L<https://depth-first.com/articles/2021/06/30/writing-aromatic-smiles/>.
+Use with caution: the implementation is experimental.
+
+=cut
+
 sub electron_cycles
 {
     my( $moiety ) = @_;
@@ -169,5 +192,9 @@ sub electron_cycles
     }
     return values %unique;
 }
+
+=back
+
+=cut
 
 1;
