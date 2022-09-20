@@ -3,6 +3,9 @@ package Chemistry::OpenSMILES::Aromaticity;
 use strict;
 use warnings;
 
+# ABSTRACT: Aromaticity handling routines
+# VERSION
+
 use Chemistry::OpenSMILES qw(
     is_aromatic
     is_double_bond

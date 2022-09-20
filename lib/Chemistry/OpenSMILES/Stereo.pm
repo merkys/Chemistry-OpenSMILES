@@ -3,6 +3,9 @@ package Chemistry::OpenSMILES::Stereo;
 use strict;
 use warnings;
 
+# ABSTRACT: Stereochemistry handling routines
+# VERSION
+
 require Exporter;
 our @ISA = qw( Exporter );
 our @EXPORT_OK = qw(
