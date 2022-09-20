@@ -17,6 +17,7 @@ our @EXPORT_OK = qw(
 
 use Chemistry::OpenSMILES qw(
     is_cis_trans_bond
+    is_double_bond
     is_ring_bond
     is_single_bond
     toggle_cistrans
@@ -34,12 +35,7 @@ sub mark_all_double_bonds
     $order_sub = sub { return $_[0]->{number} } unless $order_sub;
 
     # Select non-ring double bonds
-    my @double_bonds = grep { $graph->has_edge_attribute( $_->[0],
-                                                          $_->[1],
-                                                          'bond' ) &&
-                              $graph->get_edge_attribute( $_->[0],
-                                                          $_->[1],
-                                                          'bond' ) eq '=' &&
+    my @double_bonds = grep { is_double_bond( $graph, @$_ ) &&
                               !is_ring_bond( $graph, @$_ ) }
                             $graph->edges;
 
@@ -286,8 +282,7 @@ sub cis_trans_to_pseudoedges
 
     # Select non-ring double bonds
     my @double_bonds =
-        grep { $moiety->has_edge_attribute( @$_, 'bond' ) &&
-               $moiety->get_edge_attribute( @$_, 'bond' ) eq '=' &&
+        grep {  is_double_bond( $moiety, @$_ ) &&
                !is_ring_bond( $moiety, @$_ ) } $moiety->edges;
 
     # Connect cis/trans atoms in double bonds with pseudo-edges

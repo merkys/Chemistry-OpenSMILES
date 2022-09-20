@@ -91,7 +91,7 @@ sub is_cis_trans_bond
            $moiety->get_edge_attribute( $a, $b, 'bond' ) =~ /^[\\\/]$/;
 }
 
-sub is_double_bond($$$)
+sub is_double_bond
 {
     my( $moiety, $a, $b ) = @_;
     return $moiety->has_edge_attribute( $a, $b, 'bond' ) &&
