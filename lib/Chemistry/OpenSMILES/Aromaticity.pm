@@ -138,7 +138,6 @@ sub electron_cycles
 
     my @cycles;
     for my $start ($moiety->vertices) {
-        # print STDERR '-' x 30, "\n";
         my %seen;
         my %prev;
         my $operations = {
@@ -148,7 +147,6 @@ sub electron_cycles
                 my( $u, $v ) = @_;
                 ( $u, $v ) = ( $v, $u ) if $seen{$v};
                 $prev{$v} = $u;
-                # print STDERR $_[0]->{number} . " -- " . $_[1]->{number} . "\n"
             },
             non_tree_edge => sub {
                 my( $u, $v ) = @_;
@@ -156,7 +154,6 @@ sub electron_cycles
                     ( $u, $v ) = ( $v, $u ) if $v == $start;
                     my $current = $v;
                     my $prev_bond_is_single;
-                    # print STDERR ">>>> " . $u->{number} . " - " . $v->{number} . ": " . $prev_bond_is_single . "\n";
                     my $cycle_is_alterating = 1;
                     my @cycle = ( $u );
                     while( $prev{$current} ) {
