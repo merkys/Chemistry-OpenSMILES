@@ -14,6 +14,19 @@ use Chemistry::OpenSMILES qw(
 use Graph::Traversal::DFS;
 use List::Util qw( all );
 
+=head1 NAME
+
+Chemistry::OpenSMILES::Aromaticity - Aromaticity handling routines
+
+=head1 DESCRIPTION
+
+Chemistry::OpenSMILES::Aromaticity encodes some aromaticity handling
+subroutines for aromatisation and kekulisation. Both implementations are
+experimental, handle only some specific cases and are neither stable nor
+bug-free, thus should be used with caution.
+
+=cut
+
 require Exporter;
 our @ISA = qw( Exporter );
 our @EXPORT_OK = qw(
