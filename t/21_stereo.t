@@ -11,21 +11,20 @@ use Chemistry::OpenSMILES::Stereo qw(
 );
 use Test::More;
 
-plan tests => 12;
-
-my $parser = Chemistry::OpenSMILES::Parser->new;
-my $moiety;
-
-( $moiety ) = $parser->parse( 'N[C@](Br)(O)C' );
-chirality_to_pseudograph( $moiety );
-
-is( $moiety->vertices, 23 );
-is( $moiety->edges, 70 );
-
 my @cases = (
     [ 'C/C=C/C', 12, 15, 12, 11, 4 ],
     [ 'F/N=C(/F)\F', 5, 4, 5, 4, 0 ],
 );
+
+plan tests => 5 * @cases + 2;
+
+my $parser = Chemistry::OpenSMILES::Parser->new;
+
+my( $moiety ) = $parser->parse( 'N[C@](Br)(O)C' );
+chirality_to_pseudograph( $moiety );
+
+is( $moiety->vertices, 23 );
+is( $moiety->edges, 70 );
 
 for my $case (@cases) {
     my( $smiles,
