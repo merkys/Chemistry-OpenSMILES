@@ -37,7 +37,8 @@ sub mark_all_double_bonds
 
     # Select non-ring double bonds
     my @double_bonds = grep { is_double_bond( $graph, @$_ ) &&
-                              !is_ring_bond( $graph, @$_ ) }
+                              !is_ring_bond( $graph, @$_ ) &&
+                              !is_unimportant_double_bond( $graph, @$_ ) }
                             $graph->edges;
 
     # Construct a double bond incidence graph. Vertices are double bonds
