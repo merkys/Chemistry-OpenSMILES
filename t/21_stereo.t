@@ -11,7 +11,7 @@ use Chemistry::OpenSMILES::Stereo qw(
 );
 use Test::More;
 
-plan tests => 6;
+plan tests => 7;
 
 my $parser = Chemistry::OpenSMILES::Parser->new;
 my $moiety;
@@ -21,6 +21,11 @@ chirality_to_pseudograph( $moiety );
 
 is( $moiety->vertices, 23 );
 is( $moiety->edges, 70 );
+
+( $moiety ) = $parser->parse( 'F/N=C(/F)\F' );
+
+cis_trans_to_pseudoedges( $moiety );
+is( $moiety->edges, 4 );
 
 ( $moiety ) = $parser->parse( 'C/C=C/C' );
 
