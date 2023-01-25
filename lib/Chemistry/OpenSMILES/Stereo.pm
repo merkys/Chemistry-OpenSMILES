@@ -266,13 +266,13 @@ sub chirality_to_pseudograph
             for my $offset (0..2) {
                 my $connector = {};
                 $moiety->set_edge_attribute( $neighbour, $connector, 'chiral', 'from' );
-                $moiety->set_edge_attribute( $atom, $connector, 'chiral', 'to' );
+                # Do we really need to connect to the central atom?
+                # $moiety->set_edge_attribute( $atom, $connector, 'chiral', 'to' );
 
-                $moiety->set_edge_attribute( $connector, $other[0], 'chiral', 1 );
-                $moiety->set_edge_attribute( $connector, $other[1], 'chiral', 2 );
-                $moiety->set_edge_attribute( $connector, $other[2], 'chiral', 3 );
-
-                push @other, shift @other;
+                $moiety->set_edge_attribute( $connector, $other[$offset],
+                                             'chiral_order', 1 );
+                $moiety->set_edge_attribute( $connector, $other[($offset+1) % 3],
+                                             'chiral_order', 2 );
             }
         }
     }
