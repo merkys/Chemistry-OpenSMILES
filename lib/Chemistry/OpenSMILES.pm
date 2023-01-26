@@ -15,6 +15,7 @@ our @EXPORT_OK = qw(
     is_chiral
     is_cis_trans_bond
     is_double_bond
+    is_ring_atom
     is_ring_bond
     is_single_bond
     mirror
@@ -111,6 +112,14 @@ sub is_double_bond
     my( $moiety, $a, $b ) = @_;
     return $moiety->has_edge_attribute( $a, $b, 'bond' ) &&
            $moiety->get_edge_attribute( $a, $b, 'bond' ) eq '=';
+}
+
+# An atom is deemed to be a ring atom if any of its bonds is a ring bond.
+sub is_ring_atom
+{
+    my( $moiety, $atom, $max_length ) = @_;
+    return any { is_ring_bond( $moiety, $atom, $_, $max_length ) }
+               $moiety->neighbours( $atom );
 }
 
 # A bond is deemed to be a ring bond if there is an alternative path
