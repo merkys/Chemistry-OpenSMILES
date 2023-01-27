@@ -50,7 +50,6 @@ our %normal_valence = (
 # are affected, thus three-atom centers (implying lone pairs) are left
 # untouched. Returns the affected atoms.
 #
-# CAVEAT: disregards anomers
 # TODO: check other chiral centers
 sub clean_chiral_centers($$)
 {
@@ -59,6 +58,8 @@ sub clean_chiral_centers($$)
     my @affected;
     for my $atom ($moiety->vertices) {
         next unless is_chiral_tetrahedral( $atom );
+        # Anomers must not loose chirality settings
+        next if is_ring_atom( $moiety, $atom, scalar $moiety->edges );
 
         my $hcount = exists $atom->{hcount} ? $atom->{hcount} : 0;
         next if $moiety->degree($atom) + $hcount != 4;
@@ -212,9 +213,8 @@ sub _validate($@)
             } elsif( $moiety->degree($atom) == 4 && $color_sub ) {
                 my %colors = map { ($color_sub->( $_ ) => 1) }
                                  $moiety->neighbours($atom);
-                if( scalar keys %colors != 4 ) {
-                    # FIXME: anomers are false-positives, see COD entry
-                    # 7111036
+                if( scalar keys %colors != 4 &&
+                    !is_ring_atom( $moiety, $atom, scalar $moiety->edges ) ) {
                     warn sprintf 'tetrahedral chiral setting for %s(%d) ' .
                                  'is not needed as not all 4 neighbours ' .
                                  'are distinct' . "\n",
