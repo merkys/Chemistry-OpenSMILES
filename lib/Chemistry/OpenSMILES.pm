@@ -118,6 +118,7 @@ sub is_double_bond
 sub is_ring_atom
 {
     my( $moiety, $atom, $max_length ) = @_;
+    return unless $moiety->degree( $atom ) > 1;
     return any { is_ring_bond( $moiety, $atom, $_, $max_length ) }
                $moiety->neighbours( $atom );
 }
@@ -131,8 +132,11 @@ sub is_ring_atom
 sub is_ring_bond
 {
     my( $moiety, $a, $b, $max_length ) = @_;
-
     $max_length = 7 unless $max_length;
+
+    # A couple of shortcuts to reduce the complexity
+    return if any { $moiety->degree( $_ ) == 1 } ( $a, $b );
+    return if scalar( $moiety->vertices ) > scalar( $moiety->edges );
 
     my $copy = $moiety->copy;
     $copy->delete_edge( $a, $b );
