@@ -25,7 +25,7 @@ use Chemistry::OpenSMILES qw(
 use Chemistry::OpenSMILES::Writer qw( write_SMILES );
 use Graph::Traversal::BFS;
 use Graph::Undirected;
-use List::Util qw( all any max min sum sum0 );
+use List::Util qw( all any max min sum sum0 uniq );
 
 sub mark_all_double_bonds
 {
@@ -346,20 +346,21 @@ sub is_pseudoedge
 # sides and both of these atoms are identical.
 sub is_unimportant_double_bond
 {
-    my( $moiety, $a, $b ) = @_;
+    my( $moiety, $a, $b, $color_sub ) = @_;
     my @a_neighbours = grep { $_ != $b } $moiety->neighbours( $a );
     my @b_neighbours = grep { $_ != $a } $moiety->neighbours( $b );
 
-    if( @a_neighbours == 2 &&
-        all { $moiety->degree( $_ ) == 1 } @a_neighbours ) {
-        return 1 if write_SMILES( $a_neighbours[0] ) eq
-                    write_SMILES( $a_neighbours[1] );
-    }
+    for (\@a_neighbours, \@b_neighbours) {
+        next unless @$_ == 2;
 
-    if( @b_neighbours == 2 &&
-        all { $moiety->degree( $_ ) == 1 } @b_neighbours ) {
-        return 1 if write_SMILES( $b_neighbours[0] ) eq
-                    write_SMILES( $b_neighbours[1] );
+        my @representations;
+        if( $color_sub ) {
+            @representations = map { $color_sub->( $_ ) } @$_;
+        } else {
+            next if any { $moiety->degree( $_ ) != 1 } @$_;
+            @representations = map { write_SMILES( $_ ) } @$_;
+        }
+        return 1 if uniq @representations == 1;
     }
 
     return;
