@@ -33,7 +33,7 @@ sub orbit
 my @cases = (
     [ 'CC[C@](CO)(CCl)C', 0 ],
     [ 'CC[C@](CC)(CC)CC', 1 ],
-    [ 'C[S@](=O)(=O)([O-])', 0 ], # FIXME: Something is off here, should be 1!
+    [ 'C[S@](O)(O)[O-]',  0 ], # FIXME: Something is off here, should be 1!
 );
 
 plan tests => scalar @cases;
