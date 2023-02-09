@@ -50,7 +50,6 @@ our %normal_valence = (
 # are affected, thus three-atom centers (implying lone pairs) are left
 # untouched. Returns the affected atoms.
 #
-# CAVEAT: disregards anomers
 # TODO: check other chiral centers
 sub clean_chiral_centers($$)
 {
@@ -59,6 +58,8 @@ sub clean_chiral_centers($$)
     my @affected;
     for my $atom ($moiety->vertices) {
         next unless is_chiral_tetrahedral( $atom );
+        # Anomers must not loose chirality settings
+        next if is_ring_atom( $moiety, $atom, scalar $moiety->edges );
 
         my $hcount = exists $atom->{hcount} ? $atom->{hcount} : 0;
         next if $moiety->degree($atom) + $hcount != 4;
@@ -118,6 +119,7 @@ sub is_double_bond
 sub is_ring_atom
 {
     my( $moiety, $atom, $max_length ) = @_;
+    return unless $moiety->degree( $atom ) > 1;
     return any { is_ring_bond( $moiety, $atom, $_, $max_length ) }
                $moiety->neighbours( $atom );
 }
@@ -131,8 +133,11 @@ sub is_ring_atom
 sub is_ring_bond
 {
     my( $moiety, $a, $b, $max_length ) = @_;
-
     $max_length = 7 unless $max_length;
+
+    # A couple of shortcuts to reduce the complexity
+    return if any { $moiety->degree( $_ ) == 1 } ( $a, $b );
+    return if scalar( $moiety->vertices ) > scalar( $moiety->edges );
 
     my $copy = $moiety->copy;
     $copy->delete_edge( $a, $b );
@@ -208,9 +213,8 @@ sub _validate($@)
             } elsif( $moiety->degree($atom) == 4 && $color_sub ) {
                 my %colors = map { ($color_sub->( $_ ) => 1) }
                                  $moiety->neighbours($atom);
-                if( scalar keys %colors != 4 ) {
-                    # FIXME: anomers are false-positives, see COD entry
-                    # 7111036
+                if( scalar keys %colors != 4 &&
+                    !is_ring_atom( $moiety, $atom, scalar $moiety->edges ) ) {
                     warn sprintf 'tetrahedral chiral setting for %s(%d) ' .
                                  'is not needed as not all 4 neighbours ' .
                                  'are distinct' . "\n",
