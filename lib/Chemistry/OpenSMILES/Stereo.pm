@@ -29,7 +29,7 @@ use List::Util qw( all any max min sum sum0 uniq );
 
 sub mark_all_double_bonds
 {
-    my( $graph, $setting_sub, $order_sub ) = @_;
+    my( $graph, $setting_sub, $order_sub, $color_sub ) = @_;
 
     # By default, whenever there is a choice between atoms, the one with
     # lowest position in the input SMILES is chosen:
@@ -38,7 +38,7 @@ sub mark_all_double_bonds
     # Select non-ring double bonds
     my @double_bonds = grep { is_double_bond( $graph, @$_ ) &&
                               !is_ring_bond( $graph, @$_ ) &&
-                              !is_unimportant_double_bond( $graph, @$_ ) }
+                              !is_unimportant_double_bond( $graph, @$_, $color_sub ) }
                             $graph->edges;
 
     # Construct a double bond incidence graph. Vertices are double bonds
@@ -342,8 +342,9 @@ sub is_pseudoedge
     return $moiety->has_edge_attribute( $a, $b, 'pseudo' );
 }
 
-# An "unimportant" double bond is one which has leaf atoms on one of its
-# sides and both of these atoms are identical.
+# An "unimportant" double bond is one which has chemically identical atoms on one of its sides.
+# If C<$color_sub> is given, it is used to determine chemical identity of atoms.
+# If not, only leaf atoms are considered and compared.
 sub is_unimportant_double_bond
 {
     my( $moiety, $a, $b, $color_sub ) = @_;
