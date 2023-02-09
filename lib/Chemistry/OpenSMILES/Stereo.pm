@@ -361,7 +361,7 @@ sub is_unimportant_double_bond
             next if any { $moiety->degree( $_ ) != 1 } @$_;
             @representations = map { write_SMILES( $_ ) } @$_;
         }
-        return 1 if uniq @representations == 1;
+        return 1 if uniq( @representations ) == 1;
     }
 
     return;
