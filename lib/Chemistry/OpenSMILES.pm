@@ -24,7 +24,7 @@ our @EXPORT_OK = qw(
 );
 
 use Graph::Traversal::BFS;
-use List::Util qw(any);
+use List::Util qw( any none );
 
 sub is_chiral($);
 sub is_chiral_tetrahedral($);
@@ -130,6 +130,8 @@ sub is_ring_atom
 # O'Boyle (2012) saying that Open Babel SMILES writer does not output
 # cis/trans markers for double bonds in rings of size 8 or less due to
 # them implicilty being cis bonds.
+#
+# If maximum ring size is given negative, ring size is not limited.
 sub is_ring_bond
 {
     my( $moiety, $a, $b, $max_length ) = @_;
@@ -138,6 +140,15 @@ sub is_ring_bond
     # A couple of shortcuts to reduce the complexity
     return '' if any { $moiety->degree( $_ ) == 1 } ( $a, $b );
     return '' if scalar( $moiety->vertices ) > scalar( $moiety->edges );
+
+    if( $max_length < 0 ) {
+        # Due to the issue in Graph, bridges() returns strings instead of real objects.
+        # Graph issue: https://github.com/graphviz-perl/Graph/issues/29
+        my %vertices_by_name = map { $_ => $_ } $moiety->vertices;
+        return none { ( $_->[0] == $a && $_->[1] == $b ) ||
+                      ( $_->[0] == $b && $_->[1] == $a ) }
+               map  { [ map { $vertices_by_name{$_} } @$_ ] } $moiety->bridges;
+    }
 
     my $copy = $moiety->copy;
     $copy->delete_edge( $a, $b );

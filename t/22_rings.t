@@ -10,7 +10,7 @@ my %cases = (
     'CN1C=NC2=C1C(=O)N(C(=O)N2C)C' => { atoms => 9, bonds => 10 },
 );
 
-plan tests => 2 * scalar keys %cases;
+plan tests => 4 * scalar keys %cases;
 
 for my $case (sort keys %cases) {
     my $parser = Chemistry::OpenSMILES::Parser->new;
@@ -19,5 +19,10 @@ for my $case (sort keys %cases) {
     is scalar( grep { is_ring_atom( $molecule, $_ ) } $molecule->vertices ),
        $cases{$case}->{atoms};
     is scalar( grep { is_ring_bond( $molecule, @$_ ) } $molecule->edges ),
+       $cases{$case}->{bonds};
+
+    is scalar( grep { is_ring_atom( $molecule, $_, -1 ) } $molecule->vertices ),
+       $cases{$case}->{atoms};
+    is scalar( grep { is_ring_bond( $molecule, @$_, -1 ) } $molecule->edges ),
        $cases{$case}->{bonds};
 }
