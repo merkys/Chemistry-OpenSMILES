@@ -136,8 +136,8 @@ sub is_ring_bond
     $max_length = 7 unless $max_length;
 
     # A couple of shortcuts to reduce the complexity
-    return if any { $moiety->degree( $_ ) == 1 } ( $a, $b );
-    return if scalar( $moiety->vertices ) > scalar( $moiety->edges );
+    return '' if any { $moiety->degree( $_ ) == 1 } ( $a, $b );
+    return '' if scalar( $moiety->vertices ) > scalar( $moiety->edges );
 
     my $copy = $moiety->copy;
     $copy->delete_edge( $a, $b );
@@ -147,7 +147,7 @@ sub is_ring_bond
         # Record number of bonds between $a and any other vertex
         my( $u, $v ) = @_;
         my @seen = grep { exists $distance{$_} } ( $u, $v );
-        return if @seen != 1; # Can this be 0?
+        return '' if @seen != 1; # Can this be 0?
 
         my $seen = shift @seen;
         my( $unseen ) = grep { !exists $distance{$_} } ( $u, $v );
