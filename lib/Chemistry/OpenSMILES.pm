@@ -119,7 +119,7 @@ sub is_double_bond
 sub is_ring_atom
 {
     my( $moiety, $atom, $max_length ) = @_;
-    return unless $moiety->degree( $atom ) > 1;
+    return '' unless $moiety->degree( $atom ) > 1;
     return any { is_ring_bond( $moiety, $atom, $_, $max_length ) }
                $moiety->neighbours( $atom );
 }
