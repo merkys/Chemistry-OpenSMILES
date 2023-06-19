@@ -10,6 +10,8 @@ use 5.0100;
 require Exporter;
 our @ISA = qw( Exporter );
 our @EXPORT_OK = qw(
+    %bond_order_to_symbol
+    %bond_symbol_to_order
     clean_chiral_centers
     is_aromatic
     is_chiral
@@ -44,6 +46,22 @@ our %normal_valence = (
     Br => [ 1 ],
     I  => [ 1 ],
     c  => [ 3 ], # Not from OpenSMILES specification
+);
+
+our %bond_order_to_symbol = (
+    1   => '-',
+    1.5 => ':',
+    2   => '=',
+    3   => '#',
+    4   => '$',
+);
+
+our %bond_symbol_to_order = (
+    '-' => 1,
+    ':' => 1.5,
+    '=' => 2,
+    '#' => 3,
+    '$' => 4,
 );
 
 # Removes chiral setting from tetrahedral chiral centers with less than
