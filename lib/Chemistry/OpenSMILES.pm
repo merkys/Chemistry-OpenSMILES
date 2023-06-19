@@ -18,6 +18,7 @@ our @EXPORT_OK = qw(
     is_ring_atom
     is_ring_bond
     is_single_bond
+    is_triple_bond
     mirror
     %normal_valence
     toggle_cistrans
@@ -183,6 +184,13 @@ sub is_single_bond
     my( $moiety, $a, $b ) = @_;
     return !$moiety->has_edge_attribute( $a, $b, 'bond' ) ||
             $moiety->get_edge_attribute( $a, $b, 'bond' ) eq '-';
+}
+
+sub is_triple_bond
+{
+    my( $moiety, $a, $b ) = @_;
+    return $moiety->has_edge_attribute( $a, $b, 'bond' ) &&
+           $moiety->get_edge_attribute( $a, $b, 'bond' ) eq '#';
 }
 
 sub mirror($)
