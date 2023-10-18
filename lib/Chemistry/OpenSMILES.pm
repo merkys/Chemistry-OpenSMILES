@@ -65,10 +65,11 @@ our %bond_symbol_to_order = (
     '$' => 4,
 );
 
-# Removes chiral setting from tetrahedral chiral centers with less than
-# four distinct neighbours. Only tetrahedral chiral centers with four atoms
-# are affected, thus three-atom centers (implying lone pairs) are left
-# untouched. Returns the affected atoms.
+# Removes chiral setting from square planar or tetrahedral chiral centers if deemed unimportant.
+# For square planar arrangements this means situations when all neighbours are the same.
+# For tetrahedral arrangements this means situations with less than four distinct neighbours.
+# Only chiral centers with four atoms are affected, thus three-atom centers (implying lone pairs) are left untouched.
+# Returns the affected atoms.
 #
 # TODO: check other chiral centers
 sub clean_chiral_centers($$)
@@ -77,8 +78,8 @@ sub clean_chiral_centers($$)
 
     my @affected;
     for my $atom ($moiety->vertices) {
-        next unless is_chiral_tetrahedral( $atom );
-        # Anomers must not loose chirality settings
+        next unless is_chiral_planar( $atom ) || is_chiral_tetrahedral( $atom );
+        # Anomers must not loose chirality settings in any way
         next if is_ring_atom( $moiety, $atom, scalar $moiety->edges );
 
         my $hcount = exists $atom->{hcount} ? $atom->{hcount} : 0;
@@ -87,7 +88,14 @@ sub clean_chiral_centers($$)
         my %colors = map { ($color_sub->( $_ ) => 1) }
                          $moiety->neighbours($atom),
                          ( { symbol => 'H' } ) x $hcount;
-        next if scalar keys %colors == 4;
+
+        if( is_chiral_planar( $atom ) ) {
+            # Chiral planar center markers make sense even if only two types of atoms are there.
+            next if scalar keys %colors >= 2;
+        } else {
+            next if scalar keys %colors == 4;
+        }
+
         delete $atom->{chirality};
         push @affected, $atom;
     }
