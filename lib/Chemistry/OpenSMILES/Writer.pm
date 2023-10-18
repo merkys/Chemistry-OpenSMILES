@@ -10,7 +10,7 @@ use Chemistry::OpenSMILES qw(
 );
 use Chemistry::OpenSMILES::Parser;
 use Graph::Traversal::DFS;
-use List::Util qw( any uniq );
+use List::Util qw( all any uniq );
 
 # ABSTRACT: OpenSMILES format writer
 # VERSION
@@ -95,7 +95,7 @@ sub write_SMILES
 
         # Dealing with chirality
         for my $atom (@chiral) {
-            next unless $atom->{chirality} =~ /^@@?$/;
+            next unless $atom->{chirality} =~ /^@(@?|SP[123])$/;
 
             my @neighbours = $graph->neighbours($atom);
             if( scalar @neighbours < 3 || scalar @neighbours > 4 ) {
@@ -157,8 +157,30 @@ sub write_SMILES
                     }
                 }
 
-                if( join( '', _permutation_order( @order_new ) ) ne '0123' ) {
-                    $chirality_now = $chirality_now eq '@' ? '@@' : '@';
+                if( $atom->{chirality} =~ /^@@?$/ ) {
+                    # Tetragonal centers
+                    if( join( '', _permutation_order( @order_new ) ) ne '0123' ) {
+                        $chirality_now = $chirality_now eq '@' ? '@@' : '@';
+                    }
+                } else {
+                    # Square planar centers
+                    my @are_cyclic_neighbours;
+                    for (0..3) {
+                        my $diff = abs $order_new[$_] - $order_new[($_ + 1) % 4];
+                        push @are_cyclic_neighbours, $diff == 1 || $diff == 3;
+                    }
+                    if( all { $_ } @are_cyclic_neighbours ) {
+                        $chirality_now = '@SP1';
+                    } elsif( $are_cyclic_neighbours[0] && $are_cyclic_neighbours[2] &&
+                             (grep { $_ } @are_cyclic_neighbours) == 2 ) {
+                        $chirality_now = '@SP2';
+                    } elsif( $are_cyclic_neighbours[1] && $are_cyclic_neighbours[3] &&
+                             (grep { $_ } @are_cyclic_neighbours) == 2 ) {
+                        $chirality_now = '@SP3';
+                    } else {
+                        warn "unknown arrangement of square planar center\n";
+                        next;
+                    }
                 }
             }
 
