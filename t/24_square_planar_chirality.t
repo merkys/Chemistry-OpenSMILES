@@ -8,8 +8,8 @@ use Test::More;
 
 my @cases = (
     [ 'N[C@SP1](Br)(O)C', 'N([C@SP1](Br)(O)(C))', 'C([C@SP1](O)(Br)(N))' ],
-    [ 'N[C@SP2](Br)(O)C', 'N([C@SP1](Br)(O)(C))', 'C([C@SP1](O)(Br)(N))' ], # FIXME: Incorrect
-    [ 'N[C@SP3](Br)(O)C', 'N([C@SP1](Br)(O)(C))', 'C([C@SP1](O)(Br)(N))' ], # FIXME: Incorrect
+    [ 'N[C@SP2](Br)(O)C', 'N([C@SP2](Br)(O)(C))', 'C([C@SP2](O)(Br)(N))' ],
+    [ 'N[C@SP3](Br)(O)C', 'N([C@SP3](Br)(O)(C))', 'C([C@SP3](O)(Br)(N))' ],
 );
 
 plan tests => 2 * scalar @cases;

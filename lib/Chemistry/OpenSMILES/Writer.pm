@@ -164,11 +164,7 @@ sub write_SMILES
                     }
                 } else {
                     # Square planar centers
-                    $chirality_now = _square_planar_chirality( @order_new );
-                    if( !$chirality_now ) {
-                        warn "unknown arrangement of square planar center\n";
-                        next;
-                    }
+                    $chirality_now = _square_planar_chirality( @order_new, $chirality_now );
                 }
             }
 
@@ -311,19 +307,34 @@ sub _permutation_order
 
 sub _square_planar_chirality
 {
-    my @are_cyclic_neighbours;
-    for (0..3) {
-        my $diff = abs $_[$_] - $_[($_ + 1) % 4];
-        push @are_cyclic_neighbours, $diff == 1 || $diff == 3;
+    my $chirality = pop @_;
+
+    # Rotations until 0 is first
+    while( $_[0] != 0 ) {
+        push @_, shift @_;
+        my %tab = ( '@SP1' => '@SP1', '@SP2' => '@SP3', '@SP3' => '@SP2' );
+        $chirality = $tab{$chirality};
     }
 
-    return '@SP1' if all { $_ } @are_cyclic_neighbours;
-    return undef unless (grep { $_ } @are_cyclic_neighbours) == 2;
+    if( $_[3] == 1 ) { # Swap the right side
+        ( $_[2], $_[3] ) = ( $_[3], $_[2] );
+        my %tab = ( '@SP1' => '@SP3', '@SP2' => '@SP2', '@SP3' => '@SP1' );
+        $chirality = $tab{$chirality};
+    }
 
-    return '@SP2' if $are_cyclic_neighbours[0] && $are_cyclic_neighbours[2];
-    return '@SP3' if $are_cyclic_neighbours[1] && $are_cyclic_neighbours[3];
+    if( $_[2] == 1 ) { # Swap the center
+        ( $_[1], $_[2] ) = ( $_[2], $_[1] );
+        my %tab = ( '@SP1' => '@SP2', '@SP2' => '@SP1', '@SP3' => '@SP3' );
+        $chirality = $tab{$chirality};
+    }
 
-    return undef;
+    if( $_[3] == 2 ) { # Swap the right side
+        ( $_[2], $_[3] ) = ( $_[3], $_[2] );
+        my %tab = ( '@SP1' => '@SP3', '@SP2' => '@SP2', '@SP3' => '@SP1' );
+        $chirality = $tab{$chirality};
+    }
+
+    return $chirality;
 }
 
 sub _order
