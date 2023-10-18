@@ -164,20 +164,8 @@ sub write_SMILES
                     }
                 } else {
                     # Square planar centers
-                    my @are_cyclic_neighbours;
-                    for (0..3) {
-                        my $diff = abs $order_new[$_] - $order_new[($_ + 1) % 4];
-                        push @are_cyclic_neighbours, $diff == 1 || $diff == 3;
-                    }
-                    if( all { $_ } @are_cyclic_neighbours ) {
-                        $chirality_now = '@SP1';
-                    } elsif( $are_cyclic_neighbours[0] && $are_cyclic_neighbours[2] &&
-                             (grep { $_ } @are_cyclic_neighbours) == 2 ) {
-                        $chirality_now = '@SP2';
-                    } elsif( $are_cyclic_neighbours[1] && $are_cyclic_neighbours[3] &&
-                             (grep { $_ } @are_cyclic_neighbours) == 2 ) {
-                        $chirality_now = '@SP3';
-                    } else {
+                    $chirality_now = _square_planar_chirality( @order_new );
+                    if( !$chirality_now ) {
                         warn "unknown arrangement of square planar center\n";
                         next;
                     }
@@ -319,6 +307,23 @@ sub _permutation_order
         @_[1..3] = ( @_[2..3], $_[1] );
     }
     return @_;
+}
+
+sub _square_planar_chirality
+{
+    my @are_cyclic_neighbours;
+    for (0..3) {
+        my $diff = abs $_[$_] - $_[($_ + 1) % 4];
+        push @are_cyclic_neighbours, $diff == 1 || $diff == 3;
+    }
+
+    return '@SP1' if all { $_ } @are_cyclic_neighbours;
+    return undef unless (grep { $_ } @are_cyclic_neighbours) == 2;
+
+    return '@SP2' if $are_cyclic_neighbours[0] && $are_cyclic_neighbours[2];
+    return '@SP3' if $are_cyclic_neighbours[1] && $are_cyclic_neighbours[3];
+
+    return undef;
 }
 
 sub _order
