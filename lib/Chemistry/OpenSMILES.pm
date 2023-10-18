@@ -65,9 +65,9 @@ our %bond_symbol_to_order = (
     '$' => 4,
 );
 
-# Removes chiral setting from square planar or tetrahedral chiral centers if deemed unimportant.
+# Removes chiral setting from allenal, square planar or tetrahedral chiral centers if deemed unimportant.
+# For allenal and tetrahedral arrangements this means situations with less than four distinct neighbours.
 # For square planar arrangements this means situations when all neighbours are the same.
-# For tetrahedral arrangements this means situations with less than four distinct neighbours.
 # Only chiral centers with four atoms are affected, thus three-atom centers (implying lone pairs) are left untouched.
 # Returns the affected atoms.
 #
@@ -78,15 +78,24 @@ sub clean_chiral_centers($$)
 
     my @affected;
     for my $atom ($moiety->vertices) {
-        next unless is_chiral_planar( $atom ) || is_chiral_tetrahedral( $atom );
+        next unless is_chiral_allenal( $atom ) ||
+                    is_chiral_planar( $atom )  ||
+                    is_chiral_tetrahedral( $atom );
         # Anomers must not loose chirality settings in any way
         next if is_ring_atom( $moiety, $atom, scalar $moiety->edges );
 
         my $hcount = exists $atom->{hcount} ? $atom->{hcount} : 0;
-        next if $moiety->degree($atom) + $hcount != 4;
+        my @neighbours = $moiety->neighbours( $atom );
+        if( is_chiral_allenal( $atom ) ) {
+            @neighbours = grep { $_ != $atom }
+                          map  { $moiety->neighbours( $_ ) }
+                               @neighbours;
+        }
+
+        next if @neighbours + $hcount != 4;
 
         my %colors = map { ($color_sub->( $_ ) => 1) }
-                         $moiety->neighbours($atom),
+                         @neighbours,
                          ( { symbol => 'H' } ) x $hcount;
 
         if( is_chiral_planar( $atom ) ) {
