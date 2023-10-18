@@ -118,11 +118,21 @@ sub is_chiral($)
     }
 }
 
+sub is_chiral_allenal($)
+{
+    my( $what ) = @_;
+    if( ref $what eq 'HASH' ) { # Single atom
+        return $what->{chirality} && $what->{chirality} =~ /^\@AL[12]$/;
+    } else {                    # Graph representing moiety
+        return any { is_chiral_allenal( $_ ) } $what->vertices;
+    }
+}
+
 sub is_chiral_planar($)
 {
     my( $what ) = @_;
     if( ref $what eq 'HASH' ) { # Single atom
-        return $what->{chirality} && $what->{chirality} =~ /^\@SP[123]$/
+        return $what->{chirality} && $what->{chirality} =~ /^\@SP[123]$/;
     } else {                    # Graph representing moiety
         return any { is_chiral_planar( $_ ) } $what->vertices;
     }
@@ -133,7 +143,7 @@ sub is_chiral_tetrahedral($)
     my( $what ) = @_;
     if( ref $what eq 'HASH' ) { # Single atom
         # CAVEAT: will fail for allenal configurations of @/@@ in raw mode
-        return $what->{chirality} && $what->{chirality} =~ /^@@?$/
+        return $what->{chirality} && $what->{chirality} =~ /^@@?$/;
     } else {                    # Graph representing moiety
         return any { is_chiral_tetrahedral( $_ ) } $what->vertices;
     }
