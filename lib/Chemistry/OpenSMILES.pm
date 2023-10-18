@@ -30,6 +30,7 @@ use Graph::Traversal::BFS;
 use List::Util qw( any none );
 
 sub is_chiral($);
+sub is_chiral_planar($);
 sub is_chiral_tetrahedral($);
 sub mirror($);
 sub toggle_cistrans($);
@@ -106,6 +107,16 @@ sub is_chiral($)
         return exists $what->{chirality};
     } else {                    # Graph representing moiety
         return any { is_chiral( $_ ) } $what->vertices;
+    }
+}
+
+sub is_chiral_planar($)
+{
+    my( $what ) = @_;
+    if( ref $what eq 'HASH' ) { # Single atom
+        return $what->{chirality} && $what->{chirality} =~ /^\@SP[123]$/
+    } else {                    # Graph representing moiety
+        return any { is_chiral_planar( $_ ) } $what->vertices;
     }
 }
 
