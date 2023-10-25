@@ -94,9 +94,10 @@ sub clean_chiral_centers($$)
 
         next if @neighbours + $hcount != 4;
 
-        my %colors = map { ($color_sub->( $_ ) => 1) }
-                         @neighbours,
-                         ( { symbol => 'H' } ) x $hcount;
+        my %colors;
+        for (@neighbours, ( { symbol => 'H' } ) x $hcount) {
+            $colors{$color_sub->( $_ )}++;
+        }
 
         if( is_chiral_planar( $atom ) ) {
             # Chiral planar center markers make sense even if only two types of atoms are there.
