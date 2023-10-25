@@ -27,7 +27,7 @@ our @EXPORT_OK = qw(
 );
 
 use Graph::Traversal::BFS;
-use List::Util qw( any none );
+use List::Util qw( all any none );
 
 sub is_chiral($);
 sub is_chiral_planar($);
@@ -101,7 +101,8 @@ sub clean_chiral_centers($$)
 
         if( is_chiral_planar( $atom ) ) {
             # Chiral planar center markers make sense even if only two types of atoms are there.
-            next if scalar keys %colors >= 2;
+            next if scalar keys %colors  > 2;
+            next if scalar keys %colors == 2 && all { $_ == 2 } values %colors;
         } else {
             next if scalar keys %colors == 4;
         }
@@ -109,6 +110,7 @@ sub clean_chiral_centers($$)
         delete $atom->{chirality};
         push @affected, $atom;
     }
+
     return @affected;
 }
 
