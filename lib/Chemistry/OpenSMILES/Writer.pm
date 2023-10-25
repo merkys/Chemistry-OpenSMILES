@@ -311,6 +311,11 @@ sub _square_planar_chirality
     my @source = 0..3;
     my @target = @_;
 
+    if( join( ',', sort @_ ) ne '0,1,2,3' ) {
+        die '_square_planar_chirality() accepts only permutations of ' .
+            "numbers '0', '1', '2' and '3', unexpected input received";
+    }
+
     # Rotations until 0 is first
     while( $source[0] != $target[0] ) {
         push @source, shift @source;
