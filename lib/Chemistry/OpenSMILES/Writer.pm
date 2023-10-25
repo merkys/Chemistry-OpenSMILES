@@ -308,28 +308,30 @@ sub _permutation_order
 sub _square_planar_chirality
 {
     my $chirality = pop @_;
+    my @source = 0..3;
+    my @target = @_;
 
     # Rotations until 0 is first
-    while( $_[0] != 0 ) {
-        push @_, shift @_;
+    while( $source[0] != $target[0] ) {
+        push @source, shift @source;
         my %tab = ( '@SP1' => '@SP1', '@SP2' => '@SP3', '@SP3' => '@SP2' );
         $chirality = $tab{$chirality};
     }
 
-    if( $_[3] == 1 ) { # Swap the right side
-        ( $_[2], $_[3] ) = ( $_[3], $_[2] );
+    if( $source[3] == $target[1] ) { # Swap the right side
+        ( $source[2], $source[3] ) = ( $source[3], $source[2] );
         my %tab = ( '@SP1' => '@SP3', '@SP2' => '@SP2', '@SP3' => '@SP1' );
         $chirality = $tab{$chirality};
     }
 
-    if( $_[2] == 1 ) { # Swap the center
-        ( $_[1], $_[2] ) = ( $_[2], $_[1] );
+    if( $source[2] == $target[1] ) { # Swap the center
+        ( $source[1], $source[2] ) = ( $source[2], $source[1] );
         my %tab = ( '@SP1' => '@SP2', '@SP2' => '@SP1', '@SP3' => '@SP3' );
         $chirality = $tab{$chirality};
     }
 
-    if( $_[3] == 2 ) { # Swap the right side
-        ( $_[2], $_[3] ) = ( $_[3], $_[2] );
+    if( $source[3] == $target[2] ) { # Swap the right side
+        ( $source[2], $source[3] ) = ( $source[3], $source[2] );
         my %tab = ( '@SP1' => '@SP3', '@SP2' => '@SP2', '@SP3' => '@SP1' );
         $chirality = $tab{$chirality};
     }
