@@ -65,10 +65,10 @@ our %bond_symbol_to_order = (
     '$' => 4,
 );
 
-# Removes chiral setting from allenal, square planar or tetrahedral chiral centers if deemed unimportant.
-# For allenal and tetrahedral arrangements this means situations with less than four distinct neighbours.
+# Removes chiral setting from allenal, square planar, tetrahedral and trigonal bipyramidal chiral centers if deemed unimportant.
+# For allenal, tetrahedral and trigonal bipyramidal arrangements when not all the neighbours are distinct.
 # For square planar arrangements this means situations when all neighbours are the same.
-# Only chiral centers with four atoms are affected, thus three-atom centers (implying lone pairs) are left untouched.
+# Chiral centers with lone pairs are left untouched.
 # Returns the affected atoms.
 #
 # TODO: check other chiral centers
