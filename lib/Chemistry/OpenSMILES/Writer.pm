@@ -21,6 +21,20 @@ our @EXPORT_OK = qw(
     write_SMILES
 );
 
+my %TB_pair = qw(
+     1  2
+     3  4
+     5  6
+     7  8
+     9 11
+    10 12
+    13 14
+    15 20
+    16 19
+    17 18
+);
+%TB_pair = ( %TB_pair, reverse %TB_pair );
+
 sub write_SMILES
 {
     my( $what, $order_sub ) = @_;
@@ -374,17 +388,17 @@ sub _trigonal_bipyramidal_chirality
             push @order, shift @order;
         }
         return '@TB' .  $chirality if $order[1] == 2; # Direction unchanged
-        return '@TB' . ($chirality % 2 ? $chirality + 1 : $chirality - 1);
+        return '@TB' . $TB_pair{$chirality};
     } elsif( $order[0] == 4 && $order[4] == 0 ) {
         # Axis inversion
-        $chirality = $chirality % 2 ? $chirality + 1 : $chirality - 1;
+        $chirality = $TB_pair{$chirality};
         shift @order;
         pop @order;
         while( $order[0] != 1 ) {
             push @order, shift @order;
         }
-        return '@TB' .  $chirality if $order[1] == 2; # Direction unchanged
-        return '@TB' . ($chirality % 2 ? $chirality + 1 : $chirality - 1);
+        return '@TB' . $chirality if $order[1] == 2; # Direction unchanged
+        return '@TB' . $TB_pair{$chirality};
     } else {
         die 'cannot handle complex changes to trigonal bipyramidal chirality';
     }
