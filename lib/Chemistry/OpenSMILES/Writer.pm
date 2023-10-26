@@ -141,14 +141,13 @@ sub write_SMILES
                 }
 
                 my @order_new;
-                # In newly established order, the atom from which this one
+                # In the newly established order, the atom from which this one
                 # is discovered (left hand side) will be the first, if any
                 if( $discovered_from{$atom} ) {
                     push @order_new,
                          $indices{$vertex_symbols{$discovered_from{$atom}}};
                 }
-                # Second, there will be ring bonds as they are added the
-                # first of all the neighbours
+                # Second, there will be ring bonds as they are added before all of the neighbours
                 if( $rings->{$vertex_symbols{$atom}} ) {
                     push @order_new, map  { $indices{$_} }
                                      sort { $a <=> $b }
