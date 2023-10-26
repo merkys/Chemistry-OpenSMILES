@@ -417,6 +417,17 @@ sub _trigonal_bipyramidal_chirality
         }
         return '@TB' . $chirality if $order[1] < $order[2];
         return '@TB' . $opposite;
+    } elsif( $order[$axis[0]] == $axis[1] && $order[$axis[1]] == $axis[0] ) {
+        # Axis inversion
+        @order = map  { $order[$_] }
+                 grep { $_ != $axis[0] && $_ != $axis[1] }
+                      @order;
+        while( $order[0] != min @order ) {
+            push @order, shift @order;
+        }
+        ( $chirality, $opposite ) = ( $opposite, $chirality );
+        return '@TB' . $chirality if $order[1] < $order[2];
+        return '@TB' . $opposite;
     } else {
         die 'cannot handle complex changes to trigonal bipyramidal chirality';
     }
