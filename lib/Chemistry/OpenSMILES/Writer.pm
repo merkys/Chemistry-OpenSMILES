@@ -95,7 +95,7 @@ sub write_SMILES
 
         # Dealing with chirality
         for my $atom (@chiral) {
-            next unless $atom->{chirality} =~ /^@(@?|SP[123])$/;
+            next unless $atom->{chirality} =~ /^@(@?|SP[123]|TB1?[1-9]|TB20)$/;
 
             my @neighbours = $graph->neighbours($atom);
             my $has_lone_pair;
