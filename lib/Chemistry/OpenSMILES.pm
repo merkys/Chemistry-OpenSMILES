@@ -80,7 +80,8 @@ sub clean_chiral_centers($$)
     for my $atom ($moiety->vertices) {
         next unless is_chiral_allenal( $atom ) ||
                     is_chiral_planar( $atom )  ||
-                    is_chiral_tetrahedral( $atom );
+                    is_chiral_tetrahedral( $atom ) ||
+                    is_chiral_trigonal_bipyramidal( $atom );
         # Anomers must not loose chirality settings in any way
         next if is_ring_atom( $moiety, $atom, scalar $moiety->edges );
 
@@ -92,7 +93,11 @@ sub clean_chiral_centers($$)
                                @neighbours;
         }
 
-        next if @neighbours + $hcount != 4;
+        if( is_chiral_trigonal_bipyramidal( $atom ) ) {
+            next if @neighbours + $hcount != 5;
+        } else {
+            next if @neighbours + $hcount != 4;
+        }
 
         my %colors;
         for (@neighbours, ( { symbol => 'H' } ) x $hcount) {
@@ -103,6 +108,8 @@ sub clean_chiral_centers($$)
             # Chiral planar center markers make sense even if only two types of atoms are there.
             next if scalar keys %colors  > 2;
             next if scalar keys %colors == 2 && all { $_ == 2 } values %colors;
+        } elsif( is_chiral_trigonal_bipyramidal( $atom ) ) {
+            next if scalar keys %colors == 5;
         } else {
             next if scalar keys %colors == 4;
         }
@@ -158,6 +165,16 @@ sub is_chiral_tetrahedral($)
         return $what->{chirality} && $what->{chirality} =~ /^@@?$/;
     } else {                    # Graph representing moiety
         return any { is_chiral_tetrahedral( $_ ) } $what->vertices;
+    }
+}
+
+sub is_chiral_trigonal_bipyramidal($)
+{
+    my( $what ) = @_;
+    if( ref $what eq 'HASH' ) { # Single atom
+        return $what->{chirality} && $what->{chirality} =~ /^\@TB(1?[1-9]|20)$/;
+    } else {                    # Graph representing moiety
+        return any { is_chiral_trigonal_bipyramidal( $_ ) } $what->vertices;
     }
 }
 
