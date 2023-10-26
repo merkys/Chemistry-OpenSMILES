@@ -161,10 +161,10 @@ sub write_SMILES
                                       @neighbours;
                 @order_new = uniq @order_new;
 
-                if( scalar @order_new == 3 ) {
+                if( $has_lone_pair ) {
                     # Accommodate the lone pair
                     if( $discovered_from{$atom} ) {
-                        @order_new = ( $order_new[0], 1, @order_new[1..2] );
+                        @order_new = ( $order_new[0], 1, @order_new[1..$#order_new] );
                     } else {
                         unshift @order_new, 1;
                     }
