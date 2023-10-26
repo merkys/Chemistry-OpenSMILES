@@ -10,7 +10,7 @@ use Chemistry::OpenSMILES qw(
 );
 use Chemistry::OpenSMILES::Parser;
 use Graph::Traversal::DFS;
-use List::Util qw( all any min uniq );
+use List::Util qw( all any first min uniq );
 
 # ABSTRACT: OpenSMILES format writer
 # VERSION
@@ -432,9 +432,9 @@ sub _trigonal_bipyramidal_chirality
         # Axis has changed
         my @axis_now = ( (first { $order[$_] == $axis[0] } 0..4),
                          (first { $order[$_] == $axis[1] } 0..4) );
-        $chirality = 1 +  first { $TB[$_]->{axis}[0] == $axis_now[0] &&
-                                  $TB[$_]->{axis}[1] == $axis_now[1] &&
-                                  $TB[$_]->{order}   == $order } 0..$#TB;
+        $chirality = 1 +  first { $TB[$_]->{axis}[0] == $axis_now[0] + 1 &&
+                                  $TB[$_]->{axis}[1] == $axis_now[1] + 1 &&
+                                  $TB[$_]->{order}   eq $order } 0..$#TB;
         $opposite = $TB[$chirality - 1]->{opposite};
         @order = map  { $order[$_] }
                  grep { $_ != $axis_now[0] && $_ != $axis_now[1] }
