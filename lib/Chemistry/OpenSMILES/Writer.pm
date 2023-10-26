@@ -98,21 +98,26 @@ sub write_SMILES
             next unless $atom->{chirality} =~ /^@(@?|SP[123])$/;
 
             my @neighbours = $graph->neighbours($atom);
-            if( $atom->{chirality} =~ /^@(@?|SP[123])$/ &&
-              ( scalar @neighbours < 3 || scalar @neighbours > 4 ) ) {
-                warn "chirality '$atom->{chirality}' observed for atom " .
-                     'with ' . scalar @neighbours . ' neighbours, can only ' .
-                     'process tetrahedral chiral or square planar centers ' .
-                     'with possible lone pairs' . "\n";
-                next;
+            my $has_lone_pair;
+            if( $atom->{chirality} =~ /^@(@?|SP[123])$/ ) {
+                if( scalar @neighbours < 3 || scalar @neighbours > 4 ) {
+                    warn "chirality '$atom->{chirality}' observed for atom " .
+                         'with ' . scalar @neighbours . ' neighbours, can only ' .
+                         'process tetrahedral chiral or square planar centers ' .
+                         'with possible lone pairs' . "\n";
+                    next;
+                }
+                $has_lone_pair = @neighbours == 3;
             }
-            if( $atom->{chirality} =~ /^\@TB..?$/ &&
-              ( scalar @neighbours < 4 || scalar @neighbours > 5 ) ) {
-                warn "chirality '$atom->{chirality}' observed for atom " .
-                     'with ' . scalar @neighbours . ' neighbours, can only ' .
-                     'process trigonal bipyramidal centers ' .
-                     'with possible lone pairs' . "\n";
-                next;
+            if( $atom->{chirality} =~ /^\@TB..?$/ ) {
+                if( scalar @neighbours < 4 || scalar @neighbours > 5 ) {
+                    warn "chirality '$atom->{chirality}' observed for atom " .
+                         'with ' . scalar @neighbours . ' neighbours, can only ' .
+                         'process trigonal bipyramidal centers ' .
+                         'with possible lone pairs' . "\n";
+                    next;
+                }
+                $has_lone_pair = @neighbours == 4;
             }
 
             my $chirality_now = $atom->{chirality};
@@ -128,7 +133,7 @@ sub write_SMILES
                 my %indices;
                 for (0..$#{$atom->{chirality_neighbours}}) {
                     my $pos = $_;
-                    if( scalar @{$atom->{chirality_neighbours}} == 3 && $_ != 0 ) {
+                    if( $has_lone_pair && $_ != 0 ) {
                         # Lone pair is always second in the chiral neighbours array
                         $pos++;
                     }
