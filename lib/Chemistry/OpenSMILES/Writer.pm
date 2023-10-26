@@ -10,7 +10,7 @@ use Chemistry::OpenSMILES qw(
 );
 use Chemistry::OpenSMILES::Parser;
 use Graph::Traversal::DFS;
-use List::Util qw( all any uniq );
+use List::Util qw( all any min uniq );
 
 # ABSTRACT: OpenSMILES format writer
 # VERSION
@@ -34,6 +34,29 @@ my %TB_pair = qw(
     17 18
 );
 %TB_pair = ( %TB_pair, reverse %TB_pair );
+
+my @TB = (
+    { axis => [ 1, 5 ], order => '@',  opposite => 2 },
+    { axis => [ 1, 5 ], order => '@@', opposite => 1 },
+    { axis => [ 1, 4 ], order => '@',  opposite => 4 },
+    { axis => [ 1, 4 ], order => '@@', opposite => 3 },
+    { axis => [ 1, 3 ], order => '@',  opposite => 6 },
+    { axis => [ 1, 3 ], order => '@@', opposite => 5 },
+    { axis => [ 1, 2 ], order => '@',  opposite => 8 },
+    { axis => [ 1, 2 ], order => '@@', opposite => 7 },
+    { axis => [ 2, 5 ], order => '@',  opposite => 11 },
+    { axis => [ 2, 4 ], order => '@',  opposite => 12 },
+    { axis => [ 2, 5 ], order => '@@', opposite => 9 },  # 11
+    { axis => [ 2, 4 ], order => '@@', opposite => 10 },
+    { axis => [ 2, 3 ], order => '@',  opposite => 14 },
+    { axis => [ 2, 3 ], order => '@@', opposite => 13 }, # 14
+    { axis => [ 3, 5 ], order => '@',  opposite => 20 },
+    { axis => [ 3, 4 ], order => '@',  opposite => 19 }, # 16
+    { axis => [ 4, 5 ], order => '@',  opposite => 18 },
+    { axis => [ 4, 5 ], order => '@@', opposite => 17 }, # 18
+    { axis => [ 3, 4 ], order => '@@', opposite => 16 },
+    { axis => [ 3, 5 ], order => '@@', opposite => 15 },
+);
 
 sub write_SMILES
 {
@@ -379,26 +402,21 @@ sub _trigonal_bipyramidal_chirality
     my @order = @_;
 
     $chirality = int substr $chirality, 3;
+    my $TB = $TB[$chirality - 1];
+    my @axis = map { $_ - 1 } @{$TB->{axis}};
+    my $order = $TB->{order};
+    my $opposite = $TB->{opposite};
 
-    if(      $order[0] == 0 && $order[4] == 4 ) {
+    if( $order[$axis[0]] == $axis[0] && $order[$axis[1]] == $axis[1] ) {
         # No changes to the axis
-        shift @order;
-        pop @order;
-        while( $order[0] != 1 ) {
+        @order = map  { $order[$_] }
+                 grep { $_ != $axis[0] && $_ != $axis[1] }
+                      @order;
+        while( $order[0] != min @order ) {
             push @order, shift @order;
         }
-        return '@TB' .  $chirality if $order[1] == 2; # Direction unchanged
-        return '@TB' . $TB_pair{$chirality};
-    } elsif( $order[0] == 4 && $order[4] == 0 ) {
-        # Axis inversion
-        $chirality = $TB_pair{$chirality};
-        shift @order;
-        pop @order;
-        while( $order[0] != 1 ) {
-            push @order, shift @order;
-        }
-        return '@TB' . $chirality if $order[1] == 2; # Direction unchanged
-        return '@TB' . $TB_pair{$chirality};
+        return '@TB' . $chirality if $order[1] < $order[2];
+        return '@TB' . $opposite;
     } else {
         die 'cannot handle complex changes to trigonal bipyramidal chirality';
     }
