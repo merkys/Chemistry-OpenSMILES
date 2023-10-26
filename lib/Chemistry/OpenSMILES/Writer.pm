@@ -98,12 +98,20 @@ sub write_SMILES
             next unless $atom->{chirality} =~ /^@(@?|SP[123])$/;
 
             my @neighbours = $graph->neighbours($atom);
-            if( scalar @neighbours < 3 || scalar @neighbours > 4 ) {
-                # TODO: process also configurations other than tetrahedral
+            if( $atom->{chirality} =~ /^@(@?|SP[123])$/ &&
+              ( scalar @neighbours < 3 || scalar @neighbours > 4 ) ) {
                 warn "chirality '$atom->{chirality}' observed for atom " .
                      'with ' . scalar @neighbours . ' neighbours, can only ' .
-                     'process tetrahedral chiral centers with possible ' .
-                     'lone pairs' . "\n";
+                     'process tetrahedral chiral or square planar centers ' .
+                     'with possible lone pairs' . "\n";
+                next;
+            }
+            if( $atom->{chirality} =~ /^\@TB..?$/ &&
+              ( scalar @neighbours < 4 || scalar @neighbours > 5 ) ) {
+                warn "chirality '$atom->{chirality}' observed for atom " .
+                     'with ' . scalar @neighbours . ' neighbours, can only ' .
+                     'process trigonal bipyramidal centers ' .
+                     'with possible lone pairs' . "\n";
                 next;
             }
 
