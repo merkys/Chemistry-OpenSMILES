@@ -378,7 +378,7 @@ sub _trigonal_bipyramidal_chirality
     my $chirality = pop @_;
     my @order = @_;
 
-    $chirality = int substr $chirality, 2;
+    $chirality = int substr $chirality, 3;
 
     if(      $order[0] == 0 && $order[4] == 4 ) {
         # No changes to the axis
