@@ -174,9 +174,12 @@ sub write_SMILES
                     if( join( '', _permutation_order( @order_new ) ) ne '0123' ) {
                         $chirality_now = $chirality_now eq '@' ? '@@' : '@';
                     }
-                } else {
+                } elsif( $atom->{chirality} =~ /^\@SP[123]$/ ) {
                     # Square planar centers
                     $chirality_now = _square_planar_chirality( @order_new, $chirality_now );
+                } else {
+                    # Trigonal bipyramidal centers
+                    $chirality_now = _trigonal_bipyramidal_chirality( @order_new, $chirality_now );
                 }
             }
 
@@ -354,6 +357,37 @@ sub _square_planar_chirality
     }
 
     return $chirality;
+}
+
+sub _trigonal_bipyramidal_chirality
+{
+    my $chirality = pop @_;
+    my @order = @_;
+
+    $chirality = int substr $chirality, 2;
+
+    if(      $order[0] == 0 && $order[4] == 4 ) {
+        # No changes to the axis
+        shift @order;
+        pop @order;
+        while( $order[0] != 1 ) {
+            push @order, shift @order;
+        }
+        return '@TB' .  $chirality if $order[1] == 2; # Direction unchanged
+        return '@TB' . ($chirality % 2 ? $chirality + 1 : $chirality - 1);
+    } elsif( $order[0] == 4 && $order[4] == 0 ) {
+        # Axis inversion
+        $chirality = $chirality % 2 ? $chirality + 1 : $chirality - 1;
+        shift @order;
+        pop @order;
+        while( $order[0] != 1 ) {
+            push @order, shift @order;
+        }
+        return '@TB' .  $chirality if $order[1] == 2; # Direction unchanged
+        return '@TB' . ($chirality % 2 ? $chirality + 1 : $chirality - 1);
+    } else {
+        die 'cannot handle complex changes to trigonal bipyramidal chirality';
+    }
 }
 
 sub _order
