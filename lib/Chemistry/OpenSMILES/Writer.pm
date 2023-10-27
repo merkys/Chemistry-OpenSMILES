@@ -45,36 +45,36 @@ my @TB = (
 );
 
 my @OH = (
-    { shape => 'U', axis => [ 1, 6 ], order => '@' },
+    { shape => 'U', axis => [ 1, 6 ], order =>  '@' },
     { shape => 'U', axis => [ 1, 6 ], order => '@@' },
-    { shape => 'U', axis => [ 1, 5 ], order => '@' },
-    { shape => 'Z', axis => [ 1, 6 ], order => '@' },
-    { shape => 'Z', axis => [ 1, 5 ], order => '@' },
-    { shape => 'U', axis => [ 1, 4 ], order => '@' },
-    { shape => 'Z', axis => [ 1, 4 ], order => '@' }, # 7
+    { shape => 'U', axis => [ 1, 5 ], order =>  '@' },
+    { shape => 'Z', axis => [ 1, 6 ], order =>  '@' },
+    { shape => 'Z', axis => [ 1, 5 ], order =>  '@' },
+    { shape => 'U', axis => [ 1, 4 ], order =>  '@' },
+    { shape => 'Z', axis => [ 1, 4 ], order =>  '@' },
     { shape => '4', axis => [ 1, 6 ], order => '@@' },
     { shape => '4', axis => [ 1, 5 ], order => '@@' },
-    { shape => '4', axis => [ 1, 6 ], order => '@' },
-    { shape => '4', axis => [ 1, 5 ], order => '@' },
+    { shape => '4', axis => [ 1, 6 ], order =>  '@' },
+    { shape => '4', axis => [ 1, 5 ], order =>  '@' },
     { shape => '4', axis => [ 1, 4 ], order => '@@' },
-    { shape => '4', axis => [ 1, 4 ], order => '@' }, # 13
+    { shape => '4', axis => [ 1, 4 ], order =>  '@' },
     { shape => 'Z', axis => [ 1, 6 ], order => '@@' },
     { shape => 'Z', axis => [ 1, 5 ], order => '@@' },
-    { shape => 'U', axis => [ 1, 5 ], order => '@@' }, # 16
+    { shape => 'U', axis => [ 1, 5 ], order => '@@' },
     { shape => 'Z', axis => [ 1, 4 ], order => '@@' },
     { shape => 'U', axis => [ 1, 4 ], order => '@@' },
-    { shape => 'U', axis => [ 1, 3 ], order => '@' },
-    { shape => 'Z', axis => [ 1, 3 ], order => '@' },
-    { shape => '4', axis => [ 1, 3 ], order => '@@' }, # 21
-    { shape => '4', axis => [ 1, 3 ], order => '@' },
+    { shape => 'U', axis => [ 1, 3 ], order =>  '@' },
+    { shape => 'Z', axis => [ 1, 3 ], order =>  '@' },
+    { shape => '4', axis => [ 1, 3 ], order => '@@' },
+    { shape => '4', axis => [ 1, 3 ], order =>  '@' },
     { shape => 'Z', axis => [ 1, 3 ], order => '@@' },
-    { shape => 'U', axis => [ 1, 3 ], order => '@@' }, # 24
-    { shape => 'U', axis => [ 1, 2 ], order => '@' },
-    { shape => 'Z', axis => [ 1, 2 ], order => '@' },
+    { shape => 'U', axis => [ 1, 3 ], order => '@@' },
+    { shape => 'U', axis => [ 1, 2 ], order =>  '@' },
+    { shape => 'Z', axis => [ 1, 2 ], order =>  '@' },
     { shape => '4', axis => [ 1, 2 ], order => '@@' },
-    { shape => '4', axis => [ 1, 2 ], order => '@' },
+    { shape => '4', axis => [ 1, 2 ], order =>  '@' },
     { shape => 'Z', axis => [ 1, 2 ], order => '@@' },
-    { shape => 'U', axis => [ 1, 2 ], order => '@@' }, # 30
+    { shape => 'U', axis => [ 1, 2 ], order => '@@' },
 );
 
 sub write_SMILES
