@@ -395,9 +395,7 @@ sub _trigonal_bipyramidal_chirality
 
     if( $order[$axis[0]] == $axis[0] && $order[$axis[1]] == $axis[1] ) {
         # No changes to the axis
-        @order = map  { $order[$_] }
-                 grep { $_ != $axis[0] && $_ != $axis[1] }
-                      @order;
+        @order = grep { $_ != $axis[0] && $_ != $axis[1] } @order;
         while( $order[0] != min @order ) {
             push @order, shift @order;
         }
@@ -405,9 +403,7 @@ sub _trigonal_bipyramidal_chirality
         return '@TB' . $opposite;
     } elsif( $order[$axis[0]] == $axis[1] && $order[$axis[1]] == $axis[0] ) {
         # Axis inversion
-        @order = map  { $order[$_] }
-                 grep { $_ != $axis[0] && $_ != $axis[1] }
-                      @order;
+        @order = grep { $_ != $axis[0] && $_ != $axis[1] } @order;
         while( $order[0] != min @order ) {
             push @order, shift @order;
         }
@@ -422,9 +418,7 @@ sub _trigonal_bipyramidal_chirality
                                   $TB[$_]->{axis}[1] == $axis_now[1] + 1 &&
                                   $TB[$_]->{order}   eq $order } 0..$#TB;
         $opposite = $TB[$chirality - 1]->{opposite};
-        @order = map  { $order[$_] }
-                 grep { $_ != $axis_now[0] && $_ != $axis_now[1] }
-                      @order;
+        @order = grep { $_ != $axis_now[0] && $_ != $axis_now[1] } @order;
         while( $order[0] != min @order ) {
             push @order, shift @order;
         }
