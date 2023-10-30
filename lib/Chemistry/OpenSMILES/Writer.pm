@@ -472,6 +472,15 @@ sub _trigonal_bipyramidal_chirality
     }
 }
 
+sub _octahedral_chirality
+{
+    my $chirality = pop @_;
+    my @order = @_;
+
+    $chirality = int substr $chirality, 3;
+    my $OH = $OH[$chirality - 1];
+}
+
 sub _order
 {
     my( $vertices ) = @_;
