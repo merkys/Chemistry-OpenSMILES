@@ -44,7 +44,7 @@ my @TB = (
     { axis => [ 3, 5 ], order => '@@', opposite => 15 },
 );
 
-my @OH = (
+our @OH = (
     { shape => 'U', axis => [ 1, 6 ], order =>  '@' },
     { shape => 'U', axis => [ 1, 6 ], order => '@@' },
     { shape => 'U', axis => [ 1, 5 ], order =>  '@' },
@@ -175,6 +175,16 @@ sub write_SMILES
                 }
                 $has_lone_pair = @neighbours == 4;
             }
+            if( $atom->{chirality} =~ /^\@OH..?$/ ) {
+                if( scalar @neighbours < 5 || scalar @neighbours > 6 ) {
+                    warn "chirality '$atom->{chirality}' observed for atom " .
+                         'with ' . scalar @neighbours . ' neighbours, can only ' .
+                         'process octahedral centers ' .
+                         'with possible lone pairs' . "\n";
+                    next;
+                }
+                $has_lone_pair = @neighbours == 5;
+            }
 
             my $chirality_now = $atom->{chirality};
             if( $atom->{chirality_neighbours} ) {
@@ -233,9 +243,11 @@ sub write_SMILES
                 } elsif( $atom->{chirality} =~ /^\@SP[123]$/ ) {
                     # Square planar centers
                     $chirality_now = _square_planar_chirality( @order_new, $chirality_now );
-                } else {
+                } elsif( $atom->{chirality} =~ /^\@TB..?$/ ) {
                     # Trigonal bipyramidal centers
                     $chirality_now = _trigonal_bipyramidal_chirality( @order_new, $chirality_now );
+                } else {
+                    # Octahedral centers
                 }
             }
 
