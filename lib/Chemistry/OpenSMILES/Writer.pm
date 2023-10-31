@@ -479,11 +479,21 @@ sub _octahedral_chirality
     my $OH = $OH[$chirality - 1];
     my $shape = $OH->{shape};
     my @axis = map { $_ - 1 } @{$OH->{axis}};
+    my $order = $OH->{order};
 
     if( ($order[$axis[0]] == $axis[0] && $order[$axis[1]] == $axis[1]) ||
         ($order[$axis[0]] == $axis[1] && $order[$axis[1]] == $axis[0]) ) {
         # Axis is the same or inverted
         my $SP = _square_planar_chirality( (map { $_ - 1 } @order), $shape_to_SP{$shape} );
+        # If axis is inverted, direction has to be inverted as well
+        # CHECKME: Does the change of shape affect direction?
+        if( $order[$axis[0]] == $axis[1] && $order[$axis[1]] == $axis[0] ) {
+            $order = $order eq '@' ? '@@' : '@';
+        }
+        $chirality = 1 + first { $OH[$_]->{shape} eq $SP_to_shape{$SP} &&
+                                 $OH[$_]->{axis}[0] == 1 && $OH[$_]->{axis}[1] == 6 &&
+                                 $OH[$_]->{order} eq $order } 0..$#OH;
+        return '@OH' . $chirality;
     } else {
         # Axis has changed
     }
