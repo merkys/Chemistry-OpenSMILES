@@ -503,11 +503,12 @@ sub _octahedral_chirality
                         [ $remaining_numbers[1], $remaining_numbers[3] ];
         } elsif( $shape eq '4' ) {
             push @axes, [ $remaining_numbers[0], $remaining_numbers[1] ],
-                        [ $remaining_numbers[2], $remaining_numbers[3] ];
+                        [ $remaining_numbers[3], $remaining_numbers[2] ];
         } else {
             push @axes, [ $remaining_numbers[0], $remaining_numbers[3] ],
                         [ $remaining_numbers[1], $remaining_numbers[2] ];
         }
+        $axes[2] = [ reverse @{$axes[2]} ] if $order eq '@@';
     }
 }
 
