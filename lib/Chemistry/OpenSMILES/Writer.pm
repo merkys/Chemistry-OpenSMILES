@@ -438,21 +438,16 @@ sub _trigonal_bipyramidal_chirality
     my $order = $TB->{order};
     my $opposite = $TB->{opposite};
 
-    if( $order[$axis[0]] == $axis[0] && $order[$axis[1]] == $axis[1] ) {
-        # No changes to the axis
+    if( ($order[$axis[0]] == $axis[0] && $order[$axis[1]] == $axis[1]) ||
+        ($order[$axis[0]] == $axis[1] && $order[$axis[1]] == $axis[0]) ) {
+        # Axis is the same or inverted
         @order = grep { $_ != $axis[0] && $_ != $axis[1] } @order;
         while( $order[0] != min @order ) {
             push @order, shift @order;
         }
-        return '@TB' . $chirality if $order[1] < $order[2];
-        return '@TB' . $opposite;
-    } elsif( $order[$axis[0]] == $axis[1] && $order[$axis[1]] == $axis[0] ) {
-        # Axis inversion
-        @order = grep { $_ != $axis[0] && $_ != $axis[1] } @order;
-        while( $order[0] != min @order ) {
-            push @order, shift @order;
+        if( $order[$axis[0]] == $axis[1] && $order[$axis[1]] == $axis[0] ) {
+            ( $chirality, $opposite ) = ( $opposite, $chirality );
         }
-        ( $chirality, $opposite ) = ( $opposite, $chirality );
         return '@TB' . $chirality if $order[1] < $order[2];
         return '@TB' . $opposite;
     } else {
