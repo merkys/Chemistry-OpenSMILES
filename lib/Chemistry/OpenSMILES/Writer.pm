@@ -496,6 +496,18 @@ sub _octahedral_chirality
         return '@OH' . $chirality;
     } else {
         # Axis has changed
+        my @axes = ( \@axis );
+        my @remaining_numbers = grep { $_ != $axis[0] && $_ != $axis[1] } 0..5;
+        if(      $shape eq 'U' ) {
+            push @axes, [ $remaining_numbers[0], $remaining_numbers[2] ],
+                        [ $remaining_numbers[1], $remaining_numbers[3] ];
+        } elsif( $shape eq '4' ) {
+            push @axes, [ $remaining_numbers[0], $remaining_numbers[1] ],
+                        [ $remaining_numbers[2], $remaining_numbers[3] ];
+        } else {
+            push @axes, [ $remaining_numbers[0], $remaining_numbers[3] ],
+                        [ $remaining_numbers[1], $remaining_numbers[2] ];
+        }
     }
 }
 
