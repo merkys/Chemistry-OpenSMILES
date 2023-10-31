@@ -77,6 +77,9 @@ our @OH = (
     { shape => 'U', axis => [ 1, 2 ], order => '@@' },
 );
 
+my %shape_to_SP = ( 'U' => '@SP1', '4' => '@SP2', 'Z' => '@SP3' );
+my %SP_to_shape = reverse %shape_to_SP;
+
 sub write_SMILES
 {
     my( $what, $order_sub ) = @_;
@@ -474,6 +477,16 @@ sub _octahedral_chirality
 
     $chirality = int substr $chirality, 3;
     my $OH = $OH[$chirality - 1];
+    my $shape = $OH->{shape};
+    my @axis = map { $_ - 1 } @{$OH->{axis}};
+
+    if( ($order[$axis[0]] == $axis[0] && $order[$axis[1]] == $axis[1]) ||
+        ($order[$axis[0]] == $axis[1] && $order[$axis[1]] == $axis[0]) ) {
+        # Axis is the same or inverted
+        my $SP = _square_planar_chirality( (map { $_ - 1 } @order), $shape_to_SP{$shape} );
+    } else {
+        # Axis has changed
+    }
 }
 
 sub _order
