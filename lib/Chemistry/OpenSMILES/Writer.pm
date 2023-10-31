@@ -498,17 +498,9 @@ sub _octahedral_chirality
         # Axis has changed
         my @axes = ( \@axis );
         my @remaining_numbers = grep { $_ != $axis[0] && $_ != $axis[1] } 0..5;
-        if(      $shape eq 'U' ) {
-            push @axes, [ $remaining_numbers[0], $remaining_numbers[2] ],
-                        [ $remaining_numbers[1], $remaining_numbers[3] ];
-        } elsif( $shape eq '4' ) {
-            push @axes, [ $remaining_numbers[0], $remaining_numbers[1] ],
-                        [ $remaining_numbers[3], $remaining_numbers[2] ];
-        } else {
-            push @axes, [ $remaining_numbers[0], $remaining_numbers[3] ],
-                        [ $remaining_numbers[1], $remaining_numbers[2] ];
-        }
-        $axes[2] = [ reverse @{$axes[2]} ] if $order eq '@@';
+        @remaining_numbers = map { $remaining_numbers[$_] } ( 0, 3, 1, 2 ) if $shape eq '4';
+        @remaining_numbers = map { $remaining_numbers[$_] } ( 0, 1, 3, 2 ) if $shape eq 'Z';
+        @remaining_numbers = reverse @remaining_numbers if $order eq '@@';
         # TODO: Change of axis direction inverts the sign.
         # TODO: When axis A is replaced by axis B, axis C remains unchanged.
         # TODO: If axis change is to @, A is left untouched, replaces B.
