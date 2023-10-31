@@ -509,6 +509,10 @@ sub _octahedral_chirality
                         [ $remaining_numbers[1], $remaining_numbers[2] ];
         }
         $axes[2] = [ reverse @{$axes[2]} ] if $order eq '@@';
+        # TODO: Change of axis direction inverts the sign.
+        # TODO: When axis A is replaced by axis B, axis C remains unchanged.
+        # TODO: If axis change is to @, A is left untouched, replaces B.
+        # TODO: If axis change is to @@, A is inverted, replaces B.
     }
 }
 
