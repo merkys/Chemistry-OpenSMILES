@@ -279,6 +279,8 @@ sub chirality_to_pseudograph
                 }
             }
         } else {
+            # For square planar environments it is enough to retain the enumeration order of atoms.
+            # To do so, "neighbouring neighbours" are connected together and a link to central atom is placed.
             if(      $atom->{chirality} eq '@SP2' ) { # Z
                 @chirality_neighbours = map { $chirality_neighbours[$_] } ( 0, 1, 3, 2 );
             } elsif( $atom->{chirality} eq '@SP3' ) { # 4
