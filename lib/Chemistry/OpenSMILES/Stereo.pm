@@ -229,8 +229,8 @@ sub mark_cis_trans
     }
 }
 
-# Store the tetrahedral chirality character as additional pseudo vertices
-# and edges.
+# Store the tetrahedral chirality character as additional pseudo vertices and edges.
+# Algorithm is described in detail in doi:10.1186/s13321-023-00692-1
 sub chirality_to_pseudograph
 {
     my( $moiety ) = @_;
