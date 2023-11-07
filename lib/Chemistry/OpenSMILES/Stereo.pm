@@ -236,7 +236,8 @@ sub chirality_to_pseudograph
     my( $moiety ) = @_;
 
     for my $atom ($moiety->vertices) {
-        next unless Chemistry::OpenSMILES::is_chiral_tetrahedral( $atom );
+        next unless Chemistry::OpenSMILES::is_chiral_tetrahedral( $atom ) ||
+                    Chemistry::OpenSMILES::is_chiral_planar( $atom );
         next unless @{$atom->{chirality_neighbours}} >= 3 &&
                     @{$atom->{chirality_neighbours}} <= 4;
 
@@ -246,33 +247,49 @@ sub chirality_to_pseudograph
                                       {}, # marking the lone pair
                                       @chirality_neighbours[1..2] );
         }
-        if( $atom->{chirality} eq '@' ) {
-            # Reverse the order if counter-clockwise
-            @chirality_neighbours = ( $chirality_neighbours[0],
-                                      reverse @chirality_neighbours[1..3] );
-        }
 
-        for my $i (0..3) {
-            my $neighbour = $chirality_neighbours[$i];
-            my @chirality_neighbours_now = @chirality_neighbours;
-            
-            if( $i % 2 ) {
-                # Reverse the order due to projected atom change
-                @chirality_neighbours_now = ( $chirality_neighbours_now[0],
-                                              reverse @chirality_neighbours_now[1..3] );
+        if( Chemistry::OpenSMILES::is_chiral_tetrahedral( $atom ) ) {
+            if( $atom->{chirality} eq '@' ) {
+                # Reverse the order if counter-clockwise
+                @chirality_neighbours = ( $chirality_neighbours[0],
+                                          reverse @chirality_neighbours[1..3] );
             }
 
-            my @other = grep { $_ != $neighbour } @chirality_neighbours_now;
-            for my $offset (0..2) {
+            for my $i (0..3) {
+                my $neighbour = $chirality_neighbours[$i];
+                my @chirality_neighbours_now = @chirality_neighbours;
+
+                if( $i % 2 ) {
+                    # Reverse the order due to projected atom change
+                    @chirality_neighbours_now = ( $chirality_neighbours_now[0],
+                                                  reverse @chirality_neighbours_now[1..3] );
+                }
+
+                my @other = grep { $_ != $neighbour } @chirality_neighbours_now;
+                for my $offset (0..2) {
+                    my $connector = {};
+                    $moiety->set_edge_attribute( $neighbour, $connector, 'chiral', 'from' );
+                    $moiety->set_edge_attribute( $atom, $connector, 'chiral', 'to' );
+
+                    $moiety->set_edge_attribute( $connector, $other[0], 'chiral', 1 );
+                    $moiety->set_edge_attribute( $connector, $other[1], 'chiral', 2 );
+                    $moiety->set_edge_attribute( $connector, $other[2], 'chiral', 3 );
+
+                    push @other, shift @other;
+                }
+            }
+        } else {
+            if(      $atom->{chirality} eq '@SP2' ) { # Z
+                @chirality_neighbours = map { $chirality_neighbours[$_] } ( 0, 1, 3, 2 );
+            } elsif( $atom->{chirality} eq '@SP3' ) { # 4
+                @chirality_neighbours = map { $chirality_neighbours[$_] } ( 0, 2, 1, 3 );
+            }
+
+            for my $i (0..3) {
                 my $connector = {};
-                $moiety->set_edge_attribute( $neighbour, $connector, 'chiral', 'from' );
-                $moiety->set_edge_attribute( $atom, $connector, 'chiral', 'to' );
-
-                $moiety->set_edge_attribute( $connector, $other[0], 'chiral', 1 );
-                $moiety->set_edge_attribute( $connector, $other[1], 'chiral', 2 );
-                $moiety->set_edge_attribute( $connector, $other[2], 'chiral', 3 );
-
-                push @other, shift @other;
+                $moiety->set_edge_attribute( $atom, $connector, 'chiral', 'center' );
+                $moiety->set_edge_attribute( $connector, $chirality_neighbours[$i], 'chiral', 'neighbour' );
+                $moiety->set_edge_attribute( $connector, $chirality_neighbours[($i + 1) % 4], 'chiral', 'neighbour' );
             }
         }
     }
