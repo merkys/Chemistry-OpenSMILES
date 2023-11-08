@@ -16,6 +16,7 @@ our @EXPORT_OK = qw(
 );
 
 use Chemistry::OpenSMILES qw(
+    is_chiral
     is_cis_trans_bond
     is_double_bond
     is_ring_bond
@@ -235,13 +236,23 @@ sub chirality_to_pseudograph
     my( $moiety ) = @_;
 
     for my $atom ($moiety->vertices) {
-        next unless Chemistry::OpenSMILES::is_chiral_tetrahedral( $atom ) ||
-                    Chemistry::OpenSMILES::is_chiral_planar( $atom );
-        next unless @{$atom->{chirality_neighbours}} >= 3 &&
-                    @{$atom->{chirality_neighbours}} <= 4;
+        next unless is_chiral $atom;
 
+        my $has_lone_pair;
         my @chirality_neighbours = @{$atom->{chirality_neighbours}};
-        if( @chirality_neighbours == 3 ) {
+
+        if( Chemistry::OpenSMILES::is_chiral_tetrahedral( $atom ) ||
+            Chemistry::OpenSMILES::is_chiral_planar( $atom ) ) {
+            next unless @chirality_neighbours >= 3 &&
+                        @chirality_neighbours <= 4;
+            $has_lone_pair = @chirality_neighbours == 3;
+        } elsif( Chemistry::OpenSMILES::is_chiral_trigonal_bipyramidal( $atom ) ) {
+            next unless @chirality_neighbours >= 5 &&
+                        @chirality_neighbours <= 6;
+            $has_lone_pair = @chirality_neighbours == 5;
+        }
+
+        if( $has_lone_pair ) {
             @chirality_neighbours = ( $chirality_neighbours[0],
                                       {}, # marking the lone pair
                                       @chirality_neighbours[1..$#chirality_neighbours] );
