@@ -290,9 +290,9 @@ sub mirror($)
         if( is_chiral_trigonal_bipyramidal( $what ) ) {
             my $number = substr $what->{chirality}, 3;
             my $setting = $Chemistry::OpenSMILES::Writer::TB[$number-1];
-            my $opposite = first { $Chemistry::OpenSMILES::Writer::TH[$_]->{axis}[0] == $setting->{axis}[0] &&
-                                   $Chemistry::OpenSMILES::Writer::TH[$_]->{axis}[1] == $setting->{axis}[1] &&
-                                   $Chemistry::OpenSMILES::Writer::TH[$_]->{order}   ne $setting->{order} }
+            my $opposite = first { $Chemistry::OpenSMILES::Writer::TB[$_]->{axis}[0] == $setting->{axis}[0] &&
+                                   $Chemistry::OpenSMILES::Writer::TB[$_]->{axis}[1] == $setting->{axis}[1] &&
+                                   $Chemistry::OpenSMILES::Writer::TB[$_]->{order}   ne $setting->{order} }
                                  0..$#Chemistry::OpenSMILES::Writer::TB;
             $what->{chirality} = '@TB' . ($opposite + 1);
         }
