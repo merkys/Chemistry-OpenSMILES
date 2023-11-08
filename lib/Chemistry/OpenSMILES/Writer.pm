@@ -439,7 +439,9 @@ sub _trigonal_bipyramidal_chirality
     my $TB = $TB[$chirality - 1];
     my @axis = map { $_ - 1 } @{$TB->{axis}};
     my $order = $TB->{order};
-    my $opposite = $TB->{opposite};
+    my $opposite = 1 + first { $TB[$_]->{axis}[0] == $TB->{axis}[0] &&
+                               $TB[$_]->{axis}[1] == $TB->{axis}[1] &&
+                               $TB[$_]->{order}   ne $TB->{order} } 0..$#TB;
 
     if( ($order[$axis[0]] == $axis[0] && $order[$axis[1]] == $axis[1]) ||
         ($order[$axis[0]] == $axis[1] && $order[$axis[1]] == $axis[0]) ) {
