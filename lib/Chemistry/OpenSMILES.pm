@@ -287,6 +287,9 @@ sub mirror($)
         if( is_chiral_tetrahedral( $what ) ) {
             $what->{chirality} = $what->{chirality} eq '@' ? '@@' : '@';
         }
+        if( is_chiral_allenal( $what ) ) {
+            $what->{chirality} = $what->{chirality} eq '@AL1' ? '@AL2' : '@AL1';
+        }
         # Square planar centers are not affected by mirroring, doing nothing
         if( is_chiral_trigonal_bipyramidal( $what ) ) {
             my $number = substr $what->{chirality}, 3;
@@ -307,7 +310,6 @@ sub mirror($)
                                  0..$#OH;
             $what->{chirality} = '@OH' . ($opposite + 1);
         }
-        # FIXME: Mirror allenal centers
     } else {
         for ($what->vertices) {
             mirror( $_ );
