@@ -25,7 +25,7 @@ use Chemistry::OpenSMILES qw(
 use Chemistry::OpenSMILES::Writer qw( write_SMILES );
 use Graph::Traversal::BFS;
 use Graph::Undirected;
-use List::Util qw( all any max min sum sum0 uniq );
+use List::Util qw( all any first max min sum sum0 uniq );
 
 sub mark_all_double_bonds
 {
@@ -278,7 +278,7 @@ sub chirality_to_pseudograph
                     push @other, shift @other;
                 }
             }
-        } else {
+        } elsif( Chemistry::OpenSMILES::is_chiral_planar( $atom ) ) {
             # For square planar environments it is enough to retain the enumeration order of atoms.
             # To do so, "neighbouring neighbours" are connected together and a link to central atom is placed.
             if(      $atom->{chirality} eq '@SP2' ) { # 4
@@ -292,6 +292,30 @@ sub chirality_to_pseudograph
                 $moiety->set_edge_attribute( $atom, $connector, 'chiral', 'center' );
                 $moiety->set_edge_attribute( $connector, $chirality_neighbours[$i], 'chiral', 'neighbour' );
                 $moiety->set_edge_attribute( $connector, $chirality_neighbours[($i + 1) % 4], 'chiral', 'neighbour' );
+            }
+        } else { # Trigonal bipyrimidal
+            my $number = substr $atom->{chirality}, 3;
+            my $setting = $Chemistry::OpenSMILES::Writer::TB[$number - 1];
+
+            my @axis  = map  { $chirality_neighbours[$_ - 1] } @{$setting->{axis}};
+            my @other = grep { $_ != $axis[0] && $_ != $axis[1] }
+                        map  { $chirality_neighbours[$_] } 0..4;
+            @other = reverse @other if $setting->{order} eq '@@';
+
+            for my $from (@axis) {
+                my $to = first { $_ != $from } @axis;
+                for my $offset (0..2) {
+                    my $connector = {};
+                    $moiety->set_edge_attribute( $from, $connector, 'chiral', 'from' );
+                    $moiety->set_edge_attribute( $atom, $connector, 'chiral', 'center' );
+                    $moiety->set_edge_attribute( $to,   $connector, 'chiral', 'to' );
+
+                    $moiety->set_edge_attribute( $connector, $other[-1], 'chiral', 'counter-clockwise' );
+                    $moiety->set_edge_attribute( $connector, $other[ 1], 'chiral', 'clockwise' );
+
+                    push @other, shift @other;
+                }
+                @other = reverse @other; # Inverting the axis
             }
         }
     }
