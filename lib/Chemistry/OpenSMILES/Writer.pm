@@ -9,6 +9,7 @@ use Chemistry::OpenSMILES qw(
     toggle_cistrans
 );
 use Chemistry::OpenSMILES::Parser;
+use Chemistry::OpenSMILES::Stereo::Tables qw( @OH @TB );
 use Graph::Traversal::DFS;
 use List::Util qw( all any first min uniq );
 
@@ -19,62 +20,6 @@ require Exporter;
 our @ISA = qw( Exporter );
 our @EXPORT_OK = qw(
     write_SMILES
-);
-
-our @TB = (
-    { axis => [ 1, 5 ], order => '@'  },
-    { axis => [ 1, 5 ], order => '@@' },
-    { axis => [ 1, 4 ], order => '@'  },
-    { axis => [ 1, 4 ], order => '@@' },
-    { axis => [ 1, 3 ], order => '@'  },
-    { axis => [ 1, 3 ], order => '@@' },
-    { axis => [ 1, 2 ], order => '@'  },
-    { axis => [ 1, 2 ], order => '@@' },
-    { axis => [ 2, 5 ], order => '@'  },
-    { axis => [ 2, 4 ], order => '@'  },
-    { axis => [ 2, 5 ], order => '@@' },
-    { axis => [ 2, 4 ], order => '@@' },
-    { axis => [ 2, 3 ], order => '@'  },
-    { axis => [ 2, 3 ], order => '@@' },
-    { axis => [ 3, 5 ], order => '@'  },
-    { axis => [ 3, 4 ], order => '@'  },
-    { axis => [ 4, 5 ], order => '@'  },
-    { axis => [ 4, 5 ], order => '@@' },
-    { axis => [ 3, 4 ], order => '@@' },
-    { axis => [ 3, 5 ], order => '@@' },
-);
-
-our @OH = (
-    { shape => 'U', axis => [ 1, 6 ], order =>  '@' },
-    { shape => 'U', axis => [ 1, 6 ], order => '@@' },
-    { shape => 'U', axis => [ 1, 5 ], order =>  '@' },
-    { shape => 'Z', axis => [ 1, 6 ], order =>  '@' },
-    { shape => 'Z', axis => [ 1, 5 ], order =>  '@' },
-    { shape => 'U', axis => [ 1, 4 ], order =>  '@' },
-    { shape => 'Z', axis => [ 1, 4 ], order =>  '@' },
-    { shape => '4', axis => [ 1, 6 ], order => '@@' },
-    { shape => '4', axis => [ 1, 5 ], order => '@@' },
-    { shape => '4', axis => [ 1, 6 ], order =>  '@' },
-    { shape => '4', axis => [ 1, 5 ], order =>  '@' },
-    { shape => '4', axis => [ 1, 4 ], order => '@@' },
-    { shape => '4', axis => [ 1, 4 ], order =>  '@' },
-    { shape => 'Z', axis => [ 1, 6 ], order => '@@' },
-    { shape => 'Z', axis => [ 1, 5 ], order => '@@' },
-    { shape => 'U', axis => [ 1, 5 ], order => '@@' },
-    { shape => 'Z', axis => [ 1, 4 ], order => '@@' },
-    { shape => 'U', axis => [ 1, 4 ], order => '@@' },
-    { shape => 'U', axis => [ 1, 3 ], order =>  '@' },
-    { shape => 'Z', axis => [ 1, 3 ], order =>  '@' },
-    { shape => '4', axis => [ 1, 3 ], order => '@@' },
-    { shape => '4', axis => [ 1, 3 ], order =>  '@' },
-    { shape => 'Z', axis => [ 1, 3 ], order => '@@' },
-    { shape => 'U', axis => [ 1, 3 ], order => '@@' },
-    { shape => 'U', axis => [ 1, 2 ], order =>  '@' },
-    { shape => 'Z', axis => [ 1, 2 ], order =>  '@' },
-    { shape => '4', axis => [ 1, 2 ], order => '@@' },
-    { shape => '4', axis => [ 1, 2 ], order =>  '@' },
-    { shape => 'Z', axis => [ 1, 2 ], order => '@@' },
-    { shape => 'U', axis => [ 1, 2 ], order => '@@' },
 );
 
 my %shape_to_SP = ( 'U' => '@SP1', '4' => '@SP2', 'Z' => '@SP3' );

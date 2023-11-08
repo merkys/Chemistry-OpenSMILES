@@ -26,6 +26,7 @@ our @EXPORT_OK = qw(
     toggle_cistrans
 );
 
+use Chemistry::OpenSMILES::Stereo::Tables qw( @OH @TB );
 use Graph::Traversal::BFS;
 use List::Util qw( all any first none );
 
@@ -289,21 +290,21 @@ sub mirror($)
         # Square planar centers are not affected by mirroring, doing nothing
         if( is_chiral_trigonal_bipyramidal( $what ) ) {
             my $number = substr $what->{chirality}, 3;
-            my $setting = $Chemistry::OpenSMILES::Writer::TB[$number-1];
-            my $opposite = first { $Chemistry::OpenSMILES::Writer::TB[$_]->{axis}[0] == $setting->{axis}[0] &&
-                                   $Chemistry::OpenSMILES::Writer::TB[$_]->{axis}[1] == $setting->{axis}[1] &&
-                                   $Chemistry::OpenSMILES::Writer::TB[$_]->{order}   ne $setting->{order} }
-                                 0..$#Chemistry::OpenSMILES::Writer::TB;
+            my $setting = $TB[$number-1];
+            my $opposite = first { $TB[$_]->{axis}[0] == $setting->{axis}[0] &&
+                                   $TB[$_]->{axis}[1] == $setting->{axis}[1] &&
+                                   $TB[$_]->{order}   ne $setting->{order} }
+                                 0..$#TB;
             $what->{chirality} = '@TB' . ($opposite + 1);
         }
         if( is_chiral_octahedral( $what ) ) {
             my $number = substr $what->{chirality}, 3;
-            my $setting = $Chemistry::OpenSMILES::Writer::OH[$number-1];
-            my $opposite = first { $Chemistry::OpenSMILES::Writer::OH[$_]->{shape}   eq $setting->{shape} &&
-                                   $Chemistry::OpenSMILES::Writer::OH[$_]->{axis}[0] == $setting->{axis}[0] &&
-                                   $Chemistry::OpenSMILES::Writer::OH[$_]->{axis}[1] == $setting->{axis}[1] &&
-                                   $Chemistry::OpenSMILES::Writer::OH[$_]->{order}   ne $setting->{order} }
-                                 0..$#Chemistry::OpenSMILES::Writer::OH;
+            my $setting = $OH[$number-1];
+            my $opposite = first { $OH[$_]->{shape}   eq $setting->{shape} &&
+                                   $OH[$_]->{axis}[0] == $setting->{axis}[0] &&
+                                   $OH[$_]->{axis}[1] == $setting->{axis}[1] &&
+                                   $OH[$_]->{order}   ne $setting->{order} }
+                                 0..$#OH;
             $what->{chirality} = '@OH' . ($opposite + 1);
         }
         # FIXME: Mirror allenal centers

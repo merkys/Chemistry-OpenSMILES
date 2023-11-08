@@ -23,6 +23,7 @@ use Chemistry::OpenSMILES qw(
     is_single_bond
     toggle_cistrans
 );
+use Chemistry::OpenSMILES::Stereo::Tables qw( @TB );
 use Chemistry::OpenSMILES::Writer qw( write_SMILES );
 use Graph::Traversal::BFS;
 use Graph::Undirected;
@@ -306,7 +307,7 @@ sub chirality_to_pseudograph
             }
         } else { # Trigonal bipyrimidal
             my $number = substr $atom->{chirality}, 3;
-            my $setting = $Chemistry::OpenSMILES::Writer::TB[$number - 1];
+            my $setting = $TB[$number - 1];
 
             my @axis  = map  { $chirality_neighbours[$_ - 1] } @{$setting->{axis}};
             my @other = grep { $_ != $axis[0] && $_ != $axis[1] }
