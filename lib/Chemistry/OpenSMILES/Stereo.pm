@@ -229,8 +229,7 @@ sub mark_cis_trans
     }
 }
 
-# Store the tetrahedral chirality character as additional pseudo vertices and edges.
-# Algorithm is described in detail in doi:10.1186/s13321-023-00692-1
+# Store chirality character as additional pseudo vertices and edges.
 sub chirality_to_pseudograph
 {
     my( $moiety ) = @_;
@@ -249,6 +248,7 @@ sub chirality_to_pseudograph
         }
 
         if( Chemistry::OpenSMILES::is_chiral_tetrahedral( $atom ) ) {
+            # Algorithm is described in detail in doi:10.1186/s13321-023-00692-1
             if( $atom->{chirality} eq '@' ) {
                 # Reverse the order if counter-clockwise
                 @chirality_neighbours = ( $chirality_neighbours[0],
