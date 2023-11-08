@@ -28,13 +28,14 @@ for my $case (@cases) {
     @moieties = $parser->parse( $case->[0], { raw => 1 } );
 
     $result = write_SMILES( \@moieties );
-    is( $result, $case->[1] );
+    is $result, $case->[1];
 
     $result = write_SMILES( \@moieties, \&reverse_order );
-    is( $result, $case->[2] );
+    is $result, $case->[2];
 
     next unless $has_Graph_Nauty;
 
+    # Ensuring the SMILES representations describe isomorphic graphs
     my @graphs = map { $parser->parse( $_ ) } @$case;
     for (@graphs) {
         chirality_to_pseudograph( $_ );
