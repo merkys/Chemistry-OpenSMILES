@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 
+use Chemistry::OpenSMILES qw( mirror );
 use Chemistry::OpenSMILES::Parser;
 use Chemistry::OpenSMILES::Stereo qw( chirality_to_pseudograph );
 use Chemistry::OpenSMILES::Writer qw( write_SMILES );
@@ -26,7 +27,7 @@ my @cases = (
 eval 'use Graph::Nauty qw( are_isomorphic )';
 my $has_Graph_Nauty = !$@;
 
-plan tests => 2 * @cases + $has_Graph_Nauty * 2 * @cases;
+plan tests => 2 * @cases + $has_Graph_Nauty * 3 * @cases;
 
 for my $case (@cases) {
     my $parser;
@@ -45,12 +46,14 @@ for my $case (@cases) {
     next unless $has_Graph_Nauty;
 
     # Ensuring the SMILES representations describe isomorphic graphs
-    my @graphs = map { $parser->parse( $_ ) } @$case;
+    my @graphs = map { $parser->parse( $_ ) } @$case, $case->[0];
+    mirror $graphs[3];
     for (@graphs) {
         chirality_to_pseudograph( $_ );
     }
-    ok are_isomorphic( $graphs[0], $graphs[1], \&depict );
-    ok are_isomorphic( $graphs[1], $graphs[2], \&depict );
+    ok  are_isomorphic( $graphs[0], $graphs[1], \&depict );
+    ok  are_isomorphic( $graphs[1], $graphs[2], \&depict );
+    ok !are_isomorphic( $graphs[0], $graphs[3], \&depict );
 }
 
 sub depict
