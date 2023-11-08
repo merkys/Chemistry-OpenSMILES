@@ -462,7 +462,9 @@ sub _trigonal_bipyramidal_chirality
         $chirality = 1 +  first { $TB[$_]->{axis}[0] == $axis_now[0] + 1 &&
                                   $TB[$_]->{axis}[1] == $axis_now[1] + 1 &&
                                   $TB[$_]->{order}   eq $order } 0..$#TB;
-        $opposite = $TB[$chirality - 1]->{opposite};
+        $opposite  = 1 +  first { $TB[$_]->{axis}[0] == $axis_now[0] + 1 &&
+                                  $TB[$_]->{axis}[1] == $axis_now[1] + 1 &&
+                                  $TB[$_]->{order}   ne $order } 0..$#TB;
         @order = grep { $_ != $axis_now[0] && $_ != $axis_now[1] } @order;
         while( $order[0] != min @order ) {
             push @order, shift @order;
