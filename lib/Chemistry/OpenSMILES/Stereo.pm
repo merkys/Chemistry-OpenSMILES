@@ -247,9 +247,9 @@ sub chirality_to_pseudograph
                         @chirality_neighbours <= 4;
             $has_lone_pair = @chirality_neighbours == 3;
         } elsif( Chemistry::OpenSMILES::is_chiral_trigonal_bipyramidal( $atom ) ) {
-            next unless @chirality_neighbours >= 5 &&
-                        @chirality_neighbours <= 6;
-            $has_lone_pair = @chirality_neighbours == 5;
+            next unless @chirality_neighbours >= 4 &&
+                        @chirality_neighbours <= 5;
+            $has_lone_pair = @chirality_neighbours == 4;
         }
 
         if( $has_lone_pair ) {
