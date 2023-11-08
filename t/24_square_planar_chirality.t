@@ -5,6 +5,7 @@ use warnings;
 use Chemistry::OpenSMILES::Parser;
 use Chemistry::OpenSMILES::Stereo qw( chirality_to_pseudograph );
 use Chemistry::OpenSMILES::Writer qw( write_SMILES );
+use Data::Dumper;
 use Test::More;
 
 eval 'use Graph::Nauty qw( are_isomorphic )';
@@ -16,7 +17,7 @@ my @cases = (
     [ 'N[C@SP3](Br)(O)C', 'N([C@SP3](Br)(O)(C))', 'C([C@SP3](O)(Br)(N))' ],
 );
 
-plan tests => 2 * scalar @cases + $has_Graph_Nauty * 2 * scalar @cases;
+plan tests => 2 * @cases + $has_Graph_Nauty * 2 * @cases;
 
 for my $case (@cases) {
     my $parser;
@@ -38,8 +39,21 @@ for my $case (@cases) {
     for (@graphs) {
         chirality_to_pseudograph( $_ );
     }
-    ok are_isomorphic( $graphs[0], $graphs[1] );
-    ok are_isomorphic( $graphs[1], $graphs[2] );
+    ok are_isomorphic( $graphs[0], $graphs[1], \&depict );
+    ok are_isomorphic( $graphs[1], $graphs[2], \&depict );
+}
+
+sub depict
+{
+    my( $vertex ) = @_;
+
+    if( ref $vertex eq 'HASH' && exists $vertex->{symbol} ) {
+        $vertex = { %$vertex };
+        delete $vertex->{chirality};
+        return write_SMILES( $vertex );
+    }
+
+    return Dumper $vertex;
 }
 
 sub reverse_order
