@@ -21,7 +21,7 @@ our @EXPORT_OK = qw(
     write_SMILES
 );
 
-my @TB = (
+our @TB = (
     { axis => [ 1, 5 ], order => '@',  opposite =>  2 },
     { axis => [ 1, 5 ], order => '@@', opposite =>  1 },
     { axis => [ 1, 4 ], order => '@',  opposite =>  4 },

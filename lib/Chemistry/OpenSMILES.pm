@@ -273,10 +273,14 @@ sub mirror($)
 {
     my( $what ) = @_;
     if( ref $what eq 'HASH' ) { # Single atom
-        # FIXME: currently dealing only with tetrahedral chiral centers
         if( is_chiral_tetrahedral( $what ) ) {
             $what->{chirality} = $what->{chirality} eq '@' ? '@@' : '@';
         }
+        # Square planar centers are not affected by mirroring, doing nothing
+        if( is_chiral_trigonal_bipyramidal( $what ) ) {
+            $what->{chirality} = '@TB' . $Chemistry::OpenSMILES::Writer[substr( $what->{chirality}, 3 ) - 1]->{opposite};
+        }
+        # FIXME: Mirror other centers
     } else {
         for ($what->vertices) {
             mirror( $_ );
