@@ -1,11 +1,15 @@
 package Chemistry::OpenSMILES;
 
+# ABSTRACT: OpenSMILES format reader and writer
+# VERSION
+
 use strict;
 use warnings;
 use 5.0100;
 
-# ABSTRACT: OpenSMILES format reader and writer
-# VERSION
+use Chemistry::OpenSMILES::Stereo::Tables qw( @OH @TB );
+use Graph::Traversal::BFS;
+use List::Util qw( all any first none );
 
 require Exporter;
 our @ISA = qw( Exporter );
@@ -25,10 +29,6 @@ our @EXPORT_OK = qw(
     %normal_valence
     toggle_cistrans
 );
-
-use Chemistry::OpenSMILES::Stereo::Tables qw( @OH @TB );
-use Graph::Traversal::BFS;
-use List::Util qw( all any first none );
 
 sub is_chiral($);
 sub is_chiral_planar($);

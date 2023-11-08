@@ -1,5 +1,8 @@
 package Chemistry::OpenSMILES::Writer;
 
+# ABSTRACT: OpenSMILES format writer
+# VERSION
+
 use strict;
 use warnings;
 
@@ -12,9 +15,6 @@ use Chemistry::OpenSMILES::Parser;
 use Chemistry::OpenSMILES::Stereo::Tables qw( @OH @TB );
 use Graph::Traversal::DFS;
 use List::Util qw( all any first min uniq );
-
-# ABSTRACT: OpenSMILES format writer
-# VERSION
 
 require Exporter;
 our @ISA = qw( Exporter );

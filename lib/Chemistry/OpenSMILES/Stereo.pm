@@ -1,19 +1,10 @@
 package Chemistry::OpenSMILES::Stereo;
 
-use strict;
-use warnings;
-
 # ABSTRACT: Stereochemistry handling routines
 # VERSION
 
-require Exporter;
-our @ISA = qw( Exporter );
-our @EXPORT_OK = qw(
-    chirality_to_pseudograph
-    cis_trans_to_pseudoedges
-    mark_all_double_bonds
-    mark_cis_trans
-);
+use strict;
+use warnings;
 
 use Chemistry::OpenSMILES qw(
     is_chiral
@@ -28,6 +19,15 @@ use Chemistry::OpenSMILES::Writer qw( write_SMILES );
 use Graph::Traversal::BFS;
 use Graph::Undirected;
 use List::Util qw( all any first max min sum sum0 uniq );
+
+require Exporter;
+our @ISA = qw( Exporter );
+our @EXPORT_OK = qw(
+    chirality_to_pseudograph
+    cis_trans_to_pseudoedges
+    mark_all_double_bonds
+    mark_cis_trans
+);
 
 sub mark_all_double_bonds
 {
