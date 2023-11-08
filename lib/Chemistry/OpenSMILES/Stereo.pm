@@ -271,9 +271,8 @@ sub chirality_to_pseudograph
                     $moiety->set_edge_attribute( $neighbour, $connector, 'chiral', 'from' );
                     $moiety->set_edge_attribute( $atom, $connector, 'chiral', 'to' );
 
-                    $moiety->set_edge_attribute( $connector, $other[0], 'chiral', 1 );
-                    $moiety->set_edge_attribute( $connector, $other[1], 'chiral', 2 );
-                    $moiety->set_edge_attribute( $connector, $other[2], 'chiral', 3 );
+                    $moiety->set_edge_attribute( $connector, $other[-1], 'chiral', 'counter-clockwise' );
+                    $moiety->set_edge_attribute( $connector, $other[ 1], 'chiral', 'clockwise' );
 
                     push @other, shift @other;
                 }

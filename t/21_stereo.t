@@ -24,7 +24,7 @@ my( $moiety ) = $parser->parse( 'N[C@](Br)(O)C' );
 chirality_to_pseudograph( $moiety );
 
 is( $moiety->vertices, 23 );
-is( $moiety->edges, 70 );
+is( $moiety->edges, 58 );
 
 for my $case (@cases) {
     my( $smiles,
