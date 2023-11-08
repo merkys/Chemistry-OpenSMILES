@@ -244,7 +244,7 @@ sub chirality_to_pseudograph
         if( @chirality_neighbours == 3 ) {
             @chirality_neighbours = ( $chirality_neighbours[0],
                                       {}, # marking the lone pair
-                                      @chirality_neighbours[1..2] );
+                                      @chirality_neighbours[1..$#chirality_neighbours] );
         }
 
         if( Chemistry::OpenSMILES::is_chiral_tetrahedral( $atom ) ) {
