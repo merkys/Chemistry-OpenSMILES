@@ -27,7 +27,7 @@ our @EXPORT_OK = qw(
 );
 
 use Graph::Traversal::BFS;
-use List::Util qw( all any none );
+use List::Util qw( all any first none );
 
 sub is_chiral($);
 sub is_chiral_planar($);
@@ -288,9 +288,21 @@ sub mirror($)
         }
         # Square planar centers are not affected by mirroring, doing nothing
         if( is_chiral_trigonal_bipyramidal( $what ) ) {
-            $what->{chirality} = '@TB' . $Chemistry::OpenSMILES::Writer[substr( $what->{chirality}, 3 ) - 1]->{opposite};
+            my $number = substr $what->{chirality}, 3;
+            my $setting = $Chemistry::OpenSMILES::Writer::TB[$number-1];
+            $what->{chirality} = '@TB' . $setting->{opposite};
         }
-        # FIXME: Mirror other centers
+        if( is_chiral_octahedral( $what ) ) {
+            my $number = substr $what->{chirality}, 3;
+            my $setting = $Chemistry::OpenSMILES::Writer::OH[$number-1];
+            my $opposite = first { $Chemistry::OpenSMILES::Writer::OH[$_]->{shape}   eq $setting->{shape} &&
+                                   $Chemistry::OpenSMILES::Writer::OH[$_]->{axis}[0] == $setting->{axis}[0] &&
+                                   $Chemistry::OpenSMILES::Writer::OH[$_]->{axis}[1] == $setting->{axis}[1] &&
+                                   $Chemistry::OpenSMILES::Writer::OH[$_]->{order}   ne $setting->{order} }
+                                 0..$#Chemistry::OpenSMILES::Writer::OH;
+            $what->{chirality} = '@OH' . ($opposite + 1);
+        }
+        # FIXME: Mirror allenal centers
     } else {
         for ($what->vertices) {
             mirror( $_ );
