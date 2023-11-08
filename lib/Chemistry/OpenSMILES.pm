@@ -178,6 +178,16 @@ sub is_chiral_trigonal_bipyramidal($)
     }
 }
 
+sub is_chiral_octahedral($)
+{
+    my( $what ) = @_;
+    if( ref $what eq 'HASH' ) { # Single atom
+        return $what->{chirality} && $what->{chirality} =~ /^\@OH([1-9]|[12][0-9]|30)$/;
+    } else {                    # Graph representing moiety
+        return any { is_chiral_octahedral( $_ ) } $what->vertices;
+    }
+}
+
 sub is_cis_trans_bond
 {
     my( $moiety, $a, $b ) = @_;
