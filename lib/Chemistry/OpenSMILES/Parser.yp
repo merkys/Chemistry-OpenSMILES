@@ -331,7 +331,7 @@ sub parse
                         _push_chirality_neighbour( $atom, $hydrogen );
                     }
                 }
-                delete $atom->{hcount};
+                delete $atom->{hcount} if $atom->{hcount};
 
                 # Unify the representation of chirality
                 if( is_chiral $atom ) {
