@@ -16,7 +16,7 @@ use Chemistry::OpenSMILES qw(
 use Chemistry::OpenSMILES::Parser;
 use Chemistry::OpenSMILES::Stereo::Tables qw( @OH @TB );
 use Graph::Traversal::DFS;
-use List::Util qw( all any first min sum0 uniq );
+use List::Util qw( all any first min none sum0 uniq );
 
 require Exporter;
 our @ISA = qw( Exporter );
@@ -40,24 +40,6 @@ sub write_SMILES
     $order_sub = \&_order unless $order_sub;
 
     for my $graph (@moieties) {
-        # Drop H atom counts of 0 for atoms with normal valences
-        for my $atom ($graph->vertices) {
-            next unless exists $atom->{hcount};
-            next if $atom->{hcount};
-            next if $atom->{charge};
-            next unless exists $normal_valence{ucfirst $atom->{symbol}};
-
-            my $valence = sum0 map { exists $bond_symbol_to_order{$_}
-                                          ? $bond_symbol_to_order{$_}
-                                          : 1 }
-                               map { $graph->has_edge_attribute( $atom, $_, 'bond' )
-                                          ? $graph->get_edge_attribute( $atom, $_, 'bond' )
-                                          : 1 }
-                                   $graph->neighbours( $atom );
-            next unless any { $_ == $valence } @{$normal_valence{ucfirst $atom->{symbol}}};
-            delete $atom->{hcount};
-        }
-
         my @symbols;
         my %vertex_symbols;
         my $nrings = 0;
@@ -89,7 +71,8 @@ sub write_SMILES
                           push @symbols,
                           _pre_vertex( { map { $_ => $vertex->{$_} }
                                          grep { $_ ne 'chirality' }
-                                         keys %$vertex } );
+                                         keys %$vertex },
+                                       $graph );
                           $vertex_symbols{$vertex} = $#symbols },
 
             post => sub { push @symbols, ')' },
@@ -277,7 +260,7 @@ sub _tree_edge
 
 sub _pre_vertex
 {
-    my( $vertex ) = @_;
+    my( $vertex, $graph ) = @_;
 
     my $atom = $vertex->{symbol};
     my $is_simple = $atom =~ /^[bcnosp]$/i ||
@@ -295,8 +278,8 @@ sub _pre_vertex
 
     if( $vertex->{hcount} ) { # if non-zero
         $atom .= 'H' . ($vertex->{hcount} == 1 ? '' : $vertex->{hcount});
+        $is_simple = 0;
     }
-    $is_simple = 0 if exists $vertex->{hcount};
 
     if( $vertex->{charge} ) { # if non-zero
         $atom .= ($vertex->{charge} > 0 ? '+' : '') . $vertex->{charge};
@@ -307,6 +290,18 @@ sub _pre_vertex
     if( $vertex->{class} ) { # if non-zero
         $atom .= ':' . $vertex->{class};
         $is_simple = 0;
+    }
+
+    if( $is_simple && $graph ) { # check for unusual valency
+        my $valency = sum0 map { exists $bond_symbol_to_order{$_}
+                                      ? $bond_symbol_to_order{$_}
+                                      : 1 }
+                           map { $graph->has_edge_attribute( $vertex, $_, 'bond' )
+                                      ? $graph->get_edge_attribute( $vertex, $_, 'bond' )
+                                      : 1 }
+                               $graph->neighbours( $vertex );
+        $is_simple = any { $_ == $valency }
+                         @{$normal_valence{ucfirst $vertex->{symbol}}};
     }
 
     return $is_simple ? $atom : "[$atom]";
