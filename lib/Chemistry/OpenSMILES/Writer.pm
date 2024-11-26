@@ -30,8 +30,7 @@ sub write_SMILES
     my( $what, $order_sub ) = @_;
 
     if( ref $what eq 'HASH' ) {
-        # subroutine will also accept and properly represent a single
-        # atom:
+        # subroutine will also accept and properly represent a single atom:
         return _pre_vertex( $what );
     }
 
