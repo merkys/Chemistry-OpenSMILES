@@ -278,8 +278,8 @@ sub _pre_vertex
 
     if( $vertex->{hcount} ) { # if non-zero
         $atom .= 'H' . ($vertex->{hcount} == 1 ? '' : $vertex->{hcount});
-        $is_simple = 0;
     }
+    $is_simple = 0 if exists $vertex->{hcount};
 
     if( $vertex->{charge} ) { # if non-zero
         $atom .= ($vertex->{charge} > 0 ? '+' : '') . $vertex->{charge};
