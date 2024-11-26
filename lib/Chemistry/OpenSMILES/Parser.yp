@@ -13,7 +13,7 @@ use Chemistry::OpenSMILES qw(
     toggle_cistrans
 );
 use Graph::Undirected;
-use List::Util qw( any sum );
+use List::Util qw( any first sum );
 
 %}
 
@@ -314,8 +314,8 @@ sub parse
                                             : '-' }
                                          $graph->neighbours( $atom );
                     $degree = 0 unless $degree;
-                    my( $valence ) = grep { $degree <= $_ }
-                                          @{$normal_valence{$atom->{symbol}}};
+                    my $valence = first { $degree <= $_ }
+                                        @{$normal_valence{$atom->{symbol}}};
                     next if !defined $valence;
                     $atom->{hcount} = $valence - $degree;
                 }
@@ -376,8 +376,8 @@ sub _add_ring_bond
               $self->{USER}{RINGBONDS}{$ring_bond}{bond} ne '\\')) ) {
             die "$0: ring bond types for ring bond $ring_bond do not match.\n";
         }
-        ( $bond ) = grep { defined }
-                         ( $self->{USER}{RINGBONDS}{$ring_bond}{bond}, $bond );
+        $bond = first { defined }
+                      ( $self->{USER}{RINGBONDS}{$ring_bond}{bond}, $bond );
 
         if( $bond && $bond =~ /^[\\\/]$/ &&
             !defined $self->{USER}{RINGBONDS}{$ring_bond}{bond} ) {
@@ -401,9 +401,9 @@ sub _add_ring_bond
         delete $self->{USER}{RINGBONDS}{$ring_bond};
 
         if( is_chiral $ring_atom &&  $ring_atom->{chirality_neighbours} ) {
-            my( $pos ) = grep { !ref $ring_atom->{chirality_neighbours}[$_] &&
-                                $ring_atom->{chirality_neighbours}[$_] == $ring_bond }
-                              0..$#{$ring_atom->{chirality_neighbours}};
+            my $pos = first { !ref $ring_atom->{chirality_neighbours}[$_] &&
+                              $ring_atom->{chirality_neighbours}[$_] == $ring_bond }
+                            0..$#{$ring_atom->{chirality_neighbours}};
             $ring_atom->{chirality_neighbours}[$pos] = $atom if defined $pos;
         }
         _push_chirality_neighbour( $atom, $ring_atom );
