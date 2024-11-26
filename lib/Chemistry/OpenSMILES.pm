@@ -19,6 +19,11 @@ our @EXPORT_OK = qw(
     clean_chiral_centers
     is_aromatic
     is_chiral
+    is_chiral_allenal
+    is_chiral_octahedral
+    is_chiral_planar
+    is_chiral_tetrahedral
+    is_chiral_trigonal_bipyramidal
     is_cis_trans_bond
     is_double_bond
     is_ring_atom
