@@ -31,10 +31,8 @@ sub write_SMILES
 {
     my( $what, $order_sub ) = @_;
 
-    if( ref $what eq 'HASH' ) {
-        # subroutine will also accept and properly represent a single atom:
-        return _pre_vertex( $what );
-    }
+    # Subroutine will also accept and properly represent a single atom:
+    return _pre_vertex( $what ) if $what eq 'HASH';
 
     my @moieties = ref $what eq 'ARRAY' ? @$what : ( $what );
     my @components;

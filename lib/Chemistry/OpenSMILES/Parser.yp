@@ -7,9 +7,9 @@ use 5.0100;
 
 use Chemistry::OpenSMILES qw(
     %bond_symbol_to_order
+    %normal_valence
     is_aromatic
     is_chiral
-    %normal_valence
     toggle_cistrans
 );
 use Graph::Undirected;
