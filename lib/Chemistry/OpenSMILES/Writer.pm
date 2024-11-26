@@ -7,6 +7,8 @@ use strict;
 use warnings;
 
 use Chemistry::OpenSMILES qw(
+    %bond_symbol_to_order
+    %normal_valence
     is_aromatic
     is_chiral
     toggle_cistrans
@@ -14,7 +16,7 @@ use Chemistry::OpenSMILES qw(
 use Chemistry::OpenSMILES::Parser;
 use Chemistry::OpenSMILES::Stereo::Tables qw( @OH @TB );
 use Graph::Traversal::DFS;
-use List::Util qw( all any first min uniq );
+use List::Util qw( all any first min sum0 uniq );
 
 require Exporter;
 our @ISA = qw( Exporter );
@@ -40,6 +42,22 @@ sub write_SMILES
     $order_sub = \&_order unless $order_sub;
 
     for my $graph (@moieties) {
+        # Drop H atom counts of 0 for atoms with normal valences
+        for my $atom ($graph->vertices) {
+            next unless exists $atom->{hcount};
+            next if $atom->{hcount};
+            next if $atom->{charge};
+            next unless exists $normal_valence{$atom->{symbol}};
+
+            my $valence = sum0 map { $bond_symbol_to_order{$_} }
+                               map { $graph->has_edge_attribute( $atom, $_, 'bond' )
+                                        ? $graph->get_edge_attribute( $atom, $_, 'bond' )
+                                        : '-' }
+                                   $graph->neighbours( $atom );
+            next unless any { $_ == $valence } @{$normal_valence{$atom->{symbol}}};
+            delete $atom->{hcount};
+        }
+
         my @symbols;
         my %vertex_symbols;
         my $nrings = 0;
