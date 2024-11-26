@@ -45,7 +45,7 @@ sub write_SMILES
             next unless exists $atom->{hcount};
             next if $atom->{hcount};
             next if $atom->{charge};
-            next unless exists $normal_valence{$atom->{symbol}};
+            next unless exists $normal_valence{ucfirst $atom->{symbol}};
 
             my $valence = sum0 map { exists $bond_symbol_to_order{$_}
                                           ? $bond_symbol_to_order{$_}
@@ -54,7 +54,7 @@ sub write_SMILES
                                           ? $graph->get_edge_attribute( $atom, $_, 'bond' )
                                           : 1 }
                                    $graph->neighbours( $atom );
-            next unless any { $_ == $valence } @{$normal_valence{$atom->{symbol}}};
+            next unless any { $_ == $valence } @{$normal_valence{ucfirst $atom->{symbol}}};
             delete $atom->{hcount};
         }
 
