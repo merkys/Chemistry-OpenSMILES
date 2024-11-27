@@ -565,7 +565,12 @@ convert neither implicit nor explicit hydrogen atoms in square brackets
 to atom hashes of their own. Moreover, it will not attempt to unify the
 representations of chirality. It should be noted, though, that many of
 subroutines of Chemistry::OpenSMILES expect non-raw data structures,
-thus processing raw output may produce distorted results.
+thus processing raw output may produce distorted results. In particular,
+C<write_SMILES()> calls from
+L<Chemistry::OpenSMILES::Writer|Chemistry::OpenSMILES::Writer> have to
+be instructed to expect raw data structure:
+
+    write_SMILES( \@moieties, { raw => 1 } );
 
 =back
 
