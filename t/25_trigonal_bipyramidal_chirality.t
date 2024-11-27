@@ -38,7 +38,7 @@ for my $case (@cases) {
     $parser = Chemistry::OpenSMILES::Parser->new;
     @moieties = $parser->parse( $case->[0], { raw => 1 } );
 
-    $result = write_SMILES( \@moieties, $order_sub );
+    $result = write_SMILES( \@moieties, { raw => 1, order_sub => $order_sub } );
     is $result, $case->[2];
 
     next unless $has_Graph_Nauty;

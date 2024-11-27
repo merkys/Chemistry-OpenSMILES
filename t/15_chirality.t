@@ -25,9 +25,9 @@ for my $case (@cases) {
     $parser = Chemistry::OpenSMILES::Parser->new;
     ( $moiety ) = $parser->parse( $case->[0], { raw => 1 } );
 
-    is( is_chiral( $moiety ) + 0, $case->[1] );
-    is( Chemistry::OpenSMILES::is_chiral_tetrahedral( $moiety ) + 0, $case->[2] );
+    is is_chiral( $moiety ) + 0, $case->[1];
+    is Chemistry::OpenSMILES::is_chiral_tetrahedral( $moiety ) + 0, $case->[2];
 
     mirror( $moiety );
-    is( write_SMILES( $moiety ), $case->[3] );
+    is write_SMILES( $moiety, { raw => 1 } ), $case->[3];
 }

@@ -28,10 +28,10 @@ for my $case (@cases) {
     $parser = Chemistry::OpenSMILES::Parser->new;
     @moieties = $parser->parse( $case->[0], { raw => 1 } );
 
-    $result = write_SMILES( \@moieties );
+    $result = write_SMILES( \@moieties, { raw => 1 } );
     is $result, $case->[1];
 
-    $result = write_SMILES( \@moieties, \&reverse_order );
+    $result = write_SMILES( \@moieties, { raw => 1, order_sub => \&reverse_order } );
     is $result, $case->[2];
 
     next unless $has_Graph_Nauty;
