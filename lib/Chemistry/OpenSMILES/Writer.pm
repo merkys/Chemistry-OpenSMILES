@@ -40,7 +40,7 @@ sub write_SMILES
     my $raw = $options->{raw};
 
     # Subroutine will also accept and properly represent a single atom:
-    return _pre_vertex( $what, undef, $raw ) if ref $what eq 'HASH';
+    return _pre_vertex( $what, undef, { raw => $raw } ) if ref $what eq 'HASH';
 
     my @moieties = ref $what eq 'ARRAY' ? @$what : ( $what );
     my @components;
@@ -75,7 +75,10 @@ sub write_SMILES
             pre  => sub { my( $vertex, $dfs ) = @_;
                           push @chiral, $vertex if is_chiral $vertex;
                           push @symbols,
-                          _pre_vertex( $vertex, $graph, $raw );
+                          _pre_vertex( $vertex,
+                                       $graph,
+                                       { omit_chirality => 1,
+                                         raw => $raw } );
                           $vertex_symbols{$vertex} = $#symbols },
 
             post => sub { push @symbols, ')' },
@@ -263,7 +266,12 @@ sub _tree_edge
 
 sub _pre_vertex
 {
-    my( $vertex, $graph, $raw ) = @_;
+    my( $vertex, $graph, $options ) = @_;
+    $options = {} unless $options;
+    my( $omit_chirality,
+        $raw ) =
+      ( $options->{omit_chirality},
+        $options->{raw} );
 
     my $atom = $vertex->{symbol};
     my $is_simple = $atom =~ /^[bcnosp]$/i ||
@@ -275,7 +283,7 @@ sub _pre_vertex
     }
 
     # TODO: Get rid of graph-less calls
-    if( !$graph && is_chiral $vertex ) {
+    if( is_chiral $vertex && !$omit_chirality ) {
         $atom .= $vertex->{chirality};
         $is_simple = 0;
     }
