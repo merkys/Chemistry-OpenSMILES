@@ -299,10 +299,11 @@ sub _pre_vertex
         $is_simple = 0;
     }
 
-    if( $is_simple && $graph && !$raw && $normal_valence{ucfirst $vertex->{symbol}} ) {
+    # Decide whether to put atom in square brackets because of unusual valence
+    if( $is_simple && $graph && !$raw && $normal_valence{ucfirst $atom} ) {
         my $valence = valence( $graph, $vertex );
         $is_simple = any { $_ == $valence }
-                         @{$normal_valence{ucfirst $vertex->{symbol}}};
+                         @{$normal_valence{ucfirst $atom}};
     }
 
     return $is_simple ? $atom : "[$atom]";
