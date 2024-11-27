@@ -9,7 +9,7 @@ use 5.0100;
 
 use Chemistry::OpenSMILES::Stereo::Tables qw( @OH @TB );
 use Graph::Traversal::BFS;
-use List::Util qw( all any first none sum );
+use List::Util qw( all any first none sum0 );
 
 require Exporter;
 our @ISA = qw( Exporter );
@@ -332,13 +332,13 @@ sub valence($$)
 {
     my( $moiety, $atom ) = @_;
     return ($atom->{hcount} ? $atom->{hcount} : 0) +
-           sum map { exists $bond_symbol_to_order{$_}
-                          ? $bond_symbol_to_order{$_}
-                          : 1 }
-               map { $moiety->has_edge_attribute( $atom, $_, 'bond' )
-                          ? $moiety->get_edge_attribute( $atom, $_, 'bond' )
-                          : 1 }
-                   $moiety->neighbours( $atom );
+           sum0 map { exists $bond_symbol_to_order{$_}
+                           ? $bond_symbol_to_order{$_}
+                           : 1 }
+                map { $moiety->has_edge_attribute( $atom, $_, 'bond' )
+                           ? $moiety->get_edge_attribute( $atom, $_, 'bond' )
+                           : 1 }
+                    $moiety->neighbours( $atom );
 }
 
 # CAVEAT: requires output from non-raw parsing due issue similar to GH#2
