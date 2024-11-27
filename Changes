@@ -1,3 +1,11 @@
+0.10.0 unreleased
+
+    - Reworking the logic of marking atoms with nonstandard valences.
+    - Introducing Chemistry::OpenSMILES::valence().
+    - Changing the API of Chemistry::OpenSMILES::Writer::write_SMILES() to
+      accept option hash as the second parameter. Backwars compatibility
+      for old calls is retained.
+
 0.9.2 2024-11-26
 
     - Fix a pair of bugs in valence calculation.
