@@ -9,13 +9,14 @@ use 5.0100;
 
 use Chemistry::OpenSMILES::Stereo::Tables qw( @OH @TB );
 use Graph::Traversal::BFS;
-use List::Util qw( all any first none );
+use List::Util qw( all any first none sum );
 
 require Exporter;
 our @ISA = qw( Exporter );
 our @EXPORT_OK = qw(
     %bond_order_to_symbol
     %bond_symbol_to_order
+    %normal_valence
     clean_chiral_centers
     is_aromatic
     is_chiral
@@ -31,8 +32,8 @@ our @EXPORT_OK = qw(
     is_single_bond
     is_triple_bond
     mirror
-    %normal_valence
     toggle_cistrans
+    valence
 );
 
 sub is_chiral($);
@@ -325,6 +326,19 @@ sub mirror($)
 sub toggle_cistrans($)
 {
     return $_[0] eq '/' ? '\\' : '/';
+}
+
+sub valence($$)
+{
+    my( $moiety, $atom ) = @_;
+    return ($atom->{hcount} ? $atom->{hcount} : 0) +
+           sum map { exists $bond_symbol_to_order{$_}
+                          ? $bond_symbol_to_order{$_}
+                          : 1 }
+               map { $moiety->has_edge_attribute( $atom, $_, 'bond' )
+                          ? $moiety->get_edge_attribute( $atom, $_, 'bond' )
+                          : 1 }
+                   $moiety->neighbours( $atom );
 }
 
 # CAVEAT: requires output from non-raw parsing due issue similar to GH#2
