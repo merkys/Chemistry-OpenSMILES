@@ -75,11 +75,7 @@ sub write_SMILES
             pre  => sub { my( $vertex, $dfs ) = @_;
                           push @chiral, $vertex if is_chiral $vertex;
                           push @symbols,
-                          _pre_vertex( { map { $_ => $vertex->{$_} }
-                                         grep { $_ ne 'chirality' }
-                                         keys %$vertex },
-                                       $graph,
-                                       $raw );
+                          _pre_vertex( $vertex, $graph, $raw );
                           $vertex_symbols{$vertex} = $#symbols },
 
             post => sub { push @symbols, ')' },
@@ -278,7 +274,8 @@ sub _pre_vertex
         $is_simple = 0;
     }
 
-    if( is_chiral $vertex ) {
+    # TODO: Get rid of graph-less calls
+    if( !$graph && is_chiral $vertex ) {
         $atom .= $vertex->{chirality};
         $is_simple = 0;
     }
