@@ -12,6 +12,7 @@ use Chemistry::OpenSMILES qw(
     is_aromatic
     is_chiral
     toggle_cistrans
+    valence
 );
 use Chemistry::OpenSMILES::Parser;
 use Chemistry::OpenSMILES::Stereo::Tables qw( @OH @TB );
@@ -29,15 +30,20 @@ my %SP_to_shape = reverse %shape_to_SP;
 
 sub write_SMILES
 {
-    my( $what, $order_sub ) = @_;
+    my( $what, $options ) = @_;
+    # Backwards compatibility with the old API where second parameter was
+    # a subroutine reference for ordering:
+    my $order_sub = defined $options && ref $options eq 'CODE' ? $options : \&_order;
+    $options = {} unless defined $options && ref $options eq 'HASH';
+
+    $order_sub = $options->{order_sub} if $options->{order_sub};
+    my $raw = $options->{raw};
 
     # Subroutine will also accept and properly represent a single atom:
-    return _pre_vertex( $what ) if ref $what eq 'HASH';
+    return _pre_vertex( $what, undef, $raw ) if ref $what eq 'HASH';
 
     my @moieties = ref $what eq 'ARRAY' ? @$what : ( $what );
     my @components;
-
-    $order_sub = \&_order unless $order_sub;
 
     for my $graph (@moieties) {
         my @symbols;
@@ -72,7 +78,8 @@ sub write_SMILES
                           _pre_vertex( { map { $_ => $vertex->{$_} }
                                          grep { $_ ne 'chirality' }
                                          keys %$vertex },
-                                       $graph );
+                                       $graph,
+                                       $raw );
                           $vertex_symbols{$vertex} = $#symbols },
 
             post => sub { push @symbols, ')' },
@@ -260,7 +267,7 @@ sub _tree_edge
 
 sub _pre_vertex
 {
-    my( $vertex, $graph ) = @_;
+    my( $vertex, $graph, $raw ) = @_;
 
     my $atom = $vertex->{symbol};
     my $is_simple = $atom =~ /^[bcnosp]$/i ||
@@ -292,15 +299,9 @@ sub _pre_vertex
         $is_simple = 0;
     }
 
-    if( $is_simple && $graph ) { # check for unusual valency
-        my $valency = sum0 map { exists $bond_symbol_to_order{$_}
-                                      ? $bond_symbol_to_order{$_}
-                                      : 1 }
-                           map { $graph->has_edge_attribute( $vertex, $_, 'bond' )
-                                      ? $graph->get_edge_attribute( $vertex, $_, 'bond' )
-                                      : 1 }
-                               $graph->neighbours( $vertex );
-        $is_simple = any { $_ == $valency }
+    if( $is_simple && $graph && !$raw && $normal_valence{ucfirst $vertex->{symbol}} ) {
+        my $valence = valence( $graph, $vertex );
+        $is_simple = any { $_ == $valence }
                          @{$normal_valence{ucfirst $vertex->{symbol}}};
     }
 

@@ -31,8 +31,7 @@ plan tests => 2 * scalar keys %cases;
 for (sort keys %cases) {
     my $parser   = Chemistry::OpenSMILES::Parser->new;
     my( $graph ) = $parser->parse( $_, { raw => 1 } );
-    is( $graph->vertices, 1 );
 
-    is( join( '', map { write_SMILES( $_ ) } $graph->vertices ),
-        $cases{$_} );
+    is $graph->vertices, 1;
+    is write_SMILES( $graph, { raw => 1 } ), $cases{$_};
 }
