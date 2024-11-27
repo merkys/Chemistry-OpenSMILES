@@ -282,7 +282,6 @@ sub _pre_vertex
         $is_simple = 0;
     }
 
-    # TODO: Get rid of graph-less calls
     if( is_chiral $vertex && !$omit_chirality ) {
         $atom .= $vertex->{chirality};
         $is_simple = 0;
