@@ -1,4 +1,4 @@
-0.10.0 unreleased
+0.10.0 2024-11-28
 
     - Reworking the logic of marking atoms with nonstandard valences.
     - Introducing Chemistry::OpenSMILES::valence().
