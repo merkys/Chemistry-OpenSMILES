@@ -444,6 +444,11 @@ sub _octahedral_chirality
     my $chirality = pop @_;
     my @target = @_;
 
+    if( join( ',', sort @target ) ne '0,1,2,3,4,5' ) {
+        die '_octahedral_chirality() accepts only permutations of ' .
+            "numbers '0', '1', '2', '3', '4' and '5, unexpected input received";
+    }
+
     $chirality =~ s/^\@OH//;
     $chirality = int $chirality;
 
@@ -501,6 +506,8 @@ sub _octahedral_chirality
         ( $shape, $order ) = ( 'U', '@' );
     } elsif( $target[0] == $sides[2] && $target[1] == $sides[1] ) {
         ( $shape, $order ) = ( 'Z', '@' );
+    } else {
+        die 'unexpected situation achieved in _octahedral_chirality()';
     }
     $chirality = 1 + first { $OH[$_]->{shape}   eq $shape &&
                              $OH[$_]->{order}   eq $order &&
