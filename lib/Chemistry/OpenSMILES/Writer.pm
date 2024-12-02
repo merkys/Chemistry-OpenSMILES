@@ -502,10 +502,10 @@ sub _octahedral_chirality
         ( $shape, $order ) = ( '4', '@' );
     } elsif( $target[0] == $sides[1] && $target[1] == $sides[2] ) {
         ( $shape, $order ) = ( '4', '@@' );
+    } elsif( $target[0] == $sides[2] && $target[1] == $sides[0] ) {
+        ( $shape, $order ) = ( 'Z', '@' );
     } elsif( $target[0] == $sides[2] && $target[1] == $sides[1] ) {
         ( $shape, $order ) = ( 'U', '@' );
-    } elsif( $target[0] == $sides[2] && $target[1] == $sides[1] ) {
-        ( $shape, $order ) = ( 'Z', '@' );
     } else {
         die 'unexpected situation achieved in _octahedral_chirality()';
     }
