@@ -5,7 +5,6 @@ use warnings;
 
 use Algorithm::Combinatorics qw( permutations );
 use Chemistry::OpenSMILES::Writer;
-use List::Util qw( uniq );
 use Test::More;
 
 my @order_permutations = permutations( [ 0..5 ] );
