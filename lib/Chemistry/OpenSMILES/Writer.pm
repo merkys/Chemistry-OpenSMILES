@@ -202,7 +202,7 @@ sub write_SMILES
                     $chirality_now = _trigonal_bipyramidal_chirality( @order_new, $chirality_now );
                 } else {
                     # Octahedral centers
-                    $chirality_now = _octahedral_chirality_2( @order_new, $chirality_now );
+                    $chirality_now = _octahedral_chirality( @order_new, $chirality_now );
                 }
             }
 
@@ -440,44 +440,6 @@ sub _trigonal_bipyramidal_chirality
 }
 
 sub _octahedral_chirality
-{
-    my $chirality = pop @_;
-    my @order = @_;
-
-    $chirality = int substr $chirality, 3;
-    my $OH = $OH[$chirality - 1];
-    my $shape = $OH->{shape};
-    my @axis = map { $_ - 1 } @{$OH->{axis}};
-    my $order = $OH->{order};
-
-    if( ($order[$axis[0]] == $axis[0] && $order[$axis[1]] == $axis[1]) ||
-        ($order[$axis[0]] == $axis[1] && $order[$axis[1]] == $axis[0]) ) {
-        # Axis is the same or inverted
-        my $SP = _square_planar_chirality( (map { $_ - 1 } @order), $shape_to_SP{$shape} );
-        # If axis is inverted, direction has to be inverted as well
-        # CHECKME: Does the change of shape affect direction?
-        if( $order[$axis[0]] == $axis[1] && $order[$axis[1]] == $axis[0] ) {
-            $order = $order eq '@' ? '@@' : '@';
-        }
-        $chirality = 1 + first { $OH[$_]->{shape} eq $SP_to_shape{$SP} &&
-                                 $OH[$_]->{axis}[0] == 1 && $OH[$_]->{axis}[1] == 6 &&
-                                 $OH[$_]->{order} eq $order } 0..$#OH;
-        return '@OH' . $chirality;
-    } else {
-        # Axis has changed
-        my @axes = ( \@axis );
-        my @remaining_numbers = grep { $_ != $axis[0] && $_ != $axis[1] } 0..5;
-        @remaining_numbers = map { $remaining_numbers[$_] } ( 0, 3, 1, 2 ) if $shape eq '4';
-        @remaining_numbers = map { $remaining_numbers[$_] } ( 0, 1, 3, 2 ) if $shape eq 'Z';
-        @remaining_numbers = reverse @remaining_numbers if $order eq '@@';
-        # TODO: Change of axis direction inverts the sign.
-        # TODO: When axis A is replaced by axis B, axis C remains unchanged.
-        # TODO: If axis change is to @, A is left untouched, replaces B.
-        # TODO: If axis change is to @@, A is inverted, replaces B.
-    }
-}
-
-sub _octahedral_chirality_2
 {
     my $chirality = pop @_;
     my @target = @_;
