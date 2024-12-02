@@ -23,7 +23,7 @@ for my $case (@cases) {
     my $result;
 
     my $order_sub = sub {
-        my( $vertices ) = @_;
+        my $vertices = shift;
         for my $symbol (@{$case->[1]}) {
             my $vertex = first { $_->{symbol} eq $symbol } values %$vertices;
             return $vertex if $vertex;
@@ -34,6 +34,6 @@ for my $case (@cases) {
     $parser = Chemistry::OpenSMILES::Parser->new;
     @moieties = $parser->parse( $case->[0] );
 
-    $result = write_SMILES( \@moieties, $order_sub );
-    is( $result, $case->[2] );
+    $result = write_SMILES( \@moieties, { order_sub => $order_sub } );
+    is $result, $case->[2];
 }
