@@ -400,6 +400,11 @@ sub _trigonal_bipyramidal_chirality
     my $chirality = pop @_;
     my @order = @_;
 
+    if( join( ',', sort @order ) ne '0,1,2,3,4' ) {
+        die '_trigonal_bipyramidal_chirality() accepts only permutations of ' .
+            "numbers '0', '1', '2', '3' and '4', unexpected input received";
+    }
+
     $chirality = int substr $chirality, 3;
     my $TB = $TB[$chirality - 1];
     my @axis = map { $_ - 1 } @{$TB->{axis}};
