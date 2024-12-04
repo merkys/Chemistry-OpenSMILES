@@ -7,8 +7,8 @@ use Chemistry::OpenSMILES::Writer;
 use Test::More;
 
 my @cases = (
-    [ qw( 0 1 2 3 4 @TB1  @TB1 ) ],
-    [ qw( 0 1 3 2 4 @TB1  @TB2 ) ],
+    [ qw( 0 1 2 3 4 @TB1 @TB1 ) ],
+    [ qw( 0 1 3 2 4 @TB1 @TB2 ) ],
 );
 
 plan tests => scalar @cases;
