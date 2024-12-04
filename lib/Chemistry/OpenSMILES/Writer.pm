@@ -405,43 +405,20 @@ sub _trigonal_bipyramidal_chirality
             "numbers '0', '1', '2', '3' and '4', unexpected input received";
     }
 
-    $chirality = int substr $chirality, 3;
-    my $TB = $TB[$chirality - 1];
-    my @axis = map { $_ - 1 } @{$TB->{axis}};
-    my $order = $TB->{order};
-    my $opposite = 1 + first { $TB[$_]->{axis}[0] == $TB->{axis}[0] &&
-                               $TB[$_]->{axis}[1] == $TB->{axis}[1] &&
-                               $TB[$_]->{order}   ne $TB->{order} } 0..$#TB;
+    $chirality =~ s/^\@TB//;
+    $chirality = int $chirality;
 
-    if( ($order[$axis[0]] == $axis[0] && $order[$axis[1]] == $axis[1]) ||
-        ($order[$axis[0]] == $axis[1] && $order[$axis[1]] == $axis[0]) ) {
-        # Axis is the same or inverted
-        @order = grep { $_ != $axis[0] && $_ != $axis[1] } @order;
-        while( $order[0] != min @order ) {
-            push @order, shift @order;
-        }
-        if( $order[$axis[0]] == $axis[1] && $order[$axis[1]] == $axis[0] ) {
-            ( $chirality, $opposite ) = ( $opposite, $chirality );
-        }
-        return '@TB' . $chirality if $order[1] < $order[2];
-        return '@TB' . $opposite;
-    } else {
-        # Axis has changed
-        my @axis_now = ( (first { $order[$_] == $axis[0] } 0..4),
-                         (first { $order[$_] == $axis[1] } 0..4) );
-        $chirality = 1 +  first { $TB[$_]->{axis}[0] == $axis_now[0] + 1 &&
-                                  $TB[$_]->{axis}[1] == $axis_now[1] + 1 &&
-                                  $TB[$_]->{order}   eq $order } 0..$#TB;
-        $opposite  = 1 +  first { $TB[$_]->{axis}[0] == $axis_now[0] + 1 &&
-                                  $TB[$_]->{axis}[1] == $axis_now[1] + 1 &&
-                                  $TB[$_]->{order}   ne $order } 0..$#TB;
-        @order = grep { $_ != $axis_now[0] && $_ != $axis_now[1] } @order;
-        while( $order[0] != min @order ) {
-            push @order, shift @order;
-        }
-        return '@TB' . $chirality if $order[1] < $order[2];
-        return '@TB' . $opposite;
-    }
+    # First on, decode the source.
+    # Axis will stay on @axis, and sides will be stored on @sides in contiguous clockwise order.
+    my @axis  = map { $_ - 1 } @{$TB[$chirality-1]->{axis}};
+    my @sides = grep { $_ != $axis[0] && $_ != $axis[1] } 0..4;
+
+    # Adjust for enumeration direction
+    @sides = reverse @sides if $TB[$chirality-1]->{order} eq '@';
+
+    # Find the new location of the axis
+    my @axis_location = ( ( first { $order[$_] == $axis[0] } 0..4 ),
+                          ( first { $order[$_] == $axis[1] } 0..4 ) );
 }
 
 sub _octahedral_chirality
