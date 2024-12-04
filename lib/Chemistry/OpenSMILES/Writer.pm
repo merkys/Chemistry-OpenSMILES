@@ -408,13 +408,12 @@ sub _trigonal_bipyramidal_chirality
     $chirality =~ s/^\@TB//;
     $chirality = int $chirality;
 
-    # First on, decode the source.
-    # Axis will stay on @axis, and sides will be stored on @sides in contiguous clockwise order.
-    my @axis  = map { $_ - 1 } @{$TB[$chirality-1]->{axis}};
-    my @sides = grep { $_ != $axis[0] && $_ != $axis[1] } 0..4;
+    my $TB = $TB[$chirality - 1];
 
-    # Adjust for enumeration direction
-    @sides = reverse @sides if $TB[$chirality-1]->{order} eq '@';
+    # First on, decode the source.
+    # Axis will stay on @axis, and sides will be stored on @sides
+    my @axis  = map { $_ - 1 } @{$TB->{axis}};
+    my @sides = grep { $_ != $axis[0] && $_ != $axis[1] } 0..4;
 
     # Find the new location of the axis, remove it from @target
     my @axis_location = ( ( first { $target[$_] == $axis[0] } 0..4 ),
@@ -431,7 +430,9 @@ sub _trigonal_bipyramidal_chirality
     while( $sides[0] != $target[0] ) {
         push @sides, shift @sides;
     }
-    my $order = $sides[1] == $target[1] ? '@@' : '@';
+    my $order = $TB->{order};
+    $order = $order eq '@' ? '@@' : '@' unless $sides[1] == $target[1];
+
     $chirality = 1 + first { $TB[$_]->{order} eq $order &&
                              $TB[$_]->{axis}[0] == $axis_location[0] + 1 &&
                              $TB[$_]->{axis}[1] == $axis_location[1] + 1 }
