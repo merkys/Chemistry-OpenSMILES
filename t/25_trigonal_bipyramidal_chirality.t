@@ -19,6 +19,8 @@ my @cases = (
     # Local tests
     [ 'S[As@TB20](F)(Cl)(Br)N', [ qw( S As F Cl Br N ) ], 'S([As@TB20](F)(Cl)(Br)(N))' ],
     [ 'S[As@TB20](F)(Cl)(Br)N', [ qw( S As Br Cl F N ) ], 'S([As@TB15](Br)(Cl)(F)(N))' ],
+    [ 'S[As@TB20](F)(Cl)(Br)N', [ qw( S As Br N F Cl ) ], 'S([As@TB20](Br)(N)(F)(Cl))' ],
+    [ 'S[As@TB20](F)(Cl)(Br)N', [ qw( S As F N Br Cl ) ], 'S([As@TB15](F)(N)(Br)(Cl))' ],
 );
 
 eval 'use Graph::Nauty qw( are_isomorphic )';
