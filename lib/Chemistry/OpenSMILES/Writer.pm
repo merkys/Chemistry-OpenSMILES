@@ -416,9 +416,27 @@ sub _trigonal_bipyramidal_chirality
     # Adjust for enumeration direction
     @sides = reverse @sides if $TB[$chirality-1]->{order} eq '@';
 
-    # Find the new location of the axis
+    # Find the new location of the axis, remove it from @target
     my @axis_location = ( ( first { $target[$_] == $axis[0] } 0..4 ),
                           ( first { $target[$_] == $axis[1] } 0..4 ) );
+    @target = grep { $_ != $axis[0] && $_ != $axis[1] } @target;
+
+    # Invert the axis if needed
+    if( $axis_location[0] > $axis_location[1] ) {
+        @axis_location = reverse @axis_location;
+        @target        = reverse @target;
+    }
+
+    # Cycle the sides clockwise until the first is aligned
+    while( $sides[0] != $target[0] ) {
+        push @sides, shift @sides;
+    }
+    my $order = $sides[1] == $target[1] ? '@@' : '@';
+    $chirality = 1 + first { $TB[$_]->{order} eq $order &&
+                             $TB[$_]->{axis}[0] == $axis_location[0] + 1 &&
+                             $TB[$_]->{axis}[1] == $axis_location[1] + 1 }
+                           0..$#TB;
+    return '@TB' . $chirality;
 }
 
 sub _octahedral_chirality
