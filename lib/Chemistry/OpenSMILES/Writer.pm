@@ -398,9 +398,9 @@ sub _square_planar_chirality
 sub _trigonal_bipyramidal_chirality
 {
     my $chirality = pop @_;
-    my @order = @_;
+    my @target = @_;
 
-    if( join( ',', sort @order ) ne '0,1,2,3,4' ) {
+    if( join( ',', sort @target ) ne '0,1,2,3,4' ) {
         die '_trigonal_bipyramidal_chirality() accepts only permutations of ' .
             "numbers '0', '1', '2', '3' and '4', unexpected input received";
     }
@@ -417,8 +417,8 @@ sub _trigonal_bipyramidal_chirality
     @sides = reverse @sides if $TB[$chirality-1]->{order} eq '@';
 
     # Find the new location of the axis
-    my @axis_location = ( ( first { $order[$_] == $axis[0] } 0..4 ),
-                          ( first { $order[$_] == $axis[1] } 0..4 ) );
+    my @axis_location = ( ( first { $target[$_] == $axis[0] } 0..4 ),
+                          ( first { $target[$_] == $axis[1] } 0..4 ) );
 }
 
 sub _octahedral_chirality
