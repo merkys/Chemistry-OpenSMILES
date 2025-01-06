@@ -35,7 +35,7 @@ sub mark_all_double_bonds
 
     # By default, whenever there is a choice between atoms, the one with
     # lowest position in the input SMILES is chosen:
-    $order_sub = sub { return $_[0]->{number} } unless $order_sub;
+    $order_sub = sub { $_[0]->{number} } unless $order_sub;
 
     # Select non-ring double bonds
     my @double_bonds = grep { is_double_bond( $graph, @$_ ) &&
@@ -123,7 +123,7 @@ sub mark_cis_trans
 
     # By default, whenever there is a choice between atoms, the one with
     # lowest position in the input SMILES is chosen:
-    $order_sub = sub { return $_[0]->{number} } unless $order_sub;
+    $order_sub = sub { $_[0]->{number} } unless $order_sub;
 
     my @neighbours2 = $graph->neighbours( $atom2 );
     my @neighbours3 = $graph->neighbours( $atom3 );
@@ -353,14 +353,14 @@ sub cis_trans_to_pseudoedges
         next if @atom2_neighbours < 2 || @atom2_neighbours > 3 ||
                 @atom3_neighbours < 2 || @atom3_neighbours > 3;
 
-        my( $atom1 ) = grep { is_cis_trans_bond( $moiety, $atom2, $_ ) }
-                            @atom2_neighbours;
-        my( $atom4 ) = grep { is_cis_trans_bond( $moiety, $atom3, $_ ) }
-                            @atom3_neighbours;
+        my $atom1 = first { is_cis_trans_bond( $moiety, $atom2, $_ ) }
+                          @atom2_neighbours;
+        my $atom4 = first { is_cis_trans_bond( $moiety, $atom3, $_ ) }
+                          @atom3_neighbours;
         next unless $atom1 && $atom4;
 
-        my( $atom1_para ) = grep { $_ != $atom1 && $_ != $atom3 } @atom2_neighbours;
-        my( $atom4_para ) = grep { $_ != $atom4 && $_ != $atom2 } @atom3_neighbours;
+        my $atom1_para = first { $_ != $atom1 && $_ != $atom3 } @atom2_neighbours;
+        my $atom4_para = first { $_ != $atom4 && $_ != $atom2 } @atom3_neighbours;
 
         my $is_cis = $moiety->get_edge_attribute( $atom1, $atom2, 'bond' ) ne
                      $moiety->get_edge_attribute( $atom3, $atom4, 'bond' );
