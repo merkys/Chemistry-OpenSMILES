@@ -89,8 +89,13 @@ sub clean_chiral_centers($$)
                     is_chiral_planar( $atom )  ||
                     is_chiral_tetrahedral( $atom ) ||
                     is_chiral_trigonal_bipyramidal( $atom );
+
+        # Find neighbours which constitute ring bonds with atom in question
+        my @ring_neighbours = grep { is_ring_bond( $moiety, $atom, $_, scalar $moiety->edges ) }
+                                   $moiety->neighbours( $atom );
+
         # Anomers must not loose chirality settings in any way
-        next if is_ring_atom( $moiety, $atom, scalar $moiety->edges );
+        next if @ring_neighbours;
 
         my $hcount = exists $atom->{hcount} ? $atom->{hcount} : 0;
         my @neighbours = $moiety->neighbours( $atom );
