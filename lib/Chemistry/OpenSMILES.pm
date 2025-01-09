@@ -94,9 +94,6 @@ sub clean_chiral_centers($$)
         my @ring_neighbours = grep { is_ring_bond( $moiety, $atom, $_, scalar $moiety->edges ) }
                                    $moiety->neighbours( $atom );
 
-        # Anomers must not loose chirality settings in any way
-        next if @ring_neighbours;
-
         my $hcount = exists $atom->{hcount} ? $atom->{hcount} : 0;
         my @neighbours = $moiety->neighbours( $atom );
         if( is_chiral_allenal( $atom ) ) {
@@ -124,6 +121,20 @@ sub clean_chiral_centers($$)
             next if scalar keys %colors == 5;
         } else {
             next if scalar keys %colors == 4;
+        }
+
+        # Special treatment for anomers
+        if( @ring_neighbours ) {
+            next unless is_chiral_tetrahedral( $atom );
+            next unless @ring_neighbours == 2;
+            next if $hcount == 1;
+            if( !$hcount ) {
+                my @non_ring_neighbours = grep { $_ != $ring_neighbours[0] &&
+                                                 $_ != $ring_neighbours[1] }
+                                               @neighbours;
+                next unless $color_sub->( $non_ring_neighbours[0] ) eq
+                            $color_sub->( $non_ring_neighbours[1] );
+            }
         }
 
         delete $atom->{chirality};
