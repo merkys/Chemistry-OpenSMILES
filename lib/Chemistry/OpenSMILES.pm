@@ -90,7 +90,7 @@ sub clean_chiral_centers($$)
                     is_chiral_tetrahedral( $atom ) ||
                     is_chiral_trigonal_bipyramidal( $atom );
 
-        # Find neighbours which constitute ring bonds with atom in question
+        # Find neighbours which constitute ring bonds with the atom in question
         my @ring_neighbours = grep { is_ring_bond( $moiety, $atom, $_, scalar $moiety->edges ) }
                                    $moiety->neighbours( $atom );
 
