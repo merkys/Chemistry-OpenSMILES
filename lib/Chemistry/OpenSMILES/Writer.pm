@@ -60,7 +60,7 @@ sub write_SMILES
                                    if( $vertex_symbols{$unseen} ) {
                                        ( $seen, $unseen ) = ( $unseen, $seen );
                                    }
-                                   push @symbols, _tree_edge( $seen, $unseen, $self, $order_sub );
+                                   push @symbols, _tree_edge( $seen, $unseen, $self );
                                    $discovered_from{$unseen} = $seen },
 
             non_tree_edge => sub { my @sorted = sort { $vertex_symbols{$a} <=>
