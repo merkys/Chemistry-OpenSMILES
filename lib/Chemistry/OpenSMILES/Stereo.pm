@@ -231,7 +231,7 @@ sub mark_cis_trans
         my $other = $graph->get_edge_attribute( $atom1, $atom2, 'bond' );
         $other = toggle_cistrans $other if $setting eq 'cis';
         $other = toggle_cistrans $other if $atom1->{number} > $atom2->{number};
-        $other = toggle_cistrans $other if $atom4->{number} < $atom3->{number};
+        $other = toggle_cistrans $other if $atom3->{number} > $atom4->{number};
         $graph->set_edge_attribute( $atom3, $atom4, 'bond', $other );
         $atom4_marked = $atom4 unless $atom4_marked;
     }
@@ -244,7 +244,7 @@ sub mark_cis_trans
         my $other = $graph->get_edge_attribute( $atom3, $atom4, 'bond' );
         $other = toggle_cistrans $other if $setting eq 'cis';
         $other = toggle_cistrans $other if $atom1->{number} > $atom2->{number};
-        $other = toggle_cistrans $other if $atom4->{number} < $atom3->{number};
+        $other = toggle_cistrans $other if $atom3->{number} > $atom4->{number};
         $graph->set_edge_attribute( $atom1, $atom2, 'bond', $other );
     }
 }
