@@ -87,9 +87,9 @@ sub write_SMILES
 
         if( $order_sub ) {
             $operations->{first_root} =
-                sub { return $order_sub->( $_[1], $_[0]->graph ) };
+                sub { $order_sub->( $_[1], $_[0]->graph ) };
             $operations->{next_successor} =
-                sub { return $order_sub->( $_[1], $_[0]->graph ) };
+                sub { $order_sub->( $_[1], $_[0]->graph ) };
         }
 
         my $traversal = Graph::Traversal::DFS->new( $graph, %$operations );
