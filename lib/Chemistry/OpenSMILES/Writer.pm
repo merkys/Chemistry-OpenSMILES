@@ -85,12 +85,10 @@ sub write_SMILES
             next_root => undef,
         };
 
-        if( $order_sub ) {
-            $operations->{first_root} =
-                sub { $order_sub->( $_[1], $_[0]->graph ) };
-            $operations->{next_successor} =
-                sub { $order_sub->( $_[1], $_[0]->graph ) };
-        }
+        $operations->{first_root} =
+            sub { $order_sub->( $_[1], $_[0]->graph ) };
+        $operations->{next_successor} =
+            sub { $order_sub->( $_[1], $_[0]->graph ) };
 
         my $traversal = Graph::Traversal::DFS->new( $graph, %$operations );
         $traversal->dfs;
