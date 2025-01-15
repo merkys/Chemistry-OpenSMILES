@@ -251,10 +251,7 @@ sub write_SMILES
 }
 
 # DEPRECATED
-sub write
-{
-    &write_SMILES;
-}
+sub write { &write_SMILES }
 
 sub _tree_edge
 {
