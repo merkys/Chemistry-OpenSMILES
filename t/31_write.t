@@ -7,7 +7,7 @@ use Chemistry::OpenSMILES::Writer qw(write_SMILES);
 use Test::More;
 
 my @cases = (
-    [ 'C(=C/CO)\CO', 'C(=C(/C(O([H]))([H])([H]))([H]))(\C(O([H]))([H])([H]))([H])', '[H](O(C([H])([H])(/C([H])(=C([H])(/C([H])([H])(O([H])))))))' ],
+    [ 'C(=C/[C]O)\[C]O', 'C(=C(/[C](O([H])))([H]))(\[C](O([H])))([H])', '[H](O([C](/C([H])(=C([H])(/[C](O([H])))))))' ],
 );
 
 plan tests => 2 * scalar @cases;
