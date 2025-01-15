@@ -162,7 +162,7 @@ sub mark_cis_trans
 
     if( @cistrans_bonds2 + @cistrans_bonds3 > 1 ) {
         warn 'cannot represent cis/trans bond between atoms ' .
-             join( ' and ', sort map { $_->{number} } $atom2, $atom3 ) .
+             join( ' and ', sort { $a <=> $b } map { $_->{number} } $atom2, $atom3 ) .
              ' as there are other cis/trans bonds nearby' . "\n";
         return;
     }
@@ -173,7 +173,7 @@ sub mark_cis_trans
          !any { is_single_bond( $graph, $atom3, $_ ) } @neighbours3) ) {
         # Azide group (N=N#N) or conjugated allene-like systems (=C=)
         warn 'atoms ' .
-             join( ' and ', sort map { $_->{number} } $atom2, $atom3 ) .
+             join( ' and ', sort { $a <=> $b } map { $_->{number} } $atom2, $atom3 ) .
              ' are part of conjugated double/triple bond system, thus ' .
              'cis/trans setting of their bond is impossible to represent ' .
              '(not supported yet)' . "\n";
@@ -212,7 +212,7 @@ sub mark_cis_trans
 
     if( !$bond_will_be_marked ) {
         warn 'cannot represent cis/trans bond between atoms ' .
-             join( ' and ', sort map { $_->{number} } $atom2, $atom3 ) .
+             join( ' and ', sort { $a <=> $b } map { $_->{number} } $atom2, $atom3 ) .
              ' as there are no eligible single bonds nearby' . "\n";
         return;
     }
