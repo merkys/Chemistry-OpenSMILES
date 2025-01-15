@@ -383,6 +383,8 @@ sub cis_trans_to_pseudoedges
         my $is_cis = $moiety->get_edge_attribute( $atom1, $atom2, 'bond' ) ne
                      $moiety->get_edge_attribute( $atom3, $atom4, 'bond' );
 
+        # Here atom numbers have to be compared to differentiate between cases like:
+        # C/C=C\C and C(\C)=C/C
         $is_cis = !$is_cis if $atom1->{number} > $atom2->{number};
         $is_cis = !$is_cis if $atom3->{number} > $atom4->{number};
 
