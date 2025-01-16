@@ -225,10 +225,9 @@ sub write_SMILES
                 for my $j (sort { $a <=> $b } keys %{$rings->{$i}}) {
                     next if $i > $j;
                     if( !@ring_ids ) {
-                        # All 100 rings are open now. There is no other
-                        # solution but to terminate the program.
-                        die 'cannot represent more than 100 open ring' .
-                            ' bonds';
+                        # All 100 rings are open now.
+                        # There is no other solution but to terminate the program.
+                        die 'cannot represent more than 100 open ring bonds' . "\n";
                     }
                     $symbols[$i] .= $rings->{$i}{$j} .
                                     ($ring_ids[0] < 10 ? '' : '%') .
@@ -365,7 +364,7 @@ sub _square_planar_chirality
 
     if( join( ',', sort @_ ) ne '0,1,2,3' ) {
         die '_square_planar_chirality() accepts only permutations of ' .
-            "numbers '0', '1', '2' and '3', unexpected input received";
+            "numbers '0', '1', '2' and '3', unexpected input received\n";
     }
 
     # Rotations until 0 is first
@@ -403,7 +402,7 @@ sub _trigonal_bipyramidal_chirality
 
     if( join( ',', sort @target ) ne '0,1,2,3,4' ) {
         die '_trigonal_bipyramidal_chirality() accepts only permutations of ' .
-            "numbers '0', '1', '2', '3' and '4', unexpected input received";
+            "numbers '0', '1', '2', '3' and '4', unexpected input received\n";
     }
 
     $chirality =~ s/^\@TB//;
@@ -448,7 +447,7 @@ sub _octahedral_chirality
 
     if( join( ',', sort @target ) ne '0,1,2,3,4,5' ) {
         die '_octahedral_chirality() accepts only permutations of ' .
-            "numbers '0', '1', '2', '3', '4' and '5, unexpected input received";
+            "numbers '0', '1', '2', '3', '4' and '5, unexpected input received\n";
     }
 
     $chirality =~ s/^\@OH//;
@@ -509,7 +508,7 @@ sub _octahedral_chirality
     } elsif( $target[0] == $sides[2] && $target[1] == $sides[1] ) {
         ( $shape, $order ) = ( 'U', '@' );
     } else {
-        die 'unexpected situation achieved in _octahedral_chirality()';
+        die 'unexpected situation achieved in _octahedral_chirality()' . "\n";
     }
     $chirality = 1 + first { $OH[$_]->{shape}   eq $shape &&
                              $OH[$_]->{order}   eq $order &&
