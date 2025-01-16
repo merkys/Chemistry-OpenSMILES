@@ -217,10 +217,14 @@ sub mark_cis_trans
         return;
     }
 
-    # If there is an atom with cis/trans bond, then this is this one
+    # If there is an atom with cis/trans bond, then this is this one.
+    # Adjustment to pre-order (neither the requested order, nor the post-order!) is needed to maintain relative settings in order.
+    # Otherwise nondeterminism may occur and result in different (albeit isomorphic) output SMILES like:
+    # C/C=C\CCCCC/C=C\C
+    # C/C=C\CCCCC\C=C/C
     my( $first_atom ) = @cistrans_bonds2 ? @cistrans_bonds2 : @neighbours2;
     if( !@cistrans_bonds2 ) {
-        $graph->set_edge_attribute( $first_atom, $atom2, 'bond', '/' );
+        $graph->set_edge_attribute( $first_atom, $atom2, 'bond', $first_atom->{number} < $atom2->{number} ? '/' : '\\' );
     }
 
     my $atom4_marked;
