@@ -227,6 +227,7 @@ sub mark_cis_trans
         $graph->set_edge_attribute( $first_atom, $atom2, 'bond', $first_atom->{number} < $atom2->{number} ? '/' : '\\' );
     }
 
+    # Adjustments to pre-order (neither the requested order, nor the post-order!) are done here.
     my $atom4_marked;
     for my $atom4 (@neighbours3) {
         my $atom1 = $first_atom;
