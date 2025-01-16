@@ -28,6 +28,10 @@ our @EXPORT_OK = qw(
 my %shape_to_SP = ( 'U' => '@SP1', '4' => '@SP2', 'Z' => '@SP3' );
 my %SP_to_shape = reverse %shape_to_SP;
 
+# write_SMILES() does not necessary respect the order subroutine: if performs DFS guided by the requested order.
+# Thus before calling write_SMILES(), the exact post-order is not known.
+# Only pre-order is known, thus relative properties, such as cis/trans markers, have to be adjusted to pre-order.
+# Thus order-dependent markers have to be adjusted to pre-order.
 sub write_SMILES
 {
     my( $what, $options ) = @_;
@@ -310,6 +314,8 @@ sub _pre_vertex
     return $is_simple ? $atom : "[$atom]";
 }
 
+# _depict_bond() gets vertices in order of their appearance in the post-order.
+# It flips '/' <=> '\' if post-order is opposite from pre-order.
 sub _depict_bond
 {
     my( $u, $v, $graph ) = @_;
