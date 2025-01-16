@@ -7,7 +7,7 @@ use Chemistry::OpenSMILES::Writer qw(write_SMILES);
 use Test::More;
 
 my @cases = (
-    [ 'C(=C/[C]O)\[C]O', 'C(=C(/[C](O([H])))([H]))(\[C](O([H])))([H])', '[H](O([C](/C([H])(=C([H])(/[C](O([H])))))))', 'O([C](\C(=C(\[C](O([H])))([H]))([H])))([H])' ],
+    [ '[CH:4](=[CH:3]/[C:2][O:1])\[C:5][O:6]', '[C:4](=[C:3](/[C:2]([O:1]))([H]))(\[C:5]([O:6]))([H])', '[H]([C:3](/[C:2]([O:1]))(=[C:4]([H])(\[C:5]([O:6]))))', '[O:1]([C:2](\[C:3](=[C:4](\[C:5]([O:6]))([H]))([H])))' ],
 );
 
 plan tests => 3 * scalar @cases;
@@ -26,34 +26,24 @@ for my $case (@cases) {
     $result = write_SMILES( \@moieties, { order_sub => \&reverse_order } );
     is $result, $case->[2];
 
-    $result = write_SMILES( \@moieties, { order_sub => \&particular_order } );
+    $result = write_SMILES( \@moieties, { order_sub => \&class_order } );
     is $result, $case->[3];
 }
 
 sub reverse_order
 {
-    my( $vertices ) = @_;
+    my $vertices = shift;
     my @sorted = sort { $vertices->{$b}{number} <=>
                         $vertices->{$a}{number} } keys %$vertices;
     return $vertices->{shift @sorted};
 }
 
-sub particular_order
+sub class_order
 {
-    my( $vertices ) = @_;
-    my %order = (
-        0 => 3,
-        1 => 2,
-        2 => 1,
-        3 => 0,
-        4 => 4,
-        5 => 5,
-        6 => 6,
-        7 => 7,
-        8 => 8,
-        9 => 9,
-    );
-    my @sorted = sort { $order{$vertices->{$a}{number}} <=>
-                        $order{$vertices->{$b}{number}} } keys %$vertices;
+    my $vertices = shift;
+    my @classed   = grep {  $vertices->{$_}{class} } keys %$vertices;
+    my @classless = grep { !$vertices->{$_}{class} } keys %$vertices;
+    my @sorted = ( (sort {  $vertices->{$a}{class}  <=> $vertices->{$b}{class}  } @classed),
+                   (sort {  $vertices->{$a}{number} <=> $vertices->{$b}{number} } @classless) );
     return $vertices->{shift @sorted};
 }
