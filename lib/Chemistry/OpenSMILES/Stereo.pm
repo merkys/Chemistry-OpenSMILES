@@ -262,9 +262,10 @@ sub chirality_to_pseudograph
     for my $atom ($moiety->vertices) {
         next unless is_chiral $atom;
 
-        my $has_lone_pair;
+        next unless exists $atom->{chirality_neighbours};
         my @chirality_neighbours = @{$atom->{chirality_neighbours}};
 
+        my $has_lone_pair;
         if( Chemistry::OpenSMILES::is_chiral_tetrahedral( $atom ) ||
             Chemistry::OpenSMILES::is_chiral_planar( $atom ) ) {
             next unless @chirality_neighbours >= 3 &&
