@@ -481,6 +481,34 @@ sub _validate($@)
     # TODO: SP, TB, OH chiral centers
 }
 
+sub _allene_graph
+{
+    my( $moiety ) = @_;
+
+    my $graph = $moiety->copy;
+    $graph->delete_edges( map  { @$_ }
+                          grep { !is_double_bond( $moiety, @$_ ) }
+                               $moiety->edges );
+    $graph->delete_vertices( grep { !$graph->degree( $_ ) } $graph->vertices );
+
+    for my $system ($graph->connected_components) {
+        my @d1 = grep { $graph->degree( $_ ) == 1 } @$system;
+        my @d2 = grep { $graph->degree( $_ ) == 2 } @$system;
+        if (@d1 == 2 && @d2 && @d1 + @d2 == @$system ) {
+            $graph->set_edge_attribute( @d1, 'allene', 'end' );
+            if( @d2 % 2 ) {
+                my( $center ) = $graph->subgraph( $system )->center_vertices;
+                $graph->set_edge_attribute( $center, $d1[0], 'allene', 'mid' );
+                $graph->set_edge_attribute( $center, $d1[1], 'allene', 'mid' );
+            }
+        } else {
+            $graph->delete_vertices( @$system );
+        }
+    }
+
+    return $graph;
+}
+
 sub _neighbours_per_bond_type
 {
     my( $moiety, $atom ) = @_;
