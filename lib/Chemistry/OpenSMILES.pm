@@ -378,16 +378,19 @@ sub _validate($@)
                              $atom->{symbol},
                              $atom->{number},
                              $moiety->degree($atom);
-            } elsif( $moiety->degree($atom) == 4 && $color_sub ) {
-                my %colors = map { ($color_sub->( $_ ) => 1) }
-                                 $moiety->neighbours($atom);
-                if( scalar keys %colors != 4 &&
+            } elsif( $moiety->degree($atom) == 3 || $moiety->degree($atom) == 4 ) {
+                if( $color_sub &&
                     !is_ring_atom( $moiety, $atom, scalar $moiety->edges ) ) {
-                    warn sprintf 'tetrahedral chiral setting for %s(%d) ' .
-                                 'is not needed as not all 4 neighbours ' .
-                                 'are distinct' . "\n",
-                                 $atom->{symbol},
-                                 $atom->{number};
+                    my $has_lone_pair = $moiety->degree($atom) == 3;
+                    my %colors = map { ($color_sub->( $_ ) => 1) }
+                                     $moiety->neighbours($atom);
+                    if( scalar keys %colors != 4 - $has_lone_pair ) {
+                        warn sprintf 'tetrahedral chiral setting for %s(%d) ' .
+                                     'is not needed as not all 4 neighbours ' .
+                                     '(including possible lone pair) are distinct' . "\n",
+                                     $atom->{symbol},
+                                     $atom->{number};
+                    }
                 }
             } else {
                 warn sprintf 'chirality \'%s\' observed for %s(%d) with %d ' .
