@@ -391,7 +391,7 @@ sub _validate($@)
         if( !is_chiral( $atom ) && $moiety->degree( $atom ) == 4 ) {
             my $color_sub_local = $color_sub;
             if( !$color_sub_local ) {
-                $color_sub_local = sub { return $_[0]->{symbol} };
+                $color_sub_local = sub { $_[0]->{symbol} };
             }
             my %colors = map { ($color_sub_local->( $_ ) => 1) }
                              $moiety->neighbours($atom);

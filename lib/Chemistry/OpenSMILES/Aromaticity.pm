@@ -141,7 +141,7 @@ sub electron_cycles
         my %seen;
         my %prev;
         my $operations = {
-            start      => sub { return $start },
+            start      => sub { $start },
             pre        => sub { $seen{$_[0]} = 1 },
             pre_edge   => sub {
                 my( $u, $v ) = @_;
