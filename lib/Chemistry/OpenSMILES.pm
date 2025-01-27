@@ -362,12 +362,17 @@ sub _validate($@)
 {
     my( $moiety, $color_sub ) = @_;
 
+    my $color_by_element = sub { $_[0]->{symbol} };
+
     for my $atom (sort { $a->{number} <=> $b->{number} } $moiety->vertices) {
         # TODO: AL chiral centers also have to be checked
         if( is_chiral_tetrahedral( $atom ) ) {
-            if( $moiety->degree($atom) < 3 ) {
+            if( $moiety->degree($atom) == 2 &&
+                all { is_double_bond( $atom, $_ ) } $moiety->neighbours( $atom ) ) {
+                # Ignore tetrahedral allenes
+                # FIXME: Properly check tetrahedral allenes
+            } elsif( $moiety->degree($atom) < 3 ) {
                 # FIXME: there should be a strict mode to forbid lone pairs
-                # FIXME: tetrahedral allenes are false-positives
                 warn sprintf 'chiral center %s(%d) has %d bonds while ' .
                              'at least 3 is required' . "\n",
                              $atom->{symbol},
@@ -389,11 +394,9 @@ sub _validate($@)
 
         # Warn about unmarked tetrahedral chiral centers
         if( !is_chiral( $atom ) && $moiety->degree( $atom ) == 4 ) {
-            my $color_sub_local = $color_sub;
-            if( !$color_sub_local ) {
-                $color_sub_local = sub { $_[0]->{symbol} };
-            }
-            my %colors = map { ($color_sub_local->( $_ ) => 1) }
+            my %colors = map { $color_sub
+                                ? ($color_sub->( $_ ) => 1)
+                                : ($color_by_element->( $_ ) => 1) }
                              $moiety->neighbours($atom);
             if( scalar keys %colors == 4 ) {
                 warn sprintf 'atom %s(%d) has 4 distinct neighbours, ' .

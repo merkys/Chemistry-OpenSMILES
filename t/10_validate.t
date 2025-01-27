@@ -12,6 +12,7 @@ my %cases = (
     'C(Cl)(F)(O)' => 'atom C(0) has 4 distinct neighbours, but does not have a chiral setting',
     'C11' => 'atom C(0) has bond to itself',
     'C/C' => 'cis/trans bond is defined between atoms C(0) and C(1), but neither of them is attached to a double bond',
+    'NC(Br)=[C@]=C(O)C' => undef,
 );
 
 plan tests => scalar keys %cases;
