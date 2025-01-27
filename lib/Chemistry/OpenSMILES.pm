@@ -428,48 +428,43 @@ sub _validate($@)
                          $A->{number};
         }
 
-        if( $moiety->has_edge_attribute( @$bond, 'bond' ) ) {
-            my $bond_type = $moiety->get_edge_attribute( @$bond, 'bond' );
-            if( $bond_type eq '=' ) {
-                # Test cis/trans bonds
-                # FIXME: Not sure how to check which definition belongs to
-                # which of the double bonds. See COD entry 1547257.
-                for my $atom (@$bond) {
-                    my %bond_types = _neighbours_per_bond_type( $moiety,
-                                                                $atom );
-                    foreach ('/', '\\') {
-                        if( $bond_types{$_} && @{$bond_types{$_}} > 1 ) {
-                            warn sprintf 'atom %s(%d) has %d bonds of type \'%s\', ' .
-                                         'cis/trans definitions must not conflict' . "\n",
-                                         $atom->{symbol},
-                                         $atom->{number},
-                                         scalar @{$bond_types{$_}},
-                                         $_;
-                        }
+        if( is_double_bond( $moiety, @$bond ) ) {
+            # Test cis/trans bonds
+            # FIXME: Not sure how to check which definition belongs to
+            # which of the double bonds. See COD entry 1547257.
+            for my $atom (@$bond) {
+                my %bond_types = _neighbours_per_bond_type( $moiety, $atom );
+                foreach ('/', '\\') {
+                    if( $bond_types{$_} && @{$bond_types{$_}} > 1 ) {
+                        warn sprintf 'atom %s(%d) has %d bonds of type \'%s\', ' .
+                                     'cis/trans definitions must not conflict' . "\n",
+                                     $atom->{symbol},
+                                     $atom->{number},
+                                     scalar @{$bond_types{$_}},
+                                     $_;
                     }
                 }
-            } elsif( $bond_type =~ /^[\\\/]$/ ) {
-                # Test if next to a double bond.
-                # FIXME: Yields false-positives for delocalised bonds,
-                # see COD entry 1501863.
-                # FIXME: What about triple bond? See COD entry 4103591.
-                my %bond_types;
-                for my $atom (@$bond) {
-                    my %bond_types_now = _neighbours_per_bond_type( $moiety,
-                                                                    $atom );
-                    for my $key (keys %bond_types_now) {
-                        push @{$bond_types{$key}}, @{$bond_types_now{$key}};
-                    }
+            }
+        } elsif( is_cis_trans_bond( $moiety, @$bond ) ) {
+            # Test if next to a double bond.
+            # FIXME: Yields false-positives for delocalised bonds,
+            # see COD entry 1501863.
+            # FIXME: What about triple bond? See COD entry 4103591.
+            my %bond_types;
+            for my $atom (@$bond) {
+                my %bond_types_now = _neighbours_per_bond_type( $moiety, $atom );
+                for my $key (keys %bond_types_now) {
+                    push @{$bond_types{$key}}, @{$bond_types_now{$key}};
                 }
-                if( !$bond_types{'='} ) {
-                    warn sprintf 'cis/trans bond is defined between atoms ' .
-                                 '%s(%d) and %s(%d), but neither of them ' .
-                                 'is attached to a double bond' . "\n",
-                                 $A->{symbol},
-                                 $A->{number},
-                                 $B->{symbol},
-                                 $B->{number};
-                }
+            }
+            if( !$bond_types{'='} ) {
+                warn sprintf 'cis/trans bond is defined between atoms ' .
+                             '%s(%d) and %s(%d), but neither of them ' .
+                             'is attached to a double bond' . "\n",
+                             $A->{symbol},
+                             $A->{number},
+                             $B->{symbol},
+                             $B->{number};
             }
         }
     }
