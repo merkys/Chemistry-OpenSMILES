@@ -432,9 +432,11 @@ sub _validate($@)
             # Test cis/trans bonds
             # FIXME: Not sure how to check which definition belongs to
             # which of the double bonds. See COD entry 1547257.
+            my $cis_trans_bonds = 0;
             for my $atom (@$bond) {
                 my %bond_types = _neighbours_per_bond_type( $moiety, $atom );
                 foreach ('/', '\\') {
+                    $cis_trans_bonds += @{$bond_types{$_}} if $bond_types{$_};
                     if( $bond_types{$_} && @{$bond_types{$_}} > 1 ) {
                         warn sprintf 'atom %s(%d) has %d bonds of type \'%s\', ' .
                                      'cis/trans definitions must not conflict' . "\n",
@@ -444,6 +446,15 @@ sub _validate($@)
                                      $_;
                     }
                 }
+            }
+            if( $cis_trans_bonds == 1 ) {
+                my @bond = sort { $a->{number} <=> $b->{number} } @$bond;
+                warn sprintf 'double between atoms %s(%d) and %s(%d) ' .
+                             'has only one cis/trans marker' . "\n",
+                             $bond[0]->{symbol},
+                             $bond[0]->{number},
+                             $bond[1]->{symbol},
+                             $bond[1]->{number};
             }
         } elsif( is_cis_trans_bond( $moiety, @$bond ) ) {
             # Test if next to a double bond.
