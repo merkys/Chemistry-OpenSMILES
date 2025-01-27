@@ -12,7 +12,12 @@ my %cases = (
     'C(Cl)(F)(O)' => 'atom C(0) has 4 distinct neighbours, but does not have a chiral setting',
     'C11' => 'atom C(0) has bond to itself',
     'C/C' => 'cis/trans bond is defined between atoms C(0) and C(1), but neither of them is attached to a double bond',
+
+    # OpenSMILES specification v1.0
     'NC(Br)=[C@]=C(O)C' => undef,
+
+    # COD entry 1501863, r297409
+    'B(C(=CC(C)(C)C)c1c(F)c(F)c(F)c(F)c1F)(c1c(F)c(F)c(F)c(F)c1F)/c1c(F)c(F)c(F)c(F)c1F' => 'cis/trans bond is defined between atoms B(0) and c(29), but neither of them is attached to a double bond',
 );
 
 plan tests => scalar keys %cases;
@@ -25,5 +30,5 @@ for (sort keys %cases) {
     my( $graph ) = $parser->parse( $_ );
     Chemistry::OpenSMILES::_validate( $graph );
     $warning =~ s/\n$// if defined $warning;
-    is( $warning, $cases{$_} );
+    is $warning, $cases{$_};
 }
