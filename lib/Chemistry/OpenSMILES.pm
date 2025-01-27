@@ -389,6 +389,15 @@ sub _validate($@)
                                  $atom->{symbol},
                                  $atom->{number};
                 }
+            } else {
+                warn sprintf 'chirality \'%s\' observed for %s(%d) with %d ' .
+                             'neighbours, can only process tetrahedral ' .
+                             'chiral or square planar centers with possible ' .
+                             'lone pairs' . "\n",
+                             $atom->{chirality},
+                             $atom->{symbol},
+                             $atom->{number},
+                             $moiety->degree($atom);
             }
         }
 
