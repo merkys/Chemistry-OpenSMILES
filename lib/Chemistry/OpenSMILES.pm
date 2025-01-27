@@ -9,7 +9,7 @@ use 5.0100;
 
 use Chemistry::OpenSMILES::Stereo::Tables qw( @OH @TB );
 use Graph::Traversal::BFS;
-use List::Util qw( all any first none sum0 );
+use List::Util qw( all any first max min none sum0 );
 
 require Exporter;
 our @ISA = qw( Exporter );
@@ -419,8 +419,9 @@ sub _validate($@)
         }
     }
 
-    # FIXME: establish deterministic order
-    for my $bond ($moiety->edges) {
+    for my $bond (sort { min( map { $_->{number} } @$a ) <=> min( map { $_->{number} } @$b ) ||
+                         max( map { $_->{number} } @$a ) <=> max( map { $_->{number} } @$b ) }
+                       $moiety->edges) {
         my( $A, $B ) = sort { $a->{number} <=> $b->{number} } @$bond;
         if( $A eq $B ) {
             warn sprintf 'atom %s(%d) has bond to itself' . "\n",
@@ -448,13 +449,10 @@ sub _validate($@)
                 }
             }
             if( $cis_trans_bonds == 1 ) {
-                my @bond = sort { $a->{number} <=> $b->{number} } @$bond;
                 warn sprintf 'double between atoms %s(%d) and %s(%d) ' .
                              'has only one cis/trans marker' . "\n",
-                             $bond[0]->{symbol},
-                             $bond[0]->{number},
-                             $bond[1]->{symbol},
-                             $bond[1]->{number};
+                             $A->{symbol}, $A->{number},
+                             $B->{symbol}, $B->{number};
             }
         } elsif( is_cis_trans_bond( $moiety, @$bond ) ) {
             # Test if next to a double bond.
