@@ -14,6 +14,7 @@ my %cases = (
 
     'F/C=C=C=C/F' => undef,
     'F/C=C=C=CF' => 'allene system between atoms C(1) and C(4) has only one cis/trans marker',
+    'FC=C=C=CF' => 'allene system between atoms C(1) and C(4) has 4 neighbours, but does not have cis/trans setting',
 );
 
 plan tests => scalar keys %cases;
@@ -26,5 +27,5 @@ for (sort keys %cases) {
     my( $graph ) = $parser->parse( $_ );
     Chemistry::OpenSMILES::_validate( $graph, sub { $_[0]->{symbol} } );
     $warning =~ s/\n$// if defined $warning;
-    is $warning, $cases{$_};
+    is $warning, $cases{$_}, $_;
 }
