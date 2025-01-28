@@ -406,6 +406,8 @@ sub _validate($@)
                              map  { $moiety->edges_at($_) } @ends;
             my %colors = map { ($color_sub->( $_ ) => 1) } @neighbours;
             if( scalar keys %colors != 4 ) {
+                # FIXME: Emits false positives for coordinating metals.
+                # Need to think of a heuristic to exclude them.
                 warn sprintf 'tetrahedral chiral allenal setting for ' .
                              '%s(%d) is not needed as not all 4 neighbours ' .
                              'are distinct' . "\n",
@@ -490,6 +492,9 @@ sub _validate($@)
             }
             next if $allenes->has_edge( @$bond ); # Allene systems are checked below
             if( $cis_trans_bonds == 1 ) {
+                # FIXME: Source of false-positives.
+                # Cis/trans bond is out of place if none of neighbouring double bonds have other cis/trans bonds.
+                # This has to include allenal systems.
                 warn sprintf 'double bond between atoms %s(%d) and %s(%d) ' .
                              'has only one cis/trans marker' . "\n",
                              $A->{symbol}, $A->{number},
