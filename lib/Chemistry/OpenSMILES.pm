@@ -412,9 +412,7 @@ sub _validate($@)
                              $atom->{symbol},
                              $atom->{number};
             }
-        }
-
-        if( is_chiral_tetrahedral($atom) ) {
+        } elsif( is_chiral_tetrahedral($atom) ) {
             if( $moiety->degree($atom) < 3 ) {
                 # TODO: there should be a strict mode to forbid lone pairs
                 warn sprintf 'tetrahedral chiral center %s(%d) has %d bonds ' .
@@ -446,13 +444,11 @@ sub _validate($@)
                              $atom->{symbol},
                              $atom->{number};
             }
-        }
-
-        # Warn about unmarked tetrahedral chiral centers
-        if( !is_chiral( $atom ) && $moiety->degree( $atom ) == 4 ) {
+        } elsif( !is_chiral($atom) && $moiety->degree($atom) == 4 ) {
+            # Warn about unmarked tetrahedral chiral centers
             my %colors = map { $color_sub
-                                ? ($color_sub->( $_ ) => 1)
-                                : ($color_by_element->( $_ ) => 1) }
+                                ? ($color_sub->($_) => 1)
+                                : ($color_by_element->($_) => 1) }
                              $moiety->neighbours($atom);
             if( scalar keys %colors == 4 ) {
                 warn sprintf 'atom %s(%d) has 4 distinct neighbours, ' .
@@ -471,6 +467,7 @@ sub _validate($@)
             warn sprintf 'atom %s(%d) has bond to itself' . "\n",
                          $A->{symbol},
                          $A->{number};
+            next;
         }
 
         if( is_double_bond( $moiety, @$bond ) ) {
