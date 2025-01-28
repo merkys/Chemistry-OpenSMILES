@@ -19,8 +19,7 @@ for (sort keys %cases) {
 
     my $parser   = Chemistry::OpenSMILES::Parser->new;
     my( $graph ) = $parser->parse( $_ );
-    Chemistry::OpenSMILES::_validate( $graph,
-                                      sub { $_[0]->{symbol} } );
+    Chemistry::OpenSMILES::_validate( $graph, sub { $_[0]->{symbol} } );
     $warning =~ s/\n$// if defined $warning;
     is $warning, $cases{$_};
 }

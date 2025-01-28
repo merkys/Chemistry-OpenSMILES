@@ -375,11 +375,14 @@ sub _validate($@)
                            #~ $allenes->neighbours($atom) ) ) {
             if( $color_sub &&
                 !is_ring_atom( $moiety, $atom, scalar $moiety->edges ) ) {
-                my @neighbours = grep { $allenes->has_edge_attribute( $atom, $_, 'allene' ) &&
-                                        $allenes->get_edge_attribute( $atom, $_, 'allene' ) eq 'mid' }
-                                      $allenes->neighbours($atom);
-                my %colors = map { ($color_sub->( $_ ) => 1) }
-                                 @neighbours;
+                my @ends = grep { $allenes->has_edge_attribute( $atom, $_, 'allene' ) &&
+                                  $allenes->get_edge_attribute( $atom, $_, 'allene' ) eq 'mid' }
+                                $allenes->neighbours($atom);
+                my @neighbours = grep { $_ ne $ends[0] && $_ ne $ends[1] }
+                                 map  { @$_ }
+                                 grep { !$allenes->has_edge( @$_ ) }
+                                 map  { $moiety->edges_at($_) } @ends;
+                my %colors = map { ($color_sub->( $_ ) => 1) } @neighbours;
                 if( scalar keys %colors != 4 ) {
                     warn sprintf 'tetrahedral chiral allenal setting for ' .
                                  '%s(%d) is not needed as not all 4 neighbours ' .
