@@ -472,8 +472,7 @@ sub _validate($@)
 
         if( is_double_bond( $moiety, @$bond ) ) {
             # Test cis/trans bonds
-            # FIXME: Not sure how to check which definition belongs to
-            # which of the double bonds. See COD entry 1547257.
+            # Detect conflicting cis/trans markers, see COD entry 1547257, r297409
             my $cis_trans_bonds = 0;
             for my $atom (@$bond) {
                 my %bond_types = _neighbours_per_bond_type( $moiety, $atom );
@@ -489,7 +488,7 @@ sub _validate($@)
                     }
                 }
             }
-            next if $allenes->has_edge( @$bond ); # TODO: Check allene systems
+            next if $allenes->has_edge( @$bond ); # Allene systems are checked below
             if( $cis_trans_bonds == 1 ) {
                 warn sprintf 'double bond between atoms %s(%d) and %s(%d) ' .
                              'has only one cis/trans marker' . "\n",
