@@ -492,6 +492,7 @@ sub _validate($@)
                     }
                 }
             }
+            next if $allenes->has_edge( @$bond ); # TODO: Check allene systems
             if( $cis_trans_bonds == 1 ) {
                 warn sprintf 'double between atoms %s(%d) and %s(%d) ' .
                              'has only one cis/trans marker' . "\n",
