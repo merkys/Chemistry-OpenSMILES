@@ -13,6 +13,7 @@ my %cases = (
     'CC(C)=C=[C@]=C(C)C' => 'tetrahedral chiral allenal setting for C(4) observed for an atom which is not a center of an allenal system',
 
     'F/C=C=C=C/F' => undef,
+    'F/C=C=C=CF' => undef,
 );
 
 plan tests => scalar keys %cases;

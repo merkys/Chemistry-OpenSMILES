@@ -494,7 +494,7 @@ sub _validate($@)
             }
             next if $allenes->has_edge( @$bond ); # TODO: Check allene systems
             if( $cis_trans_bonds == 1 ) {
-                warn sprintf 'double between atoms %s(%d) and %s(%d) ' .
+                warn sprintf 'double bond between atoms %s(%d) and %s(%d) ' .
                              'has only one cis/trans marker' . "\n",
                              $A->{symbol}, $A->{number},
                              $B->{symbol}, $B->{number};
@@ -519,6 +519,22 @@ sub _validate($@)
                              $A->{number},
                              $B->{symbol},
                              $B->{number};
+            }
+        }
+
+        # Check allene systems
+        for my $system (sort { min( map { $_->{number} } @$a ) <=>
+                               min( map { $_->{number} } @$b ) }
+                             $allenes->connected_components) {
+            my @ends = sort { $a->{number} <=> $b->{number} }
+                       grep { $allenes->degree($_) == 1 } @$system;
+            my $cis_trans_bonds = grep { is_cis_trans_bond( $moiety, @$_ ) }
+                                  map  { $moiety->edges_at( $_ ) } @ends;
+            if( $cis_trans_bonds == 1 ) {
+                warn sprintf 'allene system between atoms %s(%d) and %s(%d) ' .
+                             'has only one cis/trans marker' . "\n",
+                             $ends[0]->{symbol}, $ends[0]->{number},
+                             $ends[1]->{symbol}, $ends[1]->{number};
             }
         }
     }
