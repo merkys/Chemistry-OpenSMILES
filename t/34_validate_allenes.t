@@ -10,7 +10,7 @@ my %cases = (
     'NC(Br)=[C@]=C(O)C' => undef,
     'CC(C)=[C@]=C(C)C'  => 'tetrahedral chiral allenal setting for C(3) is not needed as not all 4 neighbours are distinct',
     'CC(C)=C=[C@]=C=C(C)C' => 'tetrahedral chiral allenal setting for C(4) is not needed as not all 4 neighbours are distinct',
-    'CC(C)=C=[C@]=C(C)C' => 'tetrahedral chiral allenal setting for C(4) observed for an atom which is not a center of an allenal system',
+    'C/C(C)=C=[C@]=C(C)/C' => 'tetrahedral chiral allenal setting for C(4) observed for an atom which is not a center of an allenal system',
 
     'F/C=C=C=C/F' => undef,
     'F/C=C=C=CF' => 'allene system between atoms C(1) and C(4) has only one cis/trans marker',

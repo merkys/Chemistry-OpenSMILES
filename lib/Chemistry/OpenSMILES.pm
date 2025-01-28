@@ -526,6 +526,8 @@ sub _validate($@)
         for my $system (sort { min( map { $_->{number} } @$a ) <=>
                                min( map { $_->{number} } @$b ) }
                              $allenes->connected_components) {
+            next if @$system % 2;
+
             my @ends = sort { $a->{number} <=> $b->{number} }
                        map  { @$_ }
                        grep { $allenes->has_edge_attribute( @$_, 'allene' ) &&
@@ -539,6 +541,18 @@ sub _validate($@)
                              $ends[0]->{symbol}, $ends[0]->{number},
                              $ends[1]->{symbol}, $ends[1]->{number};
             }
+            next if $cis_trans_bonds;
+
+            my @neighbours_at_ends = grep { $_ ne $ends[0] && $_ ne $ends[1] }
+                                     map  { @$_ }
+                                     grep { !is_double_bond( $moiety, @$_ ) }
+                                     map  { $moiety->edges_at( $_ ) } @ends;
+            next unless @neighbours_at_ends == 4;
+            warn sprintf 'allene system between atoms %s(%d) and %s(%d) ' .
+                         'has 4 neighbours, but does not have cis/trans ' .
+                         'setting' . "\n",
+                         $ends[0]->{symbol}, $ends[0]->{number},
+                         $ends[1]->{symbol}, $ends[1]->{number};
         }
     }
 
