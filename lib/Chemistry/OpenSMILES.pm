@@ -362,28 +362,31 @@ sub _validate($@)
 {
     my( $moiety, $color_sub ) = @_;
 
+    # Identify islands of allene systems
+    my $allenes = _allene_graph( $moiety );
+
     my $color_by_element = sub { $_[0]->{symbol} };
 
     for my $atom (sort { $a->{number} <=> $b->{number} } $moiety->vertices) {
         # TODO: AL chiral centers also have to be checked
-        if( is_chiral_tetrahedral( $atom ) ) {
-            if( $moiety->degree($atom) == 2 &&
-                all { is_double_bond( $atom, $_ ) } $moiety->neighbours( $atom ) ) {
-                # Ignore tetrahedral allenes
-                # FIXME: Properly check tetrahedral allenes
-            } elsif( $moiety->degree($atom) < 3 ) {
-                # FIXME: there should be a strict mode to forbid lone pairs
-                warn sprintf 'chiral center %s(%d) has %d bonds while ' .
-                             'at least 3 is required' . "\n",
-                             $atom->{symbol},
-                             $atom->{number},
-                             $moiety->degree($atom);
-            } elsif( $moiety->degree($atom) == 3 || $moiety->degree($atom) == 4 ) {
+        if( is_chiral_tetrahedral($atom) ) {
+            if( ($moiety->degree($atom) == 3 || $moiety->degree($atom) == 4) ||
+                ($moiety->degree($atom) == 2 && $allenes->has_vertex($atom) &&
+                 2 == grep { $allenes->has_edge_attribute( $atom, $_, 'allene' ) &&
+                             $allenes->get_edge_attribute( $atom, $_, 'allene' ) eq 'mid' }
+                           $allenes->neighbours($atom) ) ) {
                 if( $color_sub &&
                     !is_ring_atom( $moiety, $atom, scalar $moiety->edges ) ) {
                     my $has_lone_pair = $moiety->degree($atom) == 3;
+                    my @neighbours = $moiety->neighbours($atom);
+                    if( $allenes->has_vertex($atom) ) {
+                        # Neighbours for allenes have to be adjusted
+                        @neighbours = grep { $allenes->has_edge_attribute( $atom, $_, 'allene' ) &&
+                                             $allenes->get_edge_attribute( $atom, $_, 'allene' ) eq 'mid' }
+                                           $allenes->neighbours($atom);
+                    }
                     my %colors = map { ($color_sub->( $_ ) => 1) }
-                                     $moiety->neighbours($atom);
+                                     @neighbours;
                     if( scalar keys %colors != 4 - $has_lone_pair ) {
                         warn sprintf 'tetrahedral chiral setting for %s(%d) ' .
                                      'is not needed as not all 4 neighbours ' .
@@ -392,6 +395,13 @@ sub _validate($@)
                                      $atom->{number};
                     }
                 }
+            } elsif( $moiety->degree($atom) < 3 ) {
+                # FIXME: there should be a strict mode to forbid lone pairs
+                warn sprintf 'chiral center %s(%d) has %d bonds while ' .
+                             'at least 3 is required' . "\n",
+                             $atom->{symbol},
+                             $atom->{number},
+                             $moiety->degree($atom);
             } else {
                 warn sprintf 'chirality \'%s\' observed for %s(%d) with %d ' .
                              'neighbours, can only process tetrahedral ' .
@@ -495,12 +505,12 @@ sub _allene_graph
         my @d1 = grep { $graph->degree( $_ ) == 1 } @$system;
         my @d2 = grep { $graph->degree( $_ ) == 2 } @$system;
         if (@d1 == 2 && @d2 && @d1 + @d2 == @$system ) {
-            $graph->set_edge_attribute( @d1, 'allene', 'end' );
             if( @d2 % 2 ) {
                 my( $center ) = $graph->subgraph( $system )->center_vertices;
                 $graph->set_edge_attribute( $center, $d1[0], 'allene', 'mid' );
                 $graph->set_edge_attribute( $center, $d1[1], 'allene', 'mid' );
             }
+            $graph->set_edge_attribute( @d1, 'allene', 'end' );
         } else {
             $graph->delete_vertices( @$system );
         }
