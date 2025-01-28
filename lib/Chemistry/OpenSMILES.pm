@@ -527,7 +527,10 @@ sub _validate($@)
                                min( map { $_->{number} } @$b ) }
                              $allenes->connected_components) {
             my @ends = sort { $a->{number} <=> $b->{number} }
-                       grep { $allenes->degree($_) == 1 } @$system;
+                       map  { @$_ }
+                       grep { $allenes->has_edge_attribute( @$_, 'allene' ) &&
+                              $allenes->get_edge_attribute( @$_, 'allene' ) eq 'end' }
+                            $allenes->subgraph($system)->edges;
             my $cis_trans_bonds = grep { is_cis_trans_bond( $moiety, @$_ ) }
                                   map  { $moiety->edges_at( $_ ) } @ends;
             if( $cis_trans_bonds == 1 ) {
