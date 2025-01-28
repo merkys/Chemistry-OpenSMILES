@@ -369,24 +369,35 @@ sub _validate($@)
 
     for my $atom (sort { $a->{number} <=> $b->{number} } $moiety->vertices) {
         # TODO: AL chiral centers also have to be checked
+        if( is_chiral_allenal($atom) ) {
+                #~ ($moiety->degree($atom) == 2 && $allenes->has_vertex($atom) &&
+                 #~ 2 == grep { $allenes->has_edge_attribute( $atom, $_, 'allene' ) &&
+                             #~ $allenes->get_edge_attribute( $atom, $_, 'allene' ) eq 'mid' }
+                           #~ $allenes->neighbours($atom) ) ) {
+            if( $color_sub &&
+                !is_ring_atom( $moiety, $atom, scalar $moiety->edges ) ) {
+                my @neighbours = grep { $allenes->has_edge_attribute( $atom, $_, 'allene' ) &&
+                                        $allenes->get_edge_attribute( $atom, $_, 'allene' ) eq 'mid' }
+                                      $allenes->neighbours($atom);
+                my %colors = map { ($color_sub->( $_ ) => 1) }
+                                 @neighbours;
+                if( scalar keys %colors != 4 ) {
+                    warn sprintf 'tetrahedral chiral allenal setting for ' .
+                                 '%s(%d) is not needed as not all 4 neighbours ' .
+                                 'are distinct' . "\n",
+                                 $atom->{symbol},
+                                 $atom->{number};
+                }
+            }
+        }
+
         if( is_chiral_tetrahedral($atom) ) {
-            if( ($moiety->degree($atom) == 3 || $moiety->degree($atom) == 4) ||
-                ($moiety->degree($atom) == 2 && $allenes->has_vertex($atom) &&
-                 2 == grep { $allenes->has_edge_attribute( $atom, $_, 'allene' ) &&
-                             $allenes->get_edge_attribute( $atom, $_, 'allene' ) eq 'mid' }
-                           $allenes->neighbours($atom) ) ) {
+            if( $moiety->degree($atom) == 3 || $moiety->degree($atom) == 4 ) {
                 if( $color_sub &&
                     !is_ring_atom( $moiety, $atom, scalar $moiety->edges ) ) {
                     my $has_lone_pair = $moiety->degree($atom) == 3;
-                    my @neighbours = $moiety->neighbours($atom);
-                    if( $allenes->has_vertex($atom) ) {
-                        # Neighbours for allenes have to be adjusted
-                        @neighbours = grep { $allenes->has_edge_attribute( $atom, $_, 'allene' ) &&
-                                             $allenes->get_edge_attribute( $atom, $_, 'allene' ) eq 'mid' }
-                                           $allenes->neighbours($atom);
-                    }
                     my %colors = map { ($color_sub->( $_ ) => 1) }
-                                     @neighbours;
+                                     $moiety->neighbours($atom);
                     if( scalar keys %colors != 4 - $has_lone_pair ) {
                         warn sprintf 'tetrahedral chiral setting for %s(%d) ' .
                                      'is not needed as not all 4 neighbours ' .
