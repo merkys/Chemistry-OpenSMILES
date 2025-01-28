@@ -369,27 +369,48 @@ sub _validate($@)
 
     for my $atom (sort { $a->{number} <=> $b->{number} } $moiety->vertices) {
         if( is_chiral_allenal($atom) ) {
-                #~ ($moiety->degree($atom) == 2 && $allenes->has_vertex($atom) &&
-                 #~ 2 == grep { $allenes->has_edge_attribute( $atom, $_, 'allene' ) &&
-                             #~ $allenes->get_edge_attribute( $atom, $_, 'allene' ) eq 'mid' }
-                           #~ $allenes->neighbours($atom) ) ) {
-            if( $color_sub &&
-                !is_ring_atom( $moiety, $atom, scalar $moiety->edges ) ) {
-                my @ends = grep { $allenes->has_edge_attribute( $atom, $_, 'allene' ) &&
-                                  $allenes->get_edge_attribute( $atom, $_, 'allene' ) eq 'mid' }
-                                $allenes->neighbours($atom);
-                my @neighbours = grep { $_ ne $ends[0] && $_ ne $ends[1] }
-                                 map  { @$_ }
-                                 grep { !$allenes->has_edge( @$_ ) }
-                                 map  { $moiety->edges_at($_) } @ends;
-                my %colors = map { ($color_sub->( $_ ) => 1) } @neighbours;
-                if( scalar keys %colors != 4 ) {
-                    warn sprintf 'tetrahedral chiral allenal setting for ' .
-                                 '%s(%d) is not needed as not all 4 neighbours ' .
-                                 'are distinct' . "\n",
-                                 $atom->{symbol},
-                                 $atom->{number};
-                }
+            if( $moiety->degree($atom) != 2 ) {
+                warn sprintf 'tetrahedral chiral allenal setting for %s(%d) ' .
+                             'has %d bonds while 2 are needed' . "\n",
+                             $atom->{symbol},
+                             $atom->{number},
+                             $moiety->degree($atom);
+                next;
+            }
+            if( !$allenes->has_vertex($atom) ) {
+                warn sprintf 'tetrahedral chiral allenal setting for %s(%d) ' .
+                             'is not a part of any allenal system' . "\n",
+                             $atom->{symbol},
+                             $atom->{number};
+                next;
+            }
+            if( none { $allenes->has_edge_attribute( $atom, $_, 'allene' ) &&
+                       $allenes->get_edge_attribute( $atom, $_, 'allene' ) eq 'mid' }
+                     $allenes->neighbours($atom) ) {
+                warn sprintf 'tetrahedral chiral allenal setting for %s(%d) ' .
+                             'observed for an atom which is not a center of ' .
+                             'an allenal system' . "\n",
+                             $atom->{symbol},
+                             $atom->{number};
+                next;
+            }
+            next unless $color_sub;
+            next if is_ring_atom( $moiety, $atom, scalar $moiety->edges );
+
+            my @ends = grep { $allenes->has_edge_attribute( $atom, $_, 'allene' ) &&
+                              $allenes->get_edge_attribute( $atom, $_, 'allene' ) eq 'mid' }
+                            $allenes->neighbours($atom);
+            my @neighbours = grep { $_ ne $ends[0] && $_ ne $ends[1] }
+                             map  { @$_ }
+                             grep { !$allenes->has_edge( @$_ ) }
+                             map  { $moiety->edges_at($_) } @ends;
+            my %colors = map { ($color_sub->( $_ ) => 1) } @neighbours;
+            if( scalar keys %colors != 4 ) {
+                warn sprintf 'tetrahedral chiral allenal setting for ' .
+                             '%s(%d) is not needed as not all 4 neighbours ' .
+                             'are distinct' . "\n",
+                             $atom->{symbol},
+                             $atom->{number};
             }
         }
 
