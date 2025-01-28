@@ -415,36 +415,36 @@ sub _validate($@)
         }
 
         if( is_chiral_tetrahedral($atom) ) {
-            if( $moiety->degree($atom) == 3 || $moiety->degree($atom) == 4 ) {
-                if( $color_sub &&
-                    !is_ring_atom( $moiety, $atom, scalar $moiety->edges ) ) {
-                    my $has_lone_pair = $moiety->degree($atom) == 3;
-                    my %colors = map { ($color_sub->( $_ ) => 1) }
-                                     $moiety->neighbours($atom);
-                    if( scalar keys %colors != 4 - $has_lone_pair ) {
-                        warn sprintf 'tetrahedral chiral setting for %s(%d) ' .
-                                     'is not needed as not all 4 neighbours ' .
-                                     '(including possible lone pair) are distinct' . "\n",
-                                     $atom->{symbol},
-                                     $atom->{number};
-                    }
-                }
-            } elsif( $moiety->degree($atom) < 3 ) {
-                # FIXME: there should be a strict mode to forbid lone pairs
-                warn sprintf 'chiral center %s(%d) has %d bonds while ' .
-                             'at least 3 is required' . "\n",
+            if( $moiety->degree($atom) < 3 ) {
+                # TODO: there should be a strict mode to forbid lone pairs
+                warn sprintf 'tetrahedral chiral center %s(%d) has %d bonds ' .
+                             'while at least 3 are required' . "\n",
                              $atom->{symbol},
                              $atom->{number},
                              $moiety->degree($atom);
-            } else {
-                warn sprintf 'chirality \'%s\' observed for %s(%d) with %d ' .
-                             'neighbours, can only process tetrahedral ' .
-                             'chiral or square planar centers with possible ' .
-                             'lone pairs' . "\n",
-                             $atom->{chirality},
+                next;
+            }
+            if( $moiety->degree($atom) > 4 ) {
+                warn sprintf 'tetrahedral chiral center %s(%d) has %d bonds ' .
+                             'while at most 4 are allowed' . "\n",
                              $atom->{symbol},
                              $atom->{number},
                              $moiety->degree($atom);
+                next;
+            }
+
+            next unless $color_sub;
+            next if is_ring_atom( $moiety, $atom, scalar $moiety->edges );
+
+            my $has_lone_pair = $moiety->degree($atom) == 3;
+            my %colors = map { ($color_sub->( $_ ) => 1) }
+                             $moiety->neighbours($atom);
+            if( scalar keys %colors != 4 - $has_lone_pair ) {
+                warn sprintf 'tetrahedral chiral setting for %s(%d) ' .
+                             'is not needed as not all 4 neighbours ' .
+                             '(including possible lone pair) are distinct' . "\n",
+                             $atom->{symbol},
+                             $atom->{number};
             }
         }
 
