@@ -368,7 +368,6 @@ sub _validate($@)
     my $color_by_element = sub { $_[0]->{symbol} };
 
     for my $atom (sort { $a->{number} <=> $b->{number} } $moiety->vertices) {
-        # TODO: AL chiral centers also have to be checked
         if( is_chiral_allenal($atom) ) {
                 #~ ($moiety->degree($atom) == 2 && $allenes->has_vertex($atom) &&
                  #~ 2 == grep { $allenes->has_edge_attribute( $atom, $_, 'allene' ) &&

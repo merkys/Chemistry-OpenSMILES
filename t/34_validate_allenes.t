@@ -7,6 +7,7 @@ use Chemistry::OpenSMILES::Parser;
 use Test::More;
 
 my %cases = (
+    'NC(Br)=[C@]=C(O)C' => undef,
     'CC(C)=[C@]=C(C)C'  => 'tetrahedral chiral allenal setting for C(3) is not needed as not all 4 neighbours are distinct',
 );
 
