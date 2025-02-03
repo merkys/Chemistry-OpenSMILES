@@ -494,9 +494,8 @@ sub _validate($@)
                         }
                     }
                 }
-            }
-            next if $allenes->has_edge( @$bond ); # Allene systems are checked below
-            if( (grep { is_cis_trans_bond( $moiety, @$_ ) } map { $moiety->edges_at( $_ ) } @$bond) == 1 ) {
+            } elsif( $cis_trans_A + $cis_trans_B == 1 ) {
+                next if $allenes->has_edge( @$bond ); # Allene systems are checked below
                 # FIXME: Source of false-positives.
                 # Cis/trans bond is out of place if none of neighbouring double bonds have other cis/trans bonds.
                 # This has to include allenal systems.
