@@ -475,8 +475,11 @@ sub _validate($@)
         if( is_double_bond( $moiety, @$bond ) ) {
             # Test cis/trans bonds
             # Detect conflicting cis/trans markers, see COD entry 1547257, r297409
-            if( (any { is_cis_trans_bond( $moiety, $A, $_ ) } $moiety->neighbours($A)) &&
-                (any { is_cis_trans_bond( $moiety, $B, $_ ) } $moiety->neighbours($B)) ) {
+            my $cis_trans_A = grep { is_cis_trans_bond( $moiety, $A, $_ ) }
+                                   $moiety->neighbours($A);
+            my $cis_trans_B = grep { is_cis_trans_bond( $moiety, $B, $_ ) }
+                                   $moiety->neighbours($B);
+            if( $cis_trans_A && $cis_trans_B ) {
                 # If any of the bond atoms lack cis/trans markers, it means that the other markers are from some other bond
                 for my $atom (@$bond) {
                     my %bond_types = _neighbours_per_bond_type( $moiety, $atom );
