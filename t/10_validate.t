@@ -16,6 +16,10 @@ my %cases = (
     # Atom coloring is not given, thus the following is not detected as unimportant chiral center
     'CC(C)=[C@]=C(C)C' => undef,
 
+    # COD entry 2230139, r176798, chemical name translated by OPSIN v2.8.0
+    # The mentioned double bond gets its marker from another double bond
+    'C(C=C)(=O)N1C\C(\C(/C(/C1)=C/C1=C(C=CC=C1)Cl)=O)=C/C1=C(C=CC=C1)Cl' => 'double bond between atoms C(20) and C(21) has only one cis/trans marker',
+
     # OpenSMILES specification v1.0
     'NC(Br)=[C@]=C(O)C' => undef,
 
