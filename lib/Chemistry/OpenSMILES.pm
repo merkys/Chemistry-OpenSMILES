@@ -475,23 +475,25 @@ sub _validate($@)
         if( is_double_bond( $moiety, @$bond ) ) {
             # Test cis/trans bonds
             # Detect conflicting cis/trans markers, see COD entry 1547257, r297409
-            my $cis_trans_bonds = 0;
-            for my $atom (@$bond) {
-                my %bond_types = _neighbours_per_bond_type( $moiety, $atom );
-                foreach ('/', '\\') {
-                    $cis_trans_bonds += @{$bond_types{$_}} if $bond_types{$_};
-                    if( $bond_types{$_} && @{$bond_types{$_}} > 1 ) {
-                        warn sprintf 'atom %s(%d) has %d bonds of type \'%s\', ' .
-                                     'cis/trans definitions must not conflict' . "\n",
-                                     $atom->{symbol},
-                                     $atom->{number},
-                                     scalar @{$bond_types{$_}},
-                                     $_;
+            if( (any { is_cis_trans_bond( $moiety, $A, $_ ) } $moiety->neighbours($A)) &&
+                (any { is_cis_trans_bond( $moiety, $B, $_ ) } $moiety->neighbours($B)) ) {
+                # If any of the bond atoms lack cis/trans markers, it means that the other markers are from some other bond
+                for my $atom (@$bond) {
+                    my %bond_types = _neighbours_per_bond_type( $moiety, $atom );
+                    for ('/', '\\') {
+                        if( $bond_types{$_} && @{$bond_types{$_}} > 1 ) {
+                            warn sprintf 'atom %s(%d) has %d bonds of type \'%s\', ' .
+                                         'cis/trans definitions must not conflict' . "\n",
+                                         $atom->{symbol},
+                                         $atom->{number},
+                                         scalar @{$bond_types{$_}},
+                                         $_;
+                        }
                     }
                 }
             }
             next if $allenes->has_edge( @$bond ); # Allene systems are checked below
-            if( $cis_trans_bonds == 1 ) {
+            if( (grep { is_cis_trans_bond( $moiety, @$_ ) } map { $moiety->edges_at( $_ ) } @$bond) == 1 ) {
                 # FIXME: Source of false-positives.
                 # Cis/trans bond is out of place if none of neighbouring double bonds have other cis/trans bonds.
                 # This has to include allenal systems.
