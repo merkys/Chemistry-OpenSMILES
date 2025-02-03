@@ -494,8 +494,8 @@ sub _validate($@)
                         }
                     }
                 }
-            } elsif( $cis_trans_A + $cis_trans_B == 1 ) {
-                next if $allenes->has_edge( @$bond ); # Allene systems are checked below
+            } elsif( !$allenes->has_edge( @$bond ) && # Allene systems are checked below
+                     $cis_trans_A + $cis_trans_B == 1 ) {
                 # FIXME: Source of false-positives.
                 # Cis/trans bond is out of place if none of neighbouring double bonds have other cis/trans bonds.
                 # This has to include allenal systems.
