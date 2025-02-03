@@ -334,9 +334,12 @@ sub parse
 
                 # Unify the representation of chirality
                 if( is_chiral $atom ) {
-                    if( $atom->{chirality} =~ /^@@?$/ &&
-                        $graph->degree( $atom ) == 2 ) {
-                        $atom->{chirality} =~ s/@+/'@AL' . length $&/e;
+                    if( $atom->{chirality} =~ /^@@?$/ ) {
+                        if(      $graph->degree( $atom ) == 2 ) {
+                            $atom->{chirality} =~ s/@+/'@AL' . length $&/e;
+                        } elsif( $graph->degree( $atom ) == 6 ) {
+                            $atom->{chirality} =~ s/@+/'@OH' . length $&/e;
+                        }
                     }
 
                     $atom->{chirality} =~ s/^\@TH1$/@/;
