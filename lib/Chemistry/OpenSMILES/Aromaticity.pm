@@ -69,6 +69,7 @@ sub aromatise
 
 Find nonfused even-length aromatic cycles consisting only of B, C, N, P, S and mark them with alternating single and double bonds.
 Subroutine as well accepts a subroutine reference C<$color_sub>, optionally providing external distinction for atoms.
+This is needed to stabilise the algorithm, as otherwise the outcomes of bond assignment may turn out different.
 C<$color_sub> is called with an atom as C<$_[0]> and is expected to return a value providing "color" for every atom.
 "Colors" can be any scalar values, comparable using Perl's C<cmp> operator.
 If C<$color_sub> is not given, initial atom order in input is consulted.
