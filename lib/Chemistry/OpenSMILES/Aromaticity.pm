@@ -65,16 +65,21 @@ sub aromatise
     }
 }
 
-=item kekulise( $moiety )
+=item kekulise( $moiety, $color_sub )
 
-Find nonfused even-length aromatic cycles consisting only of B, C, N, P, S
-and mark them with alternating single and double bonds.
+Find nonfused even-length aromatic cycles consisting only of B, C, N, P, S and mark them with alternating single and double bonds.
+Subroutine as well accepts a subroutine reference C<$color_sub>, optionally providing external distinction for atoms.
+C<$color_sub> is called with an atom as C<$_[0]> and is expected to return a value providing "color" for every atom.
+"Colors" can be any scalar values, comparable using Perl's C<cmp> operator.
+If C<$color_sub> is not given, initial atom order in input is consulted.
 
 =cut
 
 sub kekulise
 {
-    my( $moiety ) = @_;
+    my( $moiety, $color_sub ) = @_;
+
+    $color_sub = sub { $_[0]->{number} } unless $color_sub;
 
     my $aromatic_only = $moiety->copy_graph;
     $aromatic_only->delete_vertices( grep { !is_aromatic $_ }
@@ -83,7 +88,8 @@ sub kekulise
     my @components;
     my $get_root = sub {
         my( $self, $unseen ) = @_;
-        my( $next ) = sort { $unseen->{$a}{number} <=> $unseen->{$b}{number} }
+        my( $next ) = sort { $color_sub->($unseen->{$a}) cmp
+                             $color_sub->($unseen->{$b}) }
                            keys %$unseen;
         return unless defined $next;
 
@@ -106,8 +112,9 @@ sub kekulise
         next unless all { $_->{symbol} =~ /^[BCNPS]$/i } @$component;
         next if @$component % 2;
 
-        my( $first  ) = sort { $a->{number} <=> $b->{number} } @$component;
-        my( $second ) = sort { $a->{number} <=> $b->{number} }
+        my( $first  ) = sort { $color_sub->($a) cmp $color_sub->($b) }
+                             @$component;
+        my( $second ) = sort { $color_sub->($a) cmp $color_sub->($b) }
                              $aromatic_only->neighbours( $first );
         my $n = 0;
         while( $n < @$component ) {
