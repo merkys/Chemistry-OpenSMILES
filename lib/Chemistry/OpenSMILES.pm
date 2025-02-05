@@ -249,7 +249,7 @@ sub is_ring_bond
 
     # A couple of shortcuts to reduce the complexity
     return '' if any { $moiety->degree( $_ ) == 1 } ( $a, $b );
-    return '' if scalar( $moiety->vertices ) > scalar( $moiety->edges );
+    return '' if $moiety->vertices > $moiety->edges;
 
     if( $max_length < 0 ) {
         # Due to the issue in Graph, bridges() returns strings instead of real objects.
@@ -271,12 +271,12 @@ sub is_ring_bond
         return '' if @seen != 1; # Can this be 0?
 
         my $seen = shift @seen;
-        my( $unseen ) = grep { !exists $distance{$_} } ( $u, $v );
+        my $unseen = first { !exists $distance{$_} } ( $u, $v );
         $distance{$unseen} = $distance{$seen} + 1;
     };
 
     my $operations = {
-        start     => sub { return $a },
+        start     => sub { $a },
         tree_edge => $record_length,
     };
 
