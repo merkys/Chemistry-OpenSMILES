@@ -68,7 +68,7 @@ sub aromatise
 =item kekulise( $moiety )
 
 Find nonfused even-length aromatic cycles consisting only of B, C, N, P, S
-and mark them with aliterating single and double bonds.
+and mark them with alternating single and double bonds.
 
 =cut
 
