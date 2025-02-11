@@ -8,6 +8,9 @@ use warnings;
 
 use Chemistry::OpenSMILES qw(
     is_chiral
+    is_chiral_planar
+    is_chiral_tetrahedral
+    is_chiral_trigonal_bipyramidal
     is_cis_trans_bond
     is_double_bond
     is_ring_bond
@@ -266,12 +269,11 @@ sub chirality_to_pseudograph
         my @chirality_neighbours = @{$atom->{chirality_neighbours}};
 
         my $has_lone_pair;
-        if( Chemistry::OpenSMILES::is_chiral_tetrahedral( $atom ) ||
-            Chemistry::OpenSMILES::is_chiral_planar( $atom ) ) {
+        if( is_chiral_tetrahedral( $atom ) || is_chiral_planar( $atom ) ) {
             next unless @chirality_neighbours >= 3 &&
                         @chirality_neighbours <= 4;
             $has_lone_pair = @chirality_neighbours == 3;
-        } elsif( Chemistry::OpenSMILES::is_chiral_trigonal_bipyramidal( $atom ) ) {
+        } elsif( is_chiral_trigonal_bipyramidal( $atom ) ) {
             next unless @chirality_neighbours >= 4 &&
                         @chirality_neighbours <= 5;
             $has_lone_pair = @chirality_neighbours == 4;
@@ -283,7 +285,7 @@ sub chirality_to_pseudograph
                                       @chirality_neighbours[1..$#chirality_neighbours] );
         }
 
-        if( Chemistry::OpenSMILES::is_chiral_tetrahedral( $atom ) ) {
+        if( is_chiral_tetrahedral( $atom ) ) {
             # Algorithm is described in detail in doi:10.1186/s13321-023-00692-1
             if( $atom->{chirality} eq '@' ) {
                 # Reverse the order if counter-clockwise
@@ -314,7 +316,7 @@ sub chirality_to_pseudograph
                     push @other, shift @other;
                 }
             }
-        } elsif( Chemistry::OpenSMILES::is_chiral_planar( $atom ) ) {
+        } elsif( is_chiral_planar( $atom ) ) {
             # For square planar environments it is enough to retain the enumeration order of atoms.
             # To do so, "neighbouring neighbours" are connected together and a link to central atom is placed.
             if(      $atom->{chirality} eq '@SP2' ) { # 4
