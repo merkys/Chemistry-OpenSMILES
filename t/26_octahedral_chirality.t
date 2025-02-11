@@ -44,7 +44,7 @@ for my $case (@cases) {
 
     next unless $has_Graph_Nauty;
 
-    $output =~ s/\(\(([^\(\)]+)\)\)/$1/;
+    $output =~ s/\(\(\(\[H\]\[H\]\[H\]\)\)\)/\(\[H\]\)\(\[H\]\)\(\[H\]\)/;
     my( $output_moiety ) = $parser->parse( $output );
     for ( $input_moiety, $output_moiety ) {
         chirality_to_pseudograph( $_ );
