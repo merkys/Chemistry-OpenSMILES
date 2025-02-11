@@ -8,6 +8,7 @@ use warnings;
 
 use Chemistry::OpenSMILES qw(
     is_chiral
+    is_chiral_octahedral
     is_chiral_planar
     is_chiral_tetrahedral
     is_chiral_trigonal_bipyramidal
@@ -335,7 +336,7 @@ sub chirality_to_pseudograph
                 $moiety->set_edge_attribute( $connector, $chirality_neighbours[$i], 'chiral', 'neighbour' );
                 $moiety->set_edge_attribute( $connector, $chirality_neighbours[($i + 1) % 4], 'chiral', 'neighbour' );
             }
-        } else { # Trigonal bipyrimidal
+        } elsif( is_chiral_trigonal_bipyramidal( $atom ) ) {
             my $number = substr $atom->{chirality}, 3;
             my $setting = $TB[$number - 1];
 
@@ -359,6 +360,7 @@ sub chirality_to_pseudograph
                 }
                 @other = reverse @other; # Inverting the axis
             }
+        } else { # Chiral octahedral
         }
     }
 }
