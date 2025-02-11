@@ -5,6 +5,7 @@
 use warnings;
 use 5.0100;
 
+use Chemistry::Elements;
 use Chemistry::OpenSMILES qw(
     %bond_symbol_to_order
     %normal_valence
@@ -229,6 +230,11 @@ sub _Lexer
         my $atom = { %+, number => $self->{USER}{ATOMNO} };
         $self->{USER}{ATOMNO} ++;
         $self->{USER}{CHARNO} += length $&;
+
+        if( $atom->{symbol} ne '*' &&
+            !Chemistry::Elements->new( $atom->{symbol} ) ) {
+            warn "chemical element with symbol '$atom->{symbol}' is unknown\n";
+        }
 
         if( $atom->{charge} ) {
             $atom->{charge} =~ s/^([-+])$/${1}1/;
