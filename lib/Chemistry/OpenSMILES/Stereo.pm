@@ -277,6 +277,10 @@ sub chirality_to_pseudograph
             next unless @chirality_neighbours >= 4 &&
                         @chirality_neighbours <= 5;
             $has_lone_pair = @chirality_neighbours == 4;
+        } elsif( is_chiral_octahedral( $atom ) ) {
+            next unless @chirality_neighbours >= 5 &&
+                        @chirality_neighbours <= 6;
+            $has_lone_pair = @chirality_neighbours == 5;
         }
 
         if( $has_lone_pair ) {
