@@ -9,10 +9,11 @@ use List::Util qw( first );
 use Test::More;
 
 my @cases = (
-    [ 'C[Co@](F)(Cl)(Br)(I)S',     [ qw( F Co S I C Cl Br ) ], 'F([Co@OH2](S([H]))(I)(C((([H][H][H]))))(Cl)(Br))'  ],
-    [ 'S[Co@OH5](F)(I)(Cl)(C)Br',  [ qw( Br Co C S Cl F I ) ], 'Br([Co@OH9](C((([H][H][H]))))(S([H]))(Cl)(F)(I))'  ],
-    [ 'Br[Co@OH12](Cl)(I)(F)(S)C', [ qw( Cl Co C Br F I S ) ], 'Cl([Co@OH15](C((([H][H][H]))))(Br)(F)(I)(S([H])))' ],
-    [ 'Cl[Co@OH19](C)(I)(F)(S)Br', [ qw( I Co Cl Br F S C ) ], 'I([Co@OH27](Cl)(Br)(F)(S([H]))(C((([H][H][H])))))' ],
+    [ 'C[Co@](F)(Cl)(Br)(I)S',     [ qw( C Co F Cl Br I S ) ], 'C([Co@OH1](F)(Cl)(Br)(I)(S([H])))([H])([H])([H])'  ],
+    [ 'C[Co@](F)(Cl)(Br)(I)S',     [ qw( F Co S I C Cl Br ) ], 'F([Co@OH2](S([H]))(I)(C([H])([H])([H]))(Cl)(Br))'  ],
+    [ 'S[Co@OH5](F)(I)(Cl)(C)Br',  [ qw( Br Co C S Cl F I ) ], 'Br([Co@OH9](C([H])([H])([H]))(S([H]))(Cl)(F)(I))'  ],
+    [ 'Br[Co@OH12](Cl)(I)(F)(S)C', [ qw( Cl Co C Br F I S ) ], 'Cl([Co@OH15](C([H])([H])([H]))(Br)(F)(I)(S([H])))' ],
+    [ 'Cl[Co@OH19](C)(I)(F)(S)Br', [ qw( I Co Cl Br F S C ) ], 'I([Co@OH27](Cl)(Br)(F)(S([H]))(C([H])([H])([H])))' ],
 );
 
 eval 'use Graph::Nauty qw( are_isomorphic )';
@@ -33,7 +34,8 @@ for my $case (@cases) {
             my $vertex = first { $_->{symbol} eq $symbol } values %$vertices;
             return $vertex if $vertex;
         }
-        return values %$vertices;
+        my( $vertex ) = values %$vertices;
+        return $vertex;
     };
 
     $parser = Chemistry::OpenSMILES::Parser->new;
@@ -44,10 +46,20 @@ for my $case (@cases) {
 
     next unless $has_Graph_Nauty;
 
-    $output =~ s/\(\(\(\[H\]\[H\]\[H\]\)\)\)/\(\[H\]\)\(\[H\]\)\(\[H\]\)/;
     my( $output_moiety ) = $parser->parse( $output );
     for ( $input_moiety, $output_moiety ) {
         chirality_to_pseudograph( $_ );
     }
-    ok are_isomorphic( $input_moiety, $output_moiety );
+    ok are_isomorphic( $input_moiety, $output_moiety, \&depict );
+}
+
+sub depict
+{
+    my( $vertex ) = @_;
+
+    return '' unless exists $vertex->{symbol};
+
+    $vertex = { %$vertex };
+    delete $vertex->{chirality};
+    return write_SMILES( $vertex );
 }
