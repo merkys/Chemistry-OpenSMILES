@@ -347,7 +347,7 @@ sub chirality_to_pseudograph
 
             for my $from (@axis) {
                 my $to = first { $_ != $from } @axis;
-                for my $offset (0..2) {
+                for (0..2) {
                     my $connector = {};
                     $moiety->set_edge_attribute( $from, $connector, 'chiral', 'from' );
                     $moiety->set_edge_attribute( $atom, $connector, 'chiral', 'center' );
@@ -361,6 +361,25 @@ sub chirality_to_pseudograph
                 @other = reverse @other; # Inverting the axis
             }
         } else { # Chiral octahedral
+            my @axis = ( shift @chirality_neighbours, pop @chirality_neighbours ); # TODO: Adjust to the setting
+
+            # TODO: This is only one axis
+            for my $from (@axis) {
+                my $to = first { $_ != $from } @axis;
+                for (0..3) {
+                    my $connector = {};
+                    $moiety->set_edge_attribute( $axis[0], $connector, 'chiral', 'from' );
+                    $moiety->set_edge_attribute( $atom,    $connector, 'chiral', 'center' );
+                    $moiety->set_edge_attribute( $axis[1], $connector, 'chiral', 'to' );
+
+                    $moiety->set_edge_attribute( $connector, $chirality_neighbours[-1], 'chiral', 'counter-clockwise' );
+                    $moiety->set_edge_attribute( $connector, $chirality_neighbours[ 1], 'chiral', 'clockwise' );
+
+                    push @chirality_neighbours, shift @chirality_neighbours;
+                }
+                @chirality_neighbours = reverse @chirality_neighbours;
+            }
+            @chirality_neighbours = reverse @chirality_neighbours; # Back to the original order
         }
     }
 }
