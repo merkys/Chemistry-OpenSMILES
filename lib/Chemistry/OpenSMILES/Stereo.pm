@@ -372,16 +372,16 @@ sub chirality_to_pseudograph
                     my $to = first { $_ != $from } @axis;
                     for (0..3) {
                         my $connector = {};
-                        $moiety->set_edge_attribute( $axis[0], $connector, 'chiral', 'from' );
-                        $moiety->set_edge_attribute( $atom,    $connector, 'chiral', 'center' );
-                        $moiety->set_edge_attribute( $axis[1], $connector, 'chiral', 'to' );
+                        $moiety->set_edge_attribute( $from, $connector, 'chiral', 'from' );
+                        $moiety->set_edge_attribute( $atom, $connector, 'chiral', 'center' );
+                        $moiety->set_edge_attribute( $to,   $connector, 'chiral', 'to' );
 
                         $moiety->set_edge_attribute( $connector, $other[-1], 'chiral', 'counter-clockwise' );
                         $moiety->set_edge_attribute( $connector, $other[ 1], 'chiral', 'clockwise' );
 
                         push @other, shift @other;
                     }
-                    @other = reverse @other;
+                    @other = reverse @other; # Inverting the axis
                 }
             }
         }

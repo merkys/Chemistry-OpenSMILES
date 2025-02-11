@@ -23,8 +23,8 @@ my @cases = (
     [ '[C@TB1](F)([H])([H])([H])([H])', 'C,F,H,HHH' ],
     [ '[C@TB1](F)([H])([H])([H])(F)', 'C,FF,HHH' ],
 
-    [ '[C@OH1]([H])([H])([H])([H])([H])([H])', 'C,HHH,HHH' ], # FIXME: Should be 'C,HHHHHH'
-    [ '[C@OH1]([H])([H])([H])([H])([H])F', 'C,F,H,HH,HH' ], # FIXME: Should be 'C,F,H,HHHH'
+    [ '[C@OH1]([H])([H])([H])([H])([H])([H])', 'C,HHHHHH' ],
+    [ '[C@OH1]([H])([H])([H])([H])([H])F', 'C,F,H,HHHH' ],
 );
 
 plan tests => scalar @cases;
