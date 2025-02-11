@@ -18,7 +18,9 @@ my @cases = (
     [ '[C@H3][C@H3]', 'CC,HHHHHH' ],
     [ '[P@@](C(C)C)(C(C)C)(C(C)C)N', 'CCC,CCCCCC,HH,HHH,HHHHHHHHHHHHHHHHHH,N,P' ],
     [ '[P@@]([C@@H](C)C)([C@@H](C)C)([C@@H](C)C)N', 'CCC,CCC,CCC,HH,HHH,HHHHHHHHH,HHHHHHHHH,N,P' ],
-    [ '[C@OH1H6]', 'C,HHH,HHH' ], # FIXME: All H atoms should be at the same orbit
+
+    [ '[C@OH1]([H])([H])([H])([H])([H])([H])', 'C,HHH,HHH' ], # FIXME: Should be 'C,HHHHHH'
+    [ '[C@OH1]([H])([H])([H])([H])([H])F', 'C,F,H,HH,HH' ], # FIXME: Should be 'C,F,H,HHHH'
 );
 
 plan tests => scalar @cases;
