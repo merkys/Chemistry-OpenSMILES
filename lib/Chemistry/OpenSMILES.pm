@@ -722,8 +722,9 @@ be instructed to expect raw data structure:
 
 =head1 CAVEATS
 
-Element symbols in square brackets are not limited to the ones known to
-chemistry. Currently any single or two-letter symbol is allowed.
+Element symbols in square brackets are not limited to the ones known to chemistry.
+Currently any single or two-letter symbol is allowed.
+However, a warning is thrown for each element unknown to L<Chemistry::Elements>.
 
 Deprecated charge notations (C<--> and C<++>) are supported.
 
