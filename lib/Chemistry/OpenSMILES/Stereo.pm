@@ -18,7 +18,7 @@ use Chemistry::OpenSMILES qw(
     is_single_bond
     toggle_cistrans
 );
-use Chemistry::OpenSMILES::Stereo::Tables qw( @TB );
+use Chemistry::OpenSMILES::Stereo::Tables qw( @OH @TB );
 use Chemistry::OpenSMILES::Writer qw( write_SMILES );
 use Graph::Traversal::BFS;
 use Graph::Undirected;
@@ -361,7 +361,22 @@ sub chirality_to_pseudograph
                 @other = reverse @other; # Inverting the axis
             }
         } else { # Chiral octahedral
-            # TODO: Adjust to the setting
+            my $chirality = int substr $atom->{chirality}, 3;
+            my @axis  = map { $chirality_neighbours[$_-1] }
+                            @{$OH[$chirality-1]->{axis}};
+            my @sides = grep { $_ != $axis[0] && $_ != $axis[1] }
+                             @chirality_neighbours;
+
+            if( $OH[$chirality-1]->{shape} eq 'Z' ) {
+                ( $sides[2], $sides[3] ) = ( $sides[3], $sides[2] );
+            }
+
+            if( $OH[$chirality-1]->{shape} eq '4' ) {
+                ( $sides[0], $sides[3] ) = ( $sides[3], $sides[0] );
+            }
+
+            @chirality_neighbours = ( $axis[0], @sides, $axis[1] );
+
             for my $side (( [ [ 0, 5 ], [ 1, 2, 3, 4 ] ],
                             [ [ 1, 3 ], [ 0, 4, 5, 2 ] ],
                             [ [ 2, 4 ], [ 0, 1, 5, 3 ] ] )) {
