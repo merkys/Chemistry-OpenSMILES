@@ -195,7 +195,7 @@ sub is_chiral_trigonal_bipyramidal($)
 {
     my( $what ) = @_;
     if( ref $what eq 'HASH' ) { # Single atom
-        return $what->{chirality} && $what->{chirality} =~ /^\@TB(1?[1-9]|20)$/;
+        return $what->{chirality} && $what->{chirality} =~ /^\@TB([1-9]|1[0-9]|20)$/;
     } else {                    # Graph representing moiety
         return any { is_chiral_trigonal_bipyramidal( $_ ) } $what->vertices;
     }
