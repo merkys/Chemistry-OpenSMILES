@@ -237,7 +237,7 @@ sub _Lexer
             # OK
         } elsif( $atom->{symbol} eq 'Ha' ||
                  !Chemistry::Elements->new( $atom->{symbol} ) ) {
-            warn "chemical element with symbol '$atom->{symbol}' is unknown\n";
+            die "chemical element with symbol '$atom->{symbol}' is unknown\n";
         }
 
         if( $atom->{charge} ) {
