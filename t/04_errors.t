@@ -19,6 +19,11 @@ my %cases = (
     '(O)C'    => 't/04_errors.t: syntax error at position 1: \'O)C\'.',
     '.CC'     => 't/04_errors.t: syntax error at position 1: \'CC\'.',
     'CC.'     => 't/04_errors.t: syntax error at position 4.',
+
+    # The following SMILES are all strange and should at least be warned about:
+    'C11 '       => undef,
+    'C1C1'       => undef,
+    'C12CCCCC12' => undef,
 );
 
 plan tests => scalar keys %cases;
