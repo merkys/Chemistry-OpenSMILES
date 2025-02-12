@@ -101,17 +101,15 @@ sub kekulise
                              @$component;
         my( $second ) = sort { $order_sub->($a) cmp $order_sub->($b) }
                              $aromatic_only->neighbours( $first );
-        my $n = 0;
-        while( $n < @$component ) {
+        for my $i (0..$#$component) {
             $first->{symbol} = ucfirst $first->{symbol};
-            if( $n % 2 ) {
+            if( $i % 2 ) {
                 $moiety->set_edge_attribute( $first, $second, 'bond', '=' );
             } else {
                 $moiety->delete_edge_attribute( $first, $second, 'bond' );
             }
             ( $first, $second ) =
                 ( $second, grep { $_ ne $first } $aromatic_only->neighbours( $second ) );
-            $n++;
         }
     }
 }
