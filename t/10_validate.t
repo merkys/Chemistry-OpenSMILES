@@ -23,6 +23,9 @@ my %cases = (
     # OpenSMILES specification v1.0
     'NC(Br)=[C@]=C(O)C' => undef,
 
+    # COD entry 1100141, r297562
+    'O1C2CCCc3c2c(ccc3OC)c2ccccc2C1=O' => 'aromatic bond between atoms c(7) and c(13) is outside an aromatic ring',
+
     # COD entry 1501863, r297409
     'B(C(=CC(C)(C)C)c1c(F)c(F)c(F)c(F)c1F)(c1c(F)c(F)c(F)c(F)c1F)/c1c(F)c(F)c(F)c(F)c1F' => 'cis/trans bond is defined between atoms B(0) and c(29), but neither of them is attached to a double bond',
 

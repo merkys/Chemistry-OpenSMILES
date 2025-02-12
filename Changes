@@ -6,6 +6,7 @@
       algorithm stable.
     - Supporting octahedral chirality in chirality_to_pseudograph().
     - Introducing Chemistry::OpenSMILES::is_aromatic_bond().
+    - Reporting aromatic bonds outside aromatic rings in _validate().
 
 0.11.4 2025-02-04
 

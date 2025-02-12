@@ -569,6 +569,21 @@ sub _validate($@)
                      $ends[1]->{symbol}, $ends[1]->{number};
     }
 
+    # Check for bridging aromatic bonds
+    my $aromatic = $moiety->copy_graph;
+    $aromatic->delete_edges( map  { @$_ }
+                             grep { !is_aromatic_bond( $moiety, @$_ ) }
+                                  $moiety->edges );
+
+    for my $bridge (sort { min( map { $_->{number} } @$a ) <=> min( map { $_->{number} } @$b ) ||
+                           max( map { $_->{number} } @$a ) <=> max( map { $_->{number} } @$b ) }
+                         $aromatic->bridges) {
+        my( $A, $B ) = sort { $a->{number} <=> $b->{number} } @$bridge;
+        warn sprintf 'aromatic bond between atoms %s(%d) and %s(%d) ' .
+                     'is outside an aromatic ring' . "\n",
+                     $A->{symbol}, $A->{number}, $B->{symbol}, $B->{number};
+    }
+
     # TODO: SP, TB, OH chiral centers
 }
 
