@@ -13,7 +13,7 @@ use Chemistry::OpenSMILES qw(
     is_single_bond
 );
 use Graph::Traversal::DFS;
-use List::Util qw( all );
+use List::Util qw( all first );
 
 =head1 NAME
 
@@ -109,7 +109,7 @@ sub kekulise
                 $moiety->delete_edge_attribute( $first, $second, 'bond' );
             }
             ( $first, $second ) =
-                ( $second, grep { $_ ne $first } $aromatic_only->neighbours( $second ) );
+                ( $second, first { $_ ne $first } $aromatic_only->neighbours( $second ) );
         }
     }
 }
