@@ -65,22 +65,22 @@ sub aromatise
     }
 }
 
-=item kekulise( $moiety, $color_sub )
+=item kekulise( $moiety, $order_sub )
 
 Find nonfused even-length aromatic cycles consisting only of B, C, N, P, S and mark them with alternating single and double bonds.
-Subroutine as well accepts a subroutine reference C<$color_sub>, optionally providing external distinction for atoms.
+Subroutine as well accepts an optional subroutine reference C<$order_sub>, providing external order for atoms.
 This is needed to stabilise the algorithm, as otherwise the outcomes of bond assignment may turn out different.
-C<$color_sub> is called with an atom as C<$_[0]> and is expected to return a value providing "color" for every atom.
-"Colors" can be any scalar values, comparable using Perl's C<cmp> operator.
-If C<$color_sub> is not given, initial atom order in input is consulted.
+C<$order_sub> is called with an atom as C<$_[0]> and is expected to return a value providing a distinct order indication for every atom.
+These can be any scalar values, comparable using Perl's C<cmp> operator.
+If C<$order_sub> is not given, initial atom order in input is consulted.
 
 =cut
 
 sub kekulise
 {
-    my( $moiety, $color_sub ) = @_;
+    my( $moiety, $order_sub ) = @_;
 
-    $color_sub = sub { $_[0]->{number} } unless $color_sub;
+    $order_sub = sub { $_[0]->{number} } unless $order_sub;
 
     my $aromatic_only = $moiety->copy_graph;
     $aromatic_only->delete_vertices( grep { !is_aromatic $_ }
@@ -89,8 +89,8 @@ sub kekulise
     my @components;
     my $get_root = sub {
         my( $self, $unseen ) = @_;
-        my( $next ) = sort { $color_sub->($unseen->{$a}) cmp
-                             $color_sub->($unseen->{$b}) }
+        my( $next ) = sort { $order_sub->($unseen->{$a}) cmp
+                             $order_sub->($unseen->{$b}) }
                            keys %$unseen;
         return unless defined $next;
 
@@ -113,9 +113,9 @@ sub kekulise
         next unless all { $_->{symbol} =~ /^[BCNPS]$/i } @$component;
         next if @$component % 2;
 
-        my( $first  ) = sort { $color_sub->($a) cmp $color_sub->($b) }
+        my( $first  ) = sort { $order_sub->($a) cmp $order_sub->($b) }
                              @$component;
-        my( $second ) = sort { $color_sub->($a) cmp $color_sub->($b) }
+        my( $second ) = sort { $order_sub->($a) cmp $order_sub->($b) }
                              $aromatic_only->neighbours( $first );
         my $n = 0;
         while( $n < @$component ) {

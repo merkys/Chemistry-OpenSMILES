@@ -10,7 +10,7 @@ use List::Util qw(max);
 use Set::Object qw(set);
 use Test::More;
 
-eval 'use Graph::Nauty qw(orbits)';
+eval 'use Graph::Nauty qw(canonical_order)';
 plan skip_all => 'no Graph::Nauty' if $@;
 
 my $repeats = 10;
@@ -28,9 +28,14 @@ for my $reverse (('', 1) x $repeats) {
         }
     }
 
-    my @orbits = map { set( @$_ ) } orbits( $moiety, \&write_SMILES );
-    my $color_sub = sub { for my $i (0..$#orbits) { return $i if $orbits[$i]->has( $_[0] ) } };
-    kekulise( $moiety, $color_sub );
+    my @order = canonical_order( $moiety, \&write_SMILES );
+    my %order;
+    for my $i (0..$#order) {
+        $order{$order[$i]} = $i;
+    }
+
+    my $order_sub = sub { $order{$_[0]} };
+    kekulise( $moiety, $order_sub );
 
     ok is_single_bond( $moiety, grep { $moiety->degree($_) == 3 } $moiety->vertices );
 }
