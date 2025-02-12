@@ -24,6 +24,7 @@ my %cases = (
     'C11 '       => undef,
     'C1C1'       => undef,
     'C12CCCCC12' => undef,
+    'C[C@]C'     => undef,
 );
 
 plan tests => scalar keys %cases;
@@ -38,5 +39,5 @@ for (sort keys %cases) {
     };
     $error = $@ if $@;
     $error =~ s/\n$// if $error;
-    is( $error, $cases{$_} );
+    is $error, $cases{$_};
 }
