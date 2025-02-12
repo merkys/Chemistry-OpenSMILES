@@ -401,6 +401,7 @@ sub _add_ring_bond
         }
 
         my $ring_atom = $self->{USER}{RINGBONDS}{$ring_bond}{atom};
+        die "atom cannot be bonded to itself\n" if $atom == $ring_atom;
         if( !$bond && is_aromatic $ring_atom && is_aromatic $atom ) {
             $bond = ':';
         }

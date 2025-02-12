@@ -10,7 +10,6 @@ my %cases = (
     '[C@]' => 'tetrahedral chiral center C(0) has 0 bonds while at least 3 are required',
     'C/C(\O)=C(/C)(\O)' => 'atom C(1) has 2 bonds of type \'\\\', cis/trans definitions must not conflict',
     'C(Cl)(F)(O)' => 'atom C(0) has 4 distinct neighbours, but does not have a chiral setting',
-    'C11' => 'atom C(0) has bond to itself',
     'C/C' => 'cis/trans bond is defined between atoms C(0) and C(1), but neither of them is attached to a double bond',
     'C/C=C' => 'double bond between atoms C(1) and C(2) has only one cis/trans marker',
     # Atom coloring is not given, thus the following is not detected as unimportant chiral center
