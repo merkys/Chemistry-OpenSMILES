@@ -90,27 +90,7 @@ sub kekulise
                                   grep { !is_aromatic_bond( $moiety, @$_ ) }
                                        $aromatic_only->edges );
 
-    my @components;
-    my $get_root = sub {
-        my( $self, $unseen ) = @_;
-        my( $next ) = sort { $order_sub->($unseen->{$a}) cmp
-                             $order_sub->($unseen->{$b}) }
-                           keys %$unseen;
-        return unless defined $next;
-
-        push @components, [];
-        return $unseen->{$next};
-    };
-
-    my $operations = {
-        first_root => $get_root,
-        next_root  => $get_root,
-        pre => sub { push @{$components[-1]}, $_[0] },
-    };
-    my $traversal = Graph::Traversal::DFS->new( $aromatic_only, %$operations );
-    $traversal->dfs;
-
-    for my $component (@components) {
+    for my $component ($aromatic_only->connected_components) {
         # Taking only simple even-length cycles into consideration
         next unless all { $aromatic_only->degree( $_ ) == 2 } @$component;
         next unless all { $moiety->degree( $_ ) <= 3 }   @$component;
