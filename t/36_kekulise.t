@@ -7,7 +7,6 @@ use Chemistry::OpenSMILES::Aromaticity qw(kekulise);
 use Chemistry::OpenSMILES::Parser;
 use Chemistry::OpenSMILES::Writer qw(write_SMILES);
 use List::Util qw(max);
-use Set::Object qw(set);
 use Test::More;
 
 eval 'use Graph::Nauty qw(canonical_order)';
