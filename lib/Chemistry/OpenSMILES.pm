@@ -19,6 +19,7 @@ our @EXPORT_OK = qw(
     %normal_valence
     clean_chiral_centers
     is_aromatic
+    is_aromatic_bond
     is_chiral
     is_chiral_allenal
     is_chiral_octahedral
@@ -148,6 +149,13 @@ sub is_aromatic($)
 {
     my( $atom ) = @_;
     return $atom->{symbol} ne ucfirst $atom->{symbol};
+}
+
+sub is_aromatic_bond
+{
+    my( $moiety, $a, $b ) = @_;
+    return $moiety->has_edge_attribute( $a, $b, 'bond' ) &&
+           $moiety->get_edge_attribute( $a, $b, 'bond' ) eq ':';
 }
 
 sub is_chiral($)

@@ -8,6 +8,7 @@ use warnings;
 
 use Chemistry::OpenSMILES qw(
     is_aromatic
+    is_aromatic_bond
     is_double_bond
     is_single_bond
 );
@@ -85,6 +86,9 @@ sub kekulise
     my $aromatic_only = $moiety->copy_graph;
     $aromatic_only->delete_vertices( grep { !is_aromatic $_ }
                                           $aromatic_only->vertices );
+    $aromatic_only->delete_edges( map  { @$_ }
+                                  grep { !is_aromatic_bond( $moiety, @$_ ) }
+                                       $aromatic_only->edges );
 
     my @components;
     my $get_root = sub {
