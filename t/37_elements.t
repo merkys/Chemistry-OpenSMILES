@@ -5,7 +5,7 @@ use warnings;
 use Chemistry::OpenSMILES::Parser;
 use Test::More;
 
-my @known_elements   = ( '*', 'Db' );
+my @known_elements   = ( '*', 'Db', 'as', 'se' );
 my @unknown_elements = ( 'D', 'Ha', 'M', 'T', 'X' );
 
 plan tests => @known_elements + @unknown_elements;
