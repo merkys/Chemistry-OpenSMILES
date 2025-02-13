@@ -1,7 +1,8 @@
-0.11.5 unreleased
+0.11.5 2025-02-13
 
     - Fixing a bug failing to recognise @TB10.
     - Forbidding unknown chemical elements.
+    - Forbidding ring bonds to self.
     - Accepting order subroutine in kekulise() in order to make the
       algorithm stable.
     - Supporting octahedral chirality in chirality_to_pseudograph().
