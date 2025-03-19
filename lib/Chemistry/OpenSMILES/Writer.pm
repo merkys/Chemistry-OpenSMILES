@@ -60,11 +60,11 @@ sub write_SMILES
         my $rings = {};
 
         my $operations = {
-            tree_edge     => sub { my( $seen, $unseen, $self ) = @_;
+            tree_edge     => sub { my( $seen, $unseen ) = @_;
                                    if( $vertex_symbols{$unseen} ) {
                                        ( $seen, $unseen ) = ( $unseen, $seen );
                                    }
-                                   push @symbols, _tree_edge( $seen, $unseen, $self );
+                                   push @symbols, '(' . _depict_bond( $seen, $unseen, $graph );
                                    $discovered_from{$unseen} = $seen },
 
             non_tree_edge => sub { my @sorted = sort { $vertex_symbols{$a} <=>
@@ -255,13 +255,6 @@ sub write_SMILES
 
 # DEPRECATED
 sub write { &write_SMILES }
-
-sub _tree_edge
-{
-    my( $u, $v, $self ) = @_;
-
-    return '(' . _depict_bond( $u, $v, $self->graph );
-}
 
 sub _pre_vertex
 {
