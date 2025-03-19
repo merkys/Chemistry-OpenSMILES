@@ -56,6 +56,9 @@ sub write_SMILES
         my %seen_rings;
         my @chiral;
         my %discovered_from;
+        my @order;
+
+        my $order_by_vertex = sub { first { $order[$_] == $_[0] } 0..$#order };
 
         my $rings = {};
 
@@ -83,7 +86,8 @@ sub write_SMILES
                                        $graph,
                                        { omit_chirality => 1,
                                          raw => $raw } );
-                          $vertex_symbols{$vertex} = $#symbols },
+                          $vertex_symbols{$vertex} = $#symbols;
+                          push @order, $vertex },
 
             post => sub { push @symbols, ')' },
             next_root => undef,
@@ -96,7 +100,6 @@ sub write_SMILES
 
         my $traversal = Graph::Traversal::DFS->new( $graph, %$operations );
         $traversal->dfs;
-        my @order = $traversal->preorder;
 
         if( @order != $graph->vertices ) {
             warn $graph->vertices - @order . ' unreachable atom(s) detected in moiety' . "\n";
