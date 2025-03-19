@@ -96,13 +96,13 @@ sub write_SMILES
 
         my $traversal = Graph::Traversal::DFS->new( $graph, %$operations );
         $traversal->dfs;
+        my @order = $traversal->preorder;
 
-        if( scalar keys %vertex_symbols != scalar $graph->vertices ) {
-            warn scalar( $graph->vertices ) - scalar( keys %vertex_symbols ) .
-                 ' unreachable atom(s) detected in moiety' . "\n";
+        if( @order != $graph->vertices ) {
+            warn $graph->vertices - @order . ' unreachable atom(s) detected in moiety' . "\n";
         }
 
-        next unless @symbols;
+        next unless @order;
         pop @symbols;
 
         # Dealing with chirality
