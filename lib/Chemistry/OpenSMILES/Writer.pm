@@ -108,7 +108,13 @@ sub write_SMILES
                                             $graph,
                                             { omit_chirality => 1,
                                             raw => $raw } );
+            my $where = $i < $#order ? $discovered_from{$order[$i+1]} : $order[0];
+            while( $vertex != $where ) {
+                push @symbols_new, ')';
+                $vertex = $discovered_from{$vertex};
+            }
         }
+        @symbols = @symbols_new;
 
         # Convert ring bonds to the "old" data structure
         my $rings;
