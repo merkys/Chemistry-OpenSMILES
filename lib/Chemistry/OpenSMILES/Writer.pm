@@ -93,7 +93,6 @@ sub write_SMILES
         next unless @order;
 
         # Create both old and new ring data structures
-        my $rings;
         my $rings_new;
         for my $ring_bond (@ring_bonds) {
             my @sorted = sort { $order_by_vertex->($a) <=> $order_by_vertex->($b) } @$ring_bond;
@@ -102,11 +101,6 @@ sub write_SMILES
             $rings_new->{$order_by_vertex->($ring_bond->[1])}
                         {$order_by_vertex->($ring_bond->[0])} =
                         { bond => _depict_bond( @sorted, $graph ) };
-            $rings->{$vertex_symbols{$ring_bond->[0]}}
-                    {$vertex_symbols{$ring_bond->[1]}} =
-            $rings->{$vertex_symbols{$ring_bond->[1]}}
-                    {$vertex_symbols{$ring_bond->[0]}} =
-                    _depict_bond( @sorted, $graph );
         }
 
         # Write the SMILES
