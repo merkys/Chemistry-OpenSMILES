@@ -160,7 +160,11 @@ sub write_SMILES
         # Dealing with chirality
         my @chiral = grep { is_chiral $_ } @order;
         for my $atom (@chiral) {
-            next unless $atom->{chirality} =~ /^@(@?|SP[123]|TB1?[1-9]|TB20|OH[1-9]|OH[12][0-9]|OH30)$/;
+            if( $atom->{chirality} !~ /^@(@?|SP[123]|TB1?[1-9]|TB20|OH[1-9]|OH[12][0-9]|OH30)$/ ) {
+                delete $atom->{chirality};
+                delete $atom->{chirality_neighbours};
+                next;
+            }
 
             my @neighbours = $graph->neighbours($atom);
             my $has_lone_pair;
@@ -207,7 +211,7 @@ sub write_SMILES
             }
 
             my $chirality_now = $atom->{chirality};
-            if( scalar @neighbours != scalar @{$atom->{chirality_neighbours}} ) {
+            if( @neighbours != @{$atom->{chirality_neighbours}} ) {
                 warn 'number of neighbours does not match the length ' .
                      "of 'chirality_neighbours' array, cannot process " .
                      'such chiral centers' . "\n";
