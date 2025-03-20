@@ -116,7 +116,10 @@ sub write_SMILES
             my $vertex = $order[$i];
             if( $discovered_from{$vertex} ) {
                 my $symbol = _depict_bond( $discovered_from{$vertex}, $vertex, $graph );
-                $symbol = '(' . $symbol if _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings_new );
+                if( $options->{explicit_parentheses} ||
+                    _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings_new ) ) {
+                    $symbol = '(' . $symbol;
+                }
                 push @symbols_new, $symbol;
             }
             push @symbols_new, _pre_vertex( $vertex,
@@ -149,7 +152,8 @@ sub write_SMILES
             }
             my $where = $i < $#order ? $discovered_from{$order[$i+1]} : $order[0];
             while( $vertex != $where ) {
-                if( _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings_new ) ) {
+                if( $options->{explicit_parentheses} ||
+                    _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings_new ) ) {
                     push @symbols_new, ')';
                 } else {
                     push @symbols_new, '';

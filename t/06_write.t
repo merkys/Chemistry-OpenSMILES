@@ -36,11 +36,11 @@ for my $case (@cases) {
 
     $parser = Chemistry::OpenSMILES::Parser->new;
     @moieties = $parser->parse( $case->[0], { raw => 1 } );
-    $result = write_SMILES( \@moieties, { raw => 1 } );
+    $result = write_SMILES( \@moieties, { raw => 1, explicit_parentheses => 1 } );
     is $result, $case->[1];
 
     $parser = Chemistry::OpenSMILES::Parser->new;
     @moieties = $parser->parse( $result, { raw => 1 } );
-    $result = write_SMILES( \@moieties, { raw => 1 } );
+    $result = write_SMILES( \@moieties, { raw => 1, explicit_parentheses => 1 } );
     is $result, $case->[1];
 }
