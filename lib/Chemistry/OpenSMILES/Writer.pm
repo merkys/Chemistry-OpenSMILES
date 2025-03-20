@@ -98,16 +98,15 @@ sub write_SMILES
         for my $ring_bond (@ring_bonds) {
             my @sorted = sort { $order_by_vertex->($a) <=> $order_by_vertex->($b) } @$ring_bond;
             $rings_new->{$order_by_vertex->($ring_bond->[0])}
-                        {$order_by_vertex->($ring_bond->[1])}
-                        {bond} =
+                        {$order_by_vertex->($ring_bond->[1])} =
             $rings_new->{$order_by_vertex->($ring_bond->[1])}
-                        {$order_by_vertex->($ring_bond->[0])}
-                        {bond} =
+                        {$order_by_vertex->($ring_bond->[0])} =
+                        { bond => _depict_bond( @sorted, $graph ) };
             $rings->{$vertex_symbols{$ring_bond->[0]}}
                     {$vertex_symbols{$ring_bond->[1]}} =
             $rings->{$vertex_symbols{$ring_bond->[1]}}
                     {$vertex_symbols{$ring_bond->[0]}} =
-                    _depict_bond( @sorted, $graph )
+                    _depict_bond( @sorted, $graph );
         }
 
         # Attempt to rewrite symbol processing
@@ -356,7 +355,7 @@ sub _has_more_unseen_children
 {
     my( $vertex, $i, $order_by_vertex, $graph, $rings ) = @_;
     my $orders = set( grep { $_ > $i } map { $order_by_vertex->($_) } $graph->neighbours( $vertex ) );
-    $orders->remove( keys %{$rings->{$i}} ) if $rings->{$i};
+    $orders->remove( keys %{$rings->{$order_by_vertex->($vertex)}} ) if $rings->{$order_by_vertex->($vertex)};
     return $orders->size;
 }
 
