@@ -91,8 +91,27 @@ sub write_SMILES
 
         next unless @order;
 
+        # Create both old and new ring data structures
+        my $rings;
+        my $rings_new;
+        for my $ring_bond (@ring_bonds) {
+            my @sorted = sort { $order_by_vertex->($a) <=> $order_by_vertex->($b) } @$ring_bond;
+            $rings_new->{$order_by_vertex->($ring_bond->[0])}
+                        {$order_by_vertex->($ring_bond->[1])}
+                        {bond} =
+            $rings_new->{$order_by_vertex->($ring_bond->[1])}
+                        {$order_by_vertex->($ring_bond->[0])}
+                        {bond} =
+            $rings->{$vertex_symbols{$ring_bond->[0]}}
+                    {$vertex_symbols{$ring_bond->[1]}} =
+            $rings->{$vertex_symbols{$ring_bond->[1]}}
+                    {$vertex_symbols{$ring_bond->[0]}} =
+                    _depict_bond( @sorted, $graph )
+        }
+
         # Attempt to rewrite symbol processing
         my @symbols_new;
+        my @ring_ids = ( 1..99, 0 );
         for my $i (0..$#order) {
             my $vertex = $order[$i];
             if( $discovered_from{$vertex} ) {
@@ -102,6 +121,30 @@ sub write_SMILES
                                             $graph,
                                             { omit_chirality => 1,
                                             raw => $raw } );
+            if( $rings_new->{$i} ) {
+                for my $j (sort { $a <=> $b } keys %{$rings_new->{$i}}) {
+                    if( $i < $j ) {
+                        if( !@ring_ids ) {
+                            # All 100 rings are open now.
+                            # There is no other solution but to terminate the program.
+                            die 'cannot represent more than 100 open ring bonds' . "\n";
+                        }
+                        $rings_new->{$i}{$j}{ring} = ($ring_ids[0] < 10 ? '' : '%') .
+                                                      $ring_ids[0];
+                        $symbols_new[-1] .= $rings_new->{$i}{$j}{bond} .
+                                            $rings_new->{$i}{$j}{ring};
+                        shift @ring_ids;
+                    } else {
+                        $symbols_new[-1] .= ($rings_new->{$j}{$i}{bond} eq '/'  ? '\\' :
+                                             $rings_new->{$j}{$i}{bond} eq '\\' ? '/'  :
+                                             $rings_new->{$j}{$i}{bond}) .
+                                             $rings_new->{$j}{$i}{ring};
+                        # Ring bond '0' must stay in the end
+                        @ring_ids = sort { ($a == 0) - ($b == 0) || $a <=> $b }
+                                         ($rings_new->{$j}{$i}{ring}, @ring_ids);
+                    }
+                }
+            }
             my $where = $i < $#order ? $discovered_from{$order[$i+1]} : $order[0];
             while( $vertex != $where ) {
                 push @symbols_new, ')';
@@ -109,17 +152,6 @@ sub write_SMILES
             }
         }
         @symbols = @symbols_new;
-
-        # Convert ring bonds to the "old" data structure
-        my $rings;
-        for my $ring_bond (@ring_bonds) {
-            my @sorted = sort { $order_by_vertex->($a) <=> $order_by_vertex->($b) } @$ring_bond;
-            $rings->{$vertex_symbols{$ring_bond->[0]}}
-                    {$vertex_symbols{$ring_bond->[1]}} =
-            $rings->{$vertex_symbols{$ring_bond->[1]}}
-                    {$vertex_symbols{$ring_bond->[0]}} =
-                    _depict_bond( @sorted, $graph )
-        }
 
         # Dealing with chirality
         my @chiral = grep { is_chiral $_ } @order;
@@ -225,43 +257,17 @@ sub write_SMILES
                 }
             }
 
+            # FIXME: Kludge
+            my $ring_bonds = '';
+            $ring_bonds = $1 if $symbols[$vertex_symbols{$atom}] =~ s/(([-:=#\$\\\/]?(\d|%\d\d))*)$//;
+
             my $parser = Chemistry::OpenSMILES::Parser->new;
             my( $graph_reparsed ) = $parser->parse( $symbols[$vertex_symbols{$atom}],
                                                     { raw => 1 } );
             my( $atom_reparsed ) = $graph_reparsed->vertices;
             $atom_reparsed->{chirality} = $chirality_now;
             $symbols[$vertex_symbols{$atom}] =
-                write_SMILES( $atom_reparsed );
-        }
-
-        # Adding ring numbers
-        my @ring_ids = ( 1..99, 0 );
-        my @ring_ends;
-        for my $i (0..$#symbols) {
-            if( $rings->{$i} ) {
-                for my $j (sort { $a <=> $b } keys %{$rings->{$i}}) {
-                    next if $i > $j;
-                    if( !@ring_ids ) {
-                        # All 100 rings are open now.
-                        # There is no other solution but to terminate the program.
-                        die 'cannot represent more than 100 open ring bonds' . "\n";
-                    }
-                    $symbols[$i] .= $rings->{$i}{$j} .
-                                    ($ring_ids[0] < 10 ? '' : '%') .
-                                     $ring_ids[0];
-                    $symbols[$j] .= ($rings->{$i}{$j} eq '/'  ? '\\' :
-                                     $rings->{$i}{$j} eq '\\' ? '/'  :
-                                     $rings->{$i}{$j}) .
-                                    ($ring_ids[0] < 10 ? '' : '%') .
-                                     $ring_ids[0];
-                    push @{$ring_ends[$j]}, shift @ring_ids;
-                }
-            }
-            if( $ring_ends[$i] ) {
-                # Ring bond '0' must stay in the end
-                @ring_ids = sort { ($a == 0) - ($b == 0) || $a <=> $b }
-                                 (@{$ring_ends[$i]}, @ring_ids);
-            }
+                write_SMILES( $atom_reparsed ) . $ring_bonds;
         }
 
         push @components, join '', @symbols;
