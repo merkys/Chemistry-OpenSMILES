@@ -54,7 +54,6 @@ sub write_SMILES
         my %vertex_symbols;
         my $nrings = 0;
         my %seen_rings;
-        my @chiral;
         my %discovered_from;
         my @order;
         my @ring_bonds;
@@ -72,7 +71,6 @@ sub write_SMILES
             non_tree_edge  => sub { push @ring_bonds, [ @_[0..1] ] },
 
             pre  => sub { my( $vertex, $dfs ) = @_;
-                          push @chiral, $vertex if is_chiral $vertex;
                           push @symbols,
                           _pre_vertex( $vertex,
                                        $graph,
@@ -112,6 +110,7 @@ sub write_SMILES
         }
 
         # Dealing with chirality
+        my @chiral = grep { is_chiral $_ } @order;
         for my $atom (@chiral) {
             next unless $atom->{chirality} =~ /^@(@?|SP[123]|TB1?[1-9]|TB20|OH[1-9]|OH[12][0-9]|OH30)$/;
 
