@@ -52,7 +52,6 @@ sub write_SMILES
     for my $graph (@moieties) {
         my @symbols;
         my %vertex_symbols;
-        my $nrings = 0;
         my %seen_rings;
         my %discovered_from;
         my @order;
@@ -80,6 +79,7 @@ sub write_SMILES
                           push @order, $vertex },
 
             post => sub { push @symbols, ')' },
+
             next_root => undef,
         };
 
