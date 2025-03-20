@@ -52,7 +52,6 @@ sub write_SMILES
     for my $graph (@moieties) {
         my @symbols;
         my %vertex_symbols;
-        my %seen_rings;
         my %discovered_from;
 
         my @ring_bonds;
