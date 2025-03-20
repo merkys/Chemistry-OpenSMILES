@@ -162,8 +162,8 @@ sub write_SMILES
         @symbols = @symbols_new;
 
         # Dealing with chirality
-        my @chiral = grep { is_chiral $_ } @order;
-        for my $atom (@chiral) {
+        for my $atom (@order) {
+            next unless is_chiral $atom;
             if( !is_chiral_tetrahedral( $atom ) &&
                 !is_chiral_planar( $atom ) &&
                 !is_chiral_trigonal_bipyramidal( $atom ) &&
