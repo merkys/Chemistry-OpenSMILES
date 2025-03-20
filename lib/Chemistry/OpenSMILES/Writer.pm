@@ -201,72 +201,74 @@ sub write_SMILES
                 $has_lone_pair = @neighbours == 5;
             }
 
+            if( !exists $atom->{chirality_neighbours} ) {
+                delete  $atom->{chirality};
+                next;
+            }
+
             my $chirality_now = $atom->{chirality};
-            if( $atom->{chirality_neighbours} ) {
-                if( scalar @neighbours !=
-                    scalar @{$atom->{chirality_neighbours}} ) {
-                    warn 'number of neighbours does not match the length ' .
-                         "of 'chirality_neighbours' array, cannot process " .
-                         'such chiral centers' . "\n";
-                    delete $atom->{chirality};
-                    delete $atom->{chirality_neighbours};
-                    next;
-                }
+            if( scalar @neighbours != scalar @{$atom->{chirality_neighbours}} ) {
+                warn 'number of neighbours does not match the length ' .
+                     "of 'chirality_neighbours' array, cannot process " .
+                     'such chiral centers' . "\n";
+                delete $atom->{chirality};
+                delete $atom->{chirality_neighbours};
+                next;
+            }
 
-                my %indices;
-                for (0..$#{$atom->{chirality_neighbours}}) {
-                    my $pos = $_;
-                    if( $has_lone_pair && $_ != 0 ) {
-                        # Lone pair is always second in the chiral neighbours array
-                        $pos++;
-                    }
-                    $indices{$order_by_vertex->($atom->{chirality_neighbours}[$_])} = $pos;
+            my %indices;
+            for (0..$#{$atom->{chirality_neighbours}}) {
+                my $pos = $_;
+                if( $has_lone_pair && $_ != 0 ) {
+                    # Lone pair is always second in the chiral neighbours array
+                    $pos++;
                 }
+                $indices{$order_by_vertex->($atom->{chirality_neighbours}[$_])} = $pos;
+            }
 
-                my @order_new;
-                # In the newly established order, the atom from which this one
-                # is discovered (left hand side) will be the first, if any
-                if( $discovered_from{$atom} ) {
-                    push @order_new,
-                         $indices{$order_by_vertex->($discovered_from{$atom})};
-                }
-                # Second, there will be ring bonds as they are added before all of the neighbours
-                if( $rings->{$order_by_vertex->($atom)} ) {
-                    push @order_new, map  { $indices{$_} }
-                                     sort { $a <=> $b }
-                                     keys %{$rings->{$order_by_vertex->($atom)}};
-                }
-                # Finally, all neighbours are added, uniq will remove duplicates
+            my @order_new;
+            # In the newly established order, the atom from which this one
+            # is discovered (left hand side) will be the first, if any
+            if( $discovered_from{$atom} ) {
+                push @order_new,
+                     $indices{$order_by_vertex->($discovered_from{$atom})};
+            }
+            # Second, there will be ring bonds as they are added before all of the neighbours
+            if( $rings->{$order_by_vertex->($atom)} ) {
                 push @order_new, map  { $indices{$_} }
                                  sort { $a <=> $b }
-                                 map  { $order_by_vertex->($_) }
-                                      @neighbours;
-                @order_new = uniq @order_new;
+                                 keys %{$rings->{$order_by_vertex->($atom)}};
+            }
+            # Finally, all neighbours are added, uniq will remove duplicates
+            push @order_new, map  { $indices{$_} }
+                             sort { $a <=> $b }
+                             map  { $order_by_vertex->($_) }
+                                  @neighbours;
+            @order_new = uniq @order_new;
 
-                if( $has_lone_pair ) {
-                    # Accommodate the lone pair
-                    if( $discovered_from{$atom} ) {
-                        @order_new = ( $order_new[0], 1, @order_new[1..$#order_new] );
-                    } else {
-                        unshift @order_new, 1;
-                    }
-                }
-
-                if( $atom->{chirality} =~ /^@@?$/ ) {
-                    # Tetragonal centers
-                    if( join( '', _permutation_order( @order_new ) ) ne '0123' ) {
-                        $chirality_now = $chirality_now eq '@' ? '@@' : '@';
-                    }
-                } elsif( $atom->{chirality} =~ /^\@SP[123]$/ ) {
-                    # Square planar centers
-                    $chirality_now = _square_planar_chirality( @order_new, $chirality_now );
-                } elsif( $atom->{chirality} =~ /^\@TB..?$/ ) {
-                    # Trigonal bipyramidal centers
-                    $chirality_now = _trigonal_bipyramidal_chirality( @order_new, $chirality_now );
+            if( $has_lone_pair ) {
+                # Accommodate the lone pair
+                if( $discovered_from{$atom} ) {
+                    @order_new = ( $order_new[0], 1, @order_new[1..$#order_new] );
                 } else {
-                    # Octahedral centers
-                    $chirality_now = _octahedral_chirality( @order_new, $chirality_now );
+                    unshift @order_new, 1;
                 }
+            }
+
+            if( $atom->{chirality} =~ /^@@?$/ ) {
+                # Tetragonal centers
+                if( join( '', _permutation_order( @order_new ) ) ne '0123' ) {
+                    $chirality_now = $chirality_now eq '@' ? '@@' : '@';
+                }
+            } elsif( $atom->{chirality} =~ /^\@SP[123]$/ ) {
+                # Square planar centers
+                $chirality_now = _square_planar_chirality( @order_new, $chirality_now );
+            } elsif( $atom->{chirality} =~ /^\@TB..?$/ ) {
+                # Trigonal bipyramidal centers
+                $chirality_now = _trigonal_bipyramidal_chirality( @order_new, $chirality_now );
+            } else {
+                # Octahedral centers
+                $chirality_now = _octahedral_chirality( @order_new, $chirality_now );
             }
 
             # FIXME: Kludge
