@@ -93,14 +93,14 @@ sub write_SMILES
         next unless @order;
 
         # Create both old and new ring data structures
-        my $rings_new;
+        my $rings;
         for my $ring_bond (@ring_bonds) {
             my @sorted = sort { $order_by_vertex->($a) <=> $order_by_vertex->($b) } @$ring_bond;
-            $rings_new->{$order_by_vertex->($ring_bond->[0])}
-                        {$order_by_vertex->($ring_bond->[1])} =
-            $rings_new->{$order_by_vertex->($ring_bond->[1])}
-                        {$order_by_vertex->($ring_bond->[0])} =
-                        { bond => _depict_bond( @sorted, $graph ) };
+            $rings->{$order_by_vertex->($ring_bond->[0])}
+                    {$order_by_vertex->($ring_bond->[1])} =
+            $rings->{$order_by_vertex->($ring_bond->[1])}
+                    {$order_by_vertex->($ring_bond->[0])} =
+                    { bond => _depict_bond( @sorted, $graph ) };
         }
 
         # Write the SMILES
@@ -111,7 +111,7 @@ sub write_SMILES
             if( $discovered_from{$vertex} ) {
                 my $symbol = _depict_bond( $discovered_from{$vertex}, $vertex, $graph );
                 if( $options->{explicit_parentheses} ||
-                    _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings_new ) ) {
+                    _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings ) ) {
                     $symbol = '(' . $symbol;
                 }
                 push @symbols_new, $symbol;
@@ -120,34 +120,34 @@ sub write_SMILES
                                             $graph,
                                             { omit_chirality => 1,
                                             raw => $raw } );
-            if( $rings_new->{$i} ) {
-                for my $j (sort { $a <=> $b } keys %{$rings_new->{$i}}) {
+            if( $rings->{$i} ) {
+                for my $j (sort { $a <=> $b } keys %{$rings->{$i}}) {
                     if( $i < $j ) {
                         if( !@ring_ids ) {
                             # All 100 rings are open now.
                             # There is no other solution but to terminate the program.
                             die 'cannot represent more than 100 open ring bonds' . "\n";
                         }
-                        $rings_new->{$i}{$j}{ring} = ($ring_ids[0] < 10 ? '' : '%') .
-                                                      $ring_ids[0];
-                        $symbols_new[-1] .= $rings_new->{$i}{$j}{bond} .
-                                            $rings_new->{$i}{$j}{ring};
+                        $rings->{$i}{$j}{ring} = ($ring_ids[0] < 10 ? '' : '%') .
+                                                  $ring_ids[0];
+                        $symbols_new[-1] .= $rings->{$i}{$j}{bond} .
+                                            $rings->{$i}{$j}{ring};
                         shift @ring_ids;
                     } else {
-                        $symbols_new[-1] .= ($rings_new->{$j}{$i}{bond} eq '/'  ? '\\' :
-                                             $rings_new->{$j}{$i}{bond} eq '\\' ? '/'  :
-                                             $rings_new->{$j}{$i}{bond}) .
-                                             $rings_new->{$j}{$i}{ring};
+                        $symbols_new[-1] .= ($rings->{$j}{$i}{bond} eq '/'  ? '\\' :
+                                             $rings->{$j}{$i}{bond} eq '\\' ? '/'  :
+                                             $rings->{$j}{$i}{bond}) .
+                                             $rings->{$j}{$i}{ring};
                         # Ring bond '0' must stay in the end
                         @ring_ids = sort { ($a == 0) - ($b == 0) || $a <=> $b }
-                                         ($rings_new->{$j}{$i}{ring}, @ring_ids);
+                                         ($rings->{$j}{$i}{ring}, @ring_ids);
                     }
                 }
             }
             my $where = $i < $#order ? $discovered_from{$order[$i+1]} : $order[0];
             while( $vertex != $where ) {
                 if( $options->{explicit_parentheses} ||
-                    _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings_new ) ) {
+                    _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings ) ) {
                     push @symbols_new, ')';
                 } else {
                     push @symbols_new, '';
@@ -223,10 +223,10 @@ sub write_SMILES
                          $indices{$order_by_vertex->($discovered_from{$atom})};
                 }
                 # Second, there will be ring bonds as they are added before all of the neighbours
-                if( $rings_new->{$order_by_vertex->($atom)} ) {
+                if( $rings->{$order_by_vertex->($atom)} ) {
                     push @order_new, map  { $indices{$_} }
                                      sort { $a <=> $b }
-                                     keys %{$rings_new->{$order_by_vertex->($atom)}};
+                                     keys %{$rings->{$order_by_vertex->($atom)}};
                 }
                 # Finally, all neighbours are added, uniq will remove duplicates
                 push @order_new, map  { $indices{$_} }
