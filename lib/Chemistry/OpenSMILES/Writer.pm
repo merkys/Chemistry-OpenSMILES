@@ -93,6 +93,13 @@ sub write_SMILES
         my $traversal = Graph::Traversal::DFS->new( $graph, %$operations );
         $traversal->dfs;
 
+        if( @order != $graph->vertices ) {
+            warn $graph->vertices - @order . ' unreachable atom(s) detected in moiety' . "\n";
+        }
+
+        next unless @order;
+        pop @symbols;
+
         # Convert ring bonds to the "old" data structure
         my $rings;
         for my $ring_bond (@ring_bonds) {
@@ -103,13 +110,6 @@ sub write_SMILES
                     {$vertex_symbols{$ring_bond->[0]}} =
                     _depict_bond( @sorted, $graph )
         }
-
-        if( @order != $graph->vertices ) {
-            warn $graph->vertices - @order . ' unreachable atom(s) detected in moiety' . "\n";
-        }
-
-        next unless @order;
-        pop @symbols;
 
         # Dealing with chirality
         for my $atom (@chiral) {
