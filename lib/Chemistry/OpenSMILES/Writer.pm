@@ -170,6 +170,8 @@ sub write_SMILES
                          'with ' . scalar @neighbours . ' neighbours, can only ' .
                          'process tetrahedral chiral or square planar centers ' .
                          'with possible lone pairs' . "\n";
+                    delete $atom->{chirality};
+                    delete $atom->{chirality_neighbours};
                     next;
                 }
                 $has_lone_pair = @neighbours == 3;
@@ -180,6 +182,8 @@ sub write_SMILES
                          'with ' . scalar @neighbours . ' neighbours, can only ' .
                          'process trigonal bipyramidal centers ' .
                          'with possible lone pairs' . "\n";
+                    delete $atom->{chirality};
+                    delete $atom->{chirality_neighbours};
                     next;
                 }
                 $has_lone_pair = @neighbours == 4;
@@ -190,6 +194,8 @@ sub write_SMILES
                          'with ' . scalar @neighbours . ' neighbours, can only ' .
                          'process octahedral centers ' .
                          'with possible lone pairs' . "\n";
+                    delete $atom->{chirality};
+                    delete $atom->{chirality_neighbours};
                     next;
                 }
                 $has_lone_pair = @neighbours == 5;
@@ -202,6 +208,8 @@ sub write_SMILES
                     warn 'number of neighbours does not match the length ' .
                          "of 'chirality_neighbours' array, cannot process " .
                          'such chiral centers' . "\n";
+                    delete $atom->{chirality};
+                    delete $atom->{chirality_neighbours};
                     next;
                 }
 
