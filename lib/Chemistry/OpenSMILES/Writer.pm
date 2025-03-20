@@ -11,6 +11,10 @@ use Chemistry::OpenSMILES qw(
     %normal_valence
     is_aromatic
     is_chiral
+    is_chiral_octahedral
+    is_chiral_planar
+    is_chiral_tetrahedral
+    is_chiral_trigonal_bipyramidal
     toggle_cistrans
     valence
 );
@@ -160,7 +164,10 @@ sub write_SMILES
         # Dealing with chirality
         my @chiral = grep { is_chiral $_ } @order;
         for my $atom (@chiral) {
-            if( $atom->{chirality} !~ /^@(@?|SP[123]|TB1?[1-9]|TB20|OH[1-9]|OH[12][0-9]|OH30)$/ ) {
+            if( !is_chiral_tetrahedral( $atom ) &&
+                !is_chiral_planar( $atom ) &&
+                !is_chiral_trigonal_bipyramidal( $atom ) &&
+                !is_chiral_octahedral( $atom ) ) {
                 delete $atom->{chirality};
                 delete $atom->{chirality_neighbours};
                 next;
