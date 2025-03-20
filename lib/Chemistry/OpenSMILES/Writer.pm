@@ -109,7 +109,7 @@ sub write_SMILES
                     _depict_bond( @sorted, $graph );
         }
 
-        # Attempt to rewrite symbol processing
+        # Write the SMILES
         my @symbols_new;
         my @ring_ids = ( 1..99, 0 );
         for my $i (0..$#order) {
