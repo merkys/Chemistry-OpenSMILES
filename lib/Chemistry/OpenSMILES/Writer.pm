@@ -18,6 +18,7 @@ use Chemistry::OpenSMILES::Parser;
 use Chemistry::OpenSMILES::Stereo::Tables qw( @OH @TB );
 use Graph::Traversal::DFS;
 use List::Util qw( all any first min none sum0 uniq );
+use Set::Object qw( set );
 
 require Exporter;
 our @ISA = qw( Exporter );
@@ -115,7 +116,9 @@ sub write_SMILES
         for my $i (0..$#order) {
             my $vertex = $order[$i];
             if( $discovered_from{$vertex} ) {
-                push @symbols_new, '(' . _depict_bond( $discovered_from{$vertex}, $vertex, $graph );
+                my $symbol = _depict_bond( $discovered_from{$vertex}, $vertex, $graph );
+                $symbol = '(' . $symbol if _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings_new );
+                push @symbols_new, $symbol;
             }
             push @symbols_new, _pre_vertex( $vertex,
                                             $graph,
@@ -147,7 +150,11 @@ sub write_SMILES
             }
             my $where = $i < $#order ? $discovered_from{$order[$i+1]} : $order[0];
             while( $vertex != $where ) {
-                push @symbols_new, ')';
+                if( _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings_new ) ) {
+                    push @symbols_new, ')';
+                } else {
+                    push @symbols_new, '';
+                }
                 $vertex = $discovered_from{$vertex};
             }
         }
@@ -343,6 +350,14 @@ sub _depict_bond
     return $bond if $bond ne '/' && $bond ne '\\';
     return $bond if $u->{number} < $v->{number};
     return toggle_cistrans $bond;
+}
+
+sub _has_more_unseen_children
+{
+    my( $vertex, $i, $order_by_vertex, $graph, $rings ) = @_;
+    my $orders = set( grep { $_ > $i } map { $order_by_vertex->($_) } $graph->neighbours( $vertex ) );
+    $orders->remove( keys %{$rings->{$i}} ) if $rings->{$i};
+    return $orders->size;
 }
 
 # Reorder a permutation of elements 0, 1, 2 and 3 by taking an element
