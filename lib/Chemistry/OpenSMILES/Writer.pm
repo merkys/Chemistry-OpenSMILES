@@ -57,10 +57,9 @@ sub write_SMILES
         my @chiral;
         my %discovered_from;
         my @order;
+        my @ring_bonds;
 
         my $order_by_vertex = sub { first { $order[$_] == $_[0] } 0..$#order };
-
-        my $rings = {};
 
         my $operations = {
             tree_edge     => sub { my( $seen, $unseen ) = @_;
@@ -70,14 +69,7 @@ sub write_SMILES
                                    push @symbols, '(' . _depict_bond( $seen, $unseen, $graph );
                                    $discovered_from{$unseen} = $seen },
 
-            non_tree_edge => sub { my @sorted = sort { $vertex_symbols{$a} <=>
-                                                       $vertex_symbols{$b} }
-                                                     @_[0..1];
-                                   $rings->{$vertex_symbols{$_[0]}}
-                                           {$vertex_symbols{$_[1]}} =
-                                   $rings->{$vertex_symbols{$_[1]}}
-                                           {$vertex_symbols{$_[0]}} =
-                                        _depict_bond( @sorted, $graph ) },
+            non_tree_edge  => sub { push @ring_bonds, [ @_[0..1] ] },
 
             pre  => sub { my( $vertex, $dfs ) = @_;
                           push @chiral, $vertex if is_chiral $vertex;
@@ -100,6 +92,17 @@ sub write_SMILES
 
         my $traversal = Graph::Traversal::DFS->new( $graph, %$operations );
         $traversal->dfs;
+
+        # Convert ring bonds to the "old" data structure
+        my $rings;
+        for my $ring_bond (@ring_bonds) {
+            my @sorted = sort { $order_by_vertex->($a) <=> $order_by_vertex->($b) } @$ring_bond;
+            $rings->{$vertex_symbols{$ring_bond->[0]}}
+                    {$vertex_symbols{$ring_bond->[1]}} =
+            $rings->{$vertex_symbols{$ring_bond->[1]}}
+                    {$vertex_symbols{$ring_bond->[0]}} =
+                    _depict_bond( @sorted, $graph )
+        }
 
         if( @order != $graph->vertices ) {
             warn $graph->vertices - @order . ' unreachable atom(s) detected in moiety' . "\n";
