@@ -97,6 +97,19 @@ sub write_SMILES
         next unless @order;
         pop @symbols;
 
+        # Attempt to rewrite symbol processing
+        my @symbols_new;
+        for my $i (0..$#order) {
+            my $vertex = $order[$i];
+            if( $discovered_from{$vertex} ) {
+                push @symbols_new, '(' . _depict_bond( $discovered_from{$vertex}, $vertex, $graph );
+            }
+            push @symbols_new, _pre_vertex( $vertex,
+                                            $graph,
+                                            { omit_chirality => 1,
+                                            raw => $raw } );
+        }
+
         # Convert ring bonds to the "old" data structure
         my $rings;
         for my $ring_bond (@ring_bonds) {
