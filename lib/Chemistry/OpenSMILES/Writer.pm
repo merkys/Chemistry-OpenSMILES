@@ -218,7 +218,7 @@ sub write_SMILES
                         # Lone pair is always second in the chiral neighbours array
                         $pos++;
                     }
-                    $indices{$vertex_symbols{$atom->{chirality_neighbours}[$_]}} = $pos;
+                    $indices{$order_by_vertex->($atom->{chirality_neighbours}[$_])} = $pos;
                 }
 
                 my @order_new;
@@ -226,18 +226,18 @@ sub write_SMILES
                 # is discovered (left hand side) will be the first, if any
                 if( $discovered_from{$atom} ) {
                     push @order_new,
-                         $indices{$vertex_symbols{$discovered_from{$atom}}};
+                         $indices{$order_by_vertex->($discovered_from{$atom})};
                 }
                 # Second, there will be ring bonds as they are added before all of the neighbours
-                if( $rings->{$vertex_symbols{$atom}} ) {
+                if( $rings_new->{$order_by_vertex->($atom)} ) {
                     push @order_new, map  { $indices{$_} }
                                      sort { $a <=> $b }
-                                     keys %{$rings->{$vertex_symbols{$atom}}};
+                                     keys %{$rings_new->{$order_by_vertex->($atom)}};
                 }
                 # Finally, all neighbours are added, uniq will remove duplicates
                 push @order_new, map  { $indices{$_} }
                                  sort { $a <=> $b }
-                                 map  { $vertex_symbols{$_} }
+                                 map  { $order_by_vertex->($_) }
                                       @neighbours;
                 @order_new = uniq @order_new;
 
