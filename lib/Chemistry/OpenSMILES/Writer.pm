@@ -62,20 +62,16 @@ sub write_SMILES
                                    if( $vertex_symbols{$unseen} ) {
                                        ( $seen, $unseen ) = ( $unseen, $seen );
                                    }
-                                   push @symbols, '(' . _depict_bond( $seen, $unseen, $graph );
+                                   push @symbols, '';
                                    $discovered_from{$unseen} = $seen },
 
             non_tree_edge  => sub { push @ring_bonds, [ @_[0..1] ] },
 
-            pre  => sub { my( $vertex, $dfs ) = @_;
-                          push @symbols,
-                          _pre_vertex( $vertex,
-                                       $graph,
-                                       { omit_chirality => 1,
-                                         raw => $raw } );
+            pre  => sub { my( $vertex ) = @_;
+                          push @symbols, '';
                           $vertex_symbols{$vertex} = $#symbols },
 
-            post => sub { push @symbols, ')' },
+            post => sub { push @symbols, '' },
 
             next_root => undef,
         };
@@ -95,7 +91,6 @@ sub write_SMILES
         }
 
         next unless @order;
-        pop @symbols;
 
         # Attempt to rewrite symbol processing
         my @symbols_new;
