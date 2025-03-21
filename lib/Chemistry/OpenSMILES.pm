@@ -349,6 +349,7 @@ sub mirror($)
 
 sub toggle_cistrans($)
 {
+    return $_[0] unless $_[0] =~ /^[\\\/]$/;
     return $_[0] eq '/' ? '\\' : '/';
 }
 
