@@ -55,10 +55,8 @@ sub write_SMILES
     my @components;
 
     for my $graph (@moieties) {
-        my @symbols;
         my %seen;
         my %discovered_from;
-
         my @ring_bonds;
 
         my $operations = {
@@ -268,7 +266,7 @@ sub write_SMILES
                 $vertex = $discovered_from{$vertex};
             }
         }
-        @symbols = @symbols_new;
+        my @symbols = @symbols_new;
 
         push @components, join '', @symbols;
     }
