@@ -29,28 +29,25 @@ my @cases = (
 
 plan tests => 4 * @cases + grep { @$_ == 3 && $_->[2] =~ /:/ } @cases;
 
+my $parser = Chemistry::OpenSMILES::Parser->new;
+
 for my $case (@cases) {
-    my $parser;
     my @moieties;
     my $result;
 
-    $parser = Chemistry::OpenSMILES::Parser->new;
     @moieties = $parser->parse( $case->[0], { raw => 1 } );
     $result = write_SMILES( \@moieties, { raw => 1, explicit_parentheses => 1 } );
     is $result, $case->[1];
 
-    $parser = Chemistry::OpenSMILES::Parser->new;
     @moieties = $parser->parse( $result, { raw => 1 } );
     $result = write_SMILES( \@moieties, { raw => 1, explicit_parentheses => 1 } );
     is $result, $case->[1];
 
     my $output = @$case == 3 ? $case->[2] : $case->[0];
-    $parser = Chemistry::OpenSMILES::Parser->new;
     @moieties = $parser->parse( $case->[0], { raw => 1 } );
     $result = write_SMILES( \@moieties, { raw => 1 } );
     is $result, $output;
 
-    $parser = Chemistry::OpenSMILES::Parser->new;
     @moieties = $parser->parse( $result, { raw => 1 } );
     $result = write_SMILES( \@moieties, { raw => 1 } );
     is $result, $output;
