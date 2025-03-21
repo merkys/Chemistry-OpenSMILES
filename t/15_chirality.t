@@ -18,12 +18,12 @@ my @cases = (
 
 plan tests => 3 * scalar @cases;
 
+my $parser = Chemistry::OpenSMILES::Parser->new;
+
 for my $case (@cases) {
-    my $parser;
     my $moiety;
     my $result;
 
-    $parser = Chemistry::OpenSMILES::Parser->new;
     ( $moiety ) = $parser->parse( $case->[0], { raw => 1 } );
 
     is is_chiral( $moiety ) + 0, $case->[1];
