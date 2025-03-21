@@ -165,14 +165,10 @@ sub write_SMILES
         my %chirality;
         for my $atom (@order) {
             next unless is_chiral $atom;
-            if( !is_chiral_tetrahedral( $atom ) &&
-                !is_chiral_planar( $atom ) &&
-                !is_chiral_trigonal_bipyramidal( $atom ) &&
-                !is_chiral_octahedral( $atom ) ) {
-                delete $atom->{chirality};
-                delete $atom->{chirality_neighbours};
-                next;
-            }
+            next unless is_chiral_tetrahedral( $atom ) ||
+                        is_chiral_planar( $atom ) ||
+                        is_chiral_trigonal_bipyramidal( $atom ) ||
+                        is_chiral_octahedral( $atom );
 
             my @neighbours = $graph->neighbours($atom);
             my $has_lone_pair;
@@ -182,8 +178,6 @@ sub write_SMILES
                          'with ' . scalar @neighbours . ' neighbours, can only ' .
                          'process tetrahedral chiral or square planar centers ' .
                          'with possible lone pairs' . "\n";
-                    delete $atom->{chirality};
-                    delete $atom->{chirality_neighbours};
                     next;
                 }
                 $has_lone_pair = @neighbours == 3;
@@ -194,8 +188,6 @@ sub write_SMILES
                          'with ' . scalar @neighbours . ' neighbours, can only ' .
                          'process trigonal bipyramidal centers ' .
                          'with possible lone pairs' . "\n";
-                    delete $atom->{chirality};
-                    delete $atom->{chirality_neighbours};
                     next;
                 }
                 $has_lone_pair = @neighbours == 4;
@@ -206,25 +198,18 @@ sub write_SMILES
                          'with ' . scalar @neighbours . ' neighbours, can only ' .
                          'process octahedral centers ' .
                          'with possible lone pairs' . "\n";
-                    delete $atom->{chirality};
-                    delete $atom->{chirality_neighbours};
                     next;
                 }
                 $has_lone_pair = @neighbours == 5;
             }
 
-            if( !exists $atom->{chirality_neighbours} ) {
-                delete  $atom->{chirality};
-                next;
-            }
+            next unless exists $atom->{chirality_neighbours};
 
             my $chirality_now = $atom->{chirality};
             if( @neighbours != @{$atom->{chirality_neighbours}} ) {
                 warn 'number of neighbours does not match the length ' .
                      "of 'chirality_neighbours' array, cannot process " .
                      'such chiral centers' . "\n";
-                delete $atom->{chirality};
-                delete $atom->{chirality_neighbours};
                 next;
             }
 
