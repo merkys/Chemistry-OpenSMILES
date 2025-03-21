@@ -208,25 +208,24 @@ sub write_SMILES
         }
 
         # Write the SMILES
-        my @symbols_new;
+        my $component = '';
         my @ring_ids = ( 1..99, 0 );
         for my $i (0..$#order) {
             my $vertex = $order[$i];
             if( $discovered_from{$vertex} ) {
-                my $symbol = _depict_bond( $discovered_from{$vertex}, $vertex, $graph );
                 if( $options->{explicit_parentheses} ||
                     _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings ) ) {
-                    $symbol = '(' . $symbol;
+                    $component .= '(';
                 }
-                push @symbols_new, $symbol;
+                $component .= _depict_bond( $discovered_from{$vertex}, $vertex, $graph );
             }
             if( $chirality{$vertex} ) {
-                push @symbols_new,
+                $component .=
                      _pre_vertex( { %$vertex, chirality => $chirality{$vertex} },
                                   $graph,
                                   { raw => 1 } );
             } else {
-                push @symbols_new,
+                $component .=
                      _pre_vertex( $vertex,
                                   $graph,
                                   { omit_chirality => 1, raw => $raw } );
@@ -241,11 +240,11 @@ sub write_SMILES
                         }
                         $rings->{$i}{$j}{ring} = ($ring_ids[0] < 10 ? '' : '%') .
                                                   $ring_ids[0];
-                        $symbols_new[-1] .= $rings->{$i}{$j}{bond} .
+                        $component .= $rings->{$i}{$j}{bond} .
                                             $rings->{$i}{$j}{ring};
                         shift @ring_ids;
                     } else {
-                        $symbols_new[-1] .= ($rings->{$j}{$i}{bond} eq '/'  ? '\\' :
+                        $component .= ($rings->{$j}{$i}{bond} eq '/'  ? '\\' :
                                              $rings->{$j}{$i}{bond} eq '\\' ? '/'  :
                                              $rings->{$j}{$i}{bond}) .
                                              $rings->{$j}{$i}{ring};
@@ -259,16 +258,13 @@ sub write_SMILES
             while( $vertex != $where ) {
                 if( $options->{explicit_parentheses} ||
                     _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings ) ) {
-                    push @symbols_new, ')';
-                } else {
-                    push @symbols_new, '';
+                    $component .= ')';
                 }
                 $vertex = $discovered_from{$vertex};
             }
         }
-        my @symbols = @symbols_new;
 
-        push @components, join '', @symbols;
+        push @components, $component;
     }
 
     return join '.', @components;
