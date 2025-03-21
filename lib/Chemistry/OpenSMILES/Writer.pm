@@ -44,6 +44,9 @@ sub write_SMILES
     # a subroutine reference for ordering:
     my $order_sub = defined $options && ref $options eq 'CODE' ? $options : \&_order;
     $options = {} unless defined $options && ref $options eq 'HASH';
+
+    $options->{explicit_aromatic_bonds} = 1
+        unless exists $options->{explicit_aromatic_bonds};
     $options->{immediately_reuse_ring_numbers} = 1
         unless exists $options->{immediately_reuse_ring_numbers};
 
@@ -97,7 +100,7 @@ sub write_SMILES
                     {$order_by_vertex->($ring_bond->[1])} =
             $rings->{$order_by_vertex->($ring_bond->[1])}
                     {$order_by_vertex->($ring_bond->[0])} =
-                    { bond => _depict_bond( @sorted, $graph ) };
+                    { bond => _depict_bond( @sorted, $graph, $options ) };
         }
 
         # Deal with chirality
@@ -219,7 +222,7 @@ sub write_SMILES
                     _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings ) ) {
                     $component .= '(';
                 }
-                $component .= _depict_bond( $discovered_from{$vertex}, $vertex, $graph );
+                $component .= _depict_bond( $discovered_from{$vertex}, $vertex, $graph, $options );
             }
             if( $chirality{$vertex} ) {
                 $component .=
@@ -336,13 +339,16 @@ sub _pre_vertex
 # It flips '/' <=> '\' if post-order is opposite from pre-order.
 sub _depict_bond
 {
-    my( $u, $v, $graph ) = @_;
+    my( $u, $v, $graph, $options ) = @_;
+
+    my $n_aromatic = grep { is_aromatic $_ } ( $u, $v );
 
     if( !$graph->has_edge_attribute( $u, $v, 'bond' ) ) {
-        return is_aromatic $u && is_aromatic $v ? '-' : '';
+        return $n_aromatic == 2 ? '-' : '';
     }
 
     my $bond = $graph->get_edge_attribute( $u, $v, 'bond' );
+    return '' if $bond eq ':' && $n_aromatic && !$options->{explicit_aromatic_bonds};
     return $bond if $u->{number} < $v->{number};
     return toggle_cistrans $bond;
 }
