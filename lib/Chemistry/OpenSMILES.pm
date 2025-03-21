@@ -632,8 +632,7 @@ sub _neighbours_per_bond_type
         } else {
             $bond_type = '';
         }
-        if( $bond_type =~ /^[\\\/]$/ &&
-            $atom->{number} > $neighbour->{number} ) {
+        if( $atom->{number} > $neighbour->{number} ) {
             $bond_type = toggle_cistrans $bond_type;
         }
         push @{$bond_types{$bond_type}}, $neighbour;

@@ -345,7 +345,6 @@ sub _depict_bond
     }
 
     my $bond = $graph->get_edge_attribute( $u, $v, 'bond' );
-    return $bond if $bond ne '/' && $bond ne '\\';
     return $bond if $u->{number} < $v->{number};
     return toggle_cistrans $bond;
 }

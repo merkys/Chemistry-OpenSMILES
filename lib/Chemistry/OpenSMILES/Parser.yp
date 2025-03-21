@@ -396,8 +396,7 @@ sub _add_ring_bond
         $bond = first { defined }
                       ( $self->{USER}{RINGBONDS}{$ring_bond}{bond}, $bond );
 
-        if( $bond && $bond =~ /^[\\\/]$/ &&
-            !defined $self->{USER}{RINGBONDS}{$ring_bond}{bond} ) {
+        if( $bond && !defined $self->{USER}{RINGBONDS}{$ring_bond}{bond} ) {
             # If cis/trans marker is not specified when cis/trans bond is
             # seen first, it has to be inverted:
             $bond = toggle_cistrans $bond;
