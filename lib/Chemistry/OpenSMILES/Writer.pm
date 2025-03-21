@@ -162,6 +162,7 @@ sub write_SMILES
         @symbols = @symbols_new;
 
         # Dealing with chirality
+        my %chirality;
         for my $atom (@order) {
             next unless is_chiral $atom;
             if( !is_chiral_tetrahedral( $atom ) &&
@@ -281,6 +282,11 @@ sub write_SMILES
                 # Octahedral centers
                 $chirality_now = _octahedral_chirality( @order_new, $chirality_now );
             }
+            $chirality{$atom} = $chirality_now;
+        }
+
+        for my $atom (@order) {
+            next unless exists $chirality{$atom};
 
             # FIXME: Kludge
             my $ring_bonds = '';
@@ -290,7 +296,7 @@ sub write_SMILES
             my( $graph_reparsed ) = $parser->parse( $symbols[$vertex_symbols{$atom}],
                                                     { raw => 1 } );
             my( $atom_reparsed ) = $graph_reparsed->vertices;
-            $atom_reparsed->{chirality} = $chirality_now;
+            $atom_reparsed->{chirality} = $chirality{$atom};
             $symbols[$vertex_symbols{$atom}] =
                 write_SMILES( $atom_reparsed ) . $ring_bonds;
         }
