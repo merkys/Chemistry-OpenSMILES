@@ -107,61 +107,7 @@ sub write_SMILES
                     { bond => _depict_bond( @sorted, $graph ) };
         }
 
-        # Write the SMILES
-        my @symbols_new;
-        my @ring_ids = ( 1..99, 0 );
-        for my $i (0..$#order) {
-            my $vertex = $order[$i];
-            if( $discovered_from{$vertex} ) {
-                my $symbol = _depict_bond( $discovered_from{$vertex}, $vertex, $graph );
-                if( $options->{explicit_parentheses} ||
-                    _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings ) ) {
-                    $symbol = '(' . $symbol;
-                }
-                push @symbols_new, $symbol;
-            }
-            push @symbols_new, _pre_vertex( $vertex,
-                                            $graph,
-                                            { omit_chirality => 1,
-                                            raw => $raw } );
-            if( $rings->{$i} ) {
-                for my $j (sort { $a <=> $b } keys %{$rings->{$i}}) {
-                    if( $i < $j ) {
-                        if( !@ring_ids ) {
-                            # All 100 rings are open now.
-                            # There is no other solution but to terminate the program.
-                            die 'cannot represent more than 100 open ring bonds' . "\n";
-                        }
-                        $rings->{$i}{$j}{ring} = ($ring_ids[0] < 10 ? '' : '%') .
-                                                  $ring_ids[0];
-                        $symbols_new[-1] .= $rings->{$i}{$j}{bond} .
-                                            $rings->{$i}{$j}{ring};
-                        shift @ring_ids;
-                    } else {
-                        $symbols_new[-1] .= ($rings->{$j}{$i}{bond} eq '/'  ? '\\' :
-                                             $rings->{$j}{$i}{bond} eq '\\' ? '/'  :
-                                             $rings->{$j}{$i}{bond}) .
-                                             $rings->{$j}{$i}{ring};
-                        # Ring bond '0' must stay in the end
-                        @ring_ids = sort { ($a == 0) - ($b == 0) || $a <=> $b }
-                                         ($rings->{$j}{$i}{ring}, @ring_ids);
-                    }
-                }
-            }
-            my $where = $i < $#order ? $discovered_from{$order[$i+1]} : $order[0];
-            while( $vertex != $where ) {
-                if( $options->{explicit_parentheses} ||
-                    _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings ) ) {
-                    push @symbols_new, ')';
-                } else {
-                    push @symbols_new, '';
-                }
-                $vertex = $discovered_from{$vertex};
-            }
-        }
-        @symbols = @symbols_new;
-
-        # Dealing with chirality
+        # Deal with chirality
         my %chirality;
         for my $atom (@order) {
             next unless is_chiral $atom;
@@ -269,6 +215,60 @@ sub write_SMILES
             }
             $chirality{$atom} = $chirality_now;
         }
+
+        # Write the SMILES
+        my @symbols_new;
+        my @ring_ids = ( 1..99, 0 );
+        for my $i (0..$#order) {
+            my $vertex = $order[$i];
+            if( $discovered_from{$vertex} ) {
+                my $symbol = _depict_bond( $discovered_from{$vertex}, $vertex, $graph );
+                if( $options->{explicit_parentheses} ||
+                    _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings ) ) {
+                    $symbol = '(' . $symbol;
+                }
+                push @symbols_new, $symbol;
+            }
+            push @symbols_new, _pre_vertex( $vertex,
+                                            $graph,
+                                            { omit_chirality => 1,
+                                            raw => $raw } );
+            if( $rings->{$i} ) {
+                for my $j (sort { $a <=> $b } keys %{$rings->{$i}}) {
+                    if( $i < $j ) {
+                        if( !@ring_ids ) {
+                            # All 100 rings are open now.
+                            # There is no other solution but to terminate the program.
+                            die 'cannot represent more than 100 open ring bonds' . "\n";
+                        }
+                        $rings->{$i}{$j}{ring} = ($ring_ids[0] < 10 ? '' : '%') .
+                                                  $ring_ids[0];
+                        $symbols_new[-1] .= $rings->{$i}{$j}{bond} .
+                                            $rings->{$i}{$j}{ring};
+                        shift @ring_ids;
+                    } else {
+                        $symbols_new[-1] .= ($rings->{$j}{$i}{bond} eq '/'  ? '\\' :
+                                             $rings->{$j}{$i}{bond} eq '\\' ? '/'  :
+                                             $rings->{$j}{$i}{bond}) .
+                                             $rings->{$j}{$i}{ring};
+                        # Ring bond '0' must stay in the end
+                        @ring_ids = sort { ($a == 0) - ($b == 0) || $a <=> $b }
+                                         ($rings->{$j}{$i}{ring}, @ring_ids);
+                    }
+                }
+            }
+            my $where = $i < $#order ? $discovered_from{$order[$i+1]} : $order[0];
+            while( $vertex != $where ) {
+                if( $options->{explicit_parentheses} ||
+                    _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings ) ) {
+                    push @symbols_new, ')';
+                } else {
+                    push @symbols_new, '';
+                }
+                $vertex = $discovered_from{$vertex};
+            }
+        }
+        @symbols = @symbols_new;
 
         for my $atom (@order) {
             next unless exists $chirality{$atom};
