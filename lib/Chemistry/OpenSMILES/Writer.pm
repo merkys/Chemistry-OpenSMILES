@@ -44,6 +44,8 @@ sub write_SMILES
     # a subroutine reference for ordering:
     my $order_sub = defined $options && ref $options eq 'CODE' ? $options : \&_order;
     $options = {} unless defined $options && ref $options eq 'HASH';
+    $options->{immediately_reuse_ring_numbers} = 1
+        unless exists $options->{immediately_reuse_ring_numbers};
 
     $order_sub = $options->{order_sub} if $options->{order_sub};
     my $raw = $options->{raw};
@@ -231,6 +233,7 @@ sub write_SMILES
                                  { omit_chirality => 1, raw => $raw } );
             }
             if( $rings->{$i} ) {
+                my @rings_closed;
                 for my $j (sort { $a <=> $b } keys %{$rings->{$i}}) {
                     if( $i < $j ) {
                         if( !@ring_ids ) {
@@ -248,10 +251,18 @@ sub write_SMILES
                                        $rings->{$j}{$i}{bond}) .
                                       ($rings->{$i}{$j}{ring} < 10 ? '' : '%') .
                                        $rings->{$j}{$i}{ring};
-                        # Ring bond '0' must stay in the end
-                        @ring_ids = sort { ($a == 0) - ($b == 0) || $a <=> $b }
-                                         ($rings->{$j}{$i}{ring}, @ring_ids);
+                        if( $options->{immediately_reuse_ring_numbers} ) {
+                            # Ring bond '0' must stay in the end
+                            @ring_ids = sort { ($a == 0) - ($b == 0) || $a <=> $b }
+                                             ($rings->{$j}{$i}{ring}, @ring_ids);
+                        } else {
+                            push @rings_closed, $rings->{$j}{$i}{ring};
+                        }
                     }
+                }
+                if( !$options->{immediately_reuse_ring_numbers} ) {
+                    @ring_ids = sort { ($a == 0) - ($b == 0) || $a <=> $b }
+                                     (@rings_closed, @ring_ids);
                 }
             }
             my $where = $i < $#order ? $discovered_from{$order[$i+1]} : $order[0];
