@@ -229,10 +229,17 @@ sub write_SMILES
                 }
                 push @symbols_new, $symbol;
             }
-            push @symbols_new, _pre_vertex( $vertex,
-                                            $graph,
-                                            { omit_chirality => 1,
-                                            raw => $raw } );
+            if( $chirality{$vertex} ) {
+                push @symbols_new,
+                     _pre_vertex( { %$vertex, chirality => $chirality{$vertex} },
+                                  $graph,
+                                  { raw => 1 } );
+            } else {
+                push @symbols_new,
+                     _pre_vertex( $vertex,
+                                  $graph,
+                                  { omit_chirality => 1, raw => $raw } );
+            }
             if( $rings->{$i} ) {
                 for my $j (sort { $a <=> $b } keys %{$rings->{$i}}) {
                     if( $i < $j ) {
@@ -269,22 +276,6 @@ sub write_SMILES
             }
         }
         @symbols = @symbols_new;
-
-        for my $atom (@order) {
-            next unless exists $chirality{$atom};
-
-            # FIXME: Kludge
-            my $ring_bonds = '';
-            $ring_bonds = $1 if $symbols[$vertex_symbols{$atom}] =~ s/(([-:=#\$\\\/]?(\d|%\d\d))*)$//;
-
-            my $parser = Chemistry::OpenSMILES::Parser->new;
-            my( $graph_reparsed ) = $parser->parse( $symbols[$vertex_symbols{$atom}],
-                                                    { raw => 1 } );
-            my( $atom_reparsed ) = $graph_reparsed->vertices;
-            $atom_reparsed->{chirality} = $chirality{$atom};
-            $symbols[$vertex_symbols{$atom}] =
-                write_SMILES( $atom_reparsed ) . $ring_bonds;
-        }
 
         push @components, join '', @symbols;
     }
