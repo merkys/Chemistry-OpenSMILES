@@ -365,6 +365,9 @@ sub unsprout_hydrogens($)
         my( $neighbour ) = $moiety->neighbours( $atom );
         next if $neighbour->{symbol} eq 'H';
 
+        # TODO: Adjust chirality of the parent atom
+        # TODO: Cannot remove if H atom is needed for cis/trans representation
+
         $neighbour->{hcount}++;
         $moiety->delete_vertex( $atom );
     }
