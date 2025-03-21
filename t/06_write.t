@@ -27,7 +27,7 @@ my @cases = (
     [ '[C]#[O]', '[C](#[O])' ],
 );
 
-plan tests => 4 * scalar @cases;
+plan tests => 4 * @cases + grep { @$_ == 3 && $_->[2] =~ /:/ } @cases;
 
 for my $case (@cases) {
     my $parser;
@@ -44,7 +44,7 @@ for my $case (@cases) {
     $result = write_SMILES( \@moieties, { raw => 1, explicit_parentheses => 1 } );
     is $result, $case->[1];
 
-    my $output = @$case > 2 ? $case->[2] : $case->[0];
+    my $output = @$case == 3 ? $case->[2] : $case->[0];
     $parser = Chemistry::OpenSMILES::Parser->new;
     @moieties = $parser->parse( $case->[0], { raw => 1 } );
     $result = write_SMILES( \@moieties, { raw => 1 } );
@@ -54,4 +54,11 @@ for my $case (@cases) {
     @moieties = $parser->parse( $result, { raw => 1 } );
     $result = write_SMILES( \@moieties, { raw => 1 } );
     is $result, $output;
+
+    if( @$case == 3 && $case->[2] =~ /:/ ) {
+        @moieties = $parser->parse( $case->[0], { raw => 1 } );
+        $output =~ s/://g;
+        $result = write_SMILES( \@moieties, { raw => 1, explicit_aromatic_bonds => 0 } );
+        is $result, $output;
+    }
 }
