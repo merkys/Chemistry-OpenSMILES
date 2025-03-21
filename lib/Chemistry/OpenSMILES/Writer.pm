@@ -238,15 +238,15 @@ sub write_SMILES
                             # There is no other solution but to terminate the program.
                             die 'cannot represent more than 100 open ring bonds' . "\n";
                         }
-                        $rings->{$i}{$j}{ring} = ($ring_ids[0] < 10 ? '' : '%') .
-                                                  $ring_ids[0];
-                        $component .= $rings->{$i}{$j}{bond} .
-                                      $rings->{$i}{$j}{ring};
-                        shift @ring_ids;
+                        $rings->{$i}{$j}{ring} = shift @ring_ids;
+                        $component .=  $rings->{$i}{$j}{bond} .
+                                      ($rings->{$i}{$j}{ring} < 10 ? '' : '%') .
+                                       $rings->{$i}{$j}{ring}
                     } else {
                         $component .= ($rings->{$j}{$i}{bond} eq '/'  ? '\\' :
                                        $rings->{$j}{$i}{bond} eq '\\' ? '/'  :
                                        $rings->{$j}{$i}{bond}) .
+                                      ($rings->{$i}{$j}{ring} < 10 ? '' : '%') .
                                        $rings->{$j}{$i}{ring};
                         # Ring bond '0' must stay in the end
                         @ring_ids = sort { ($a == 0) - ($b == 0) || $a <=> $b }
