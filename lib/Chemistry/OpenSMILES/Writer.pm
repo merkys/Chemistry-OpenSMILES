@@ -221,14 +221,14 @@ sub write_SMILES
             }
             if( $chirality{$vertex} ) {
                 $component .=
-                     _pre_vertex( { %$vertex, chirality => $chirality{$vertex} },
-                                  $graph,
-                                  { raw => 1 } );
+                    _pre_vertex( { %$vertex, chirality => $chirality{$vertex} },
+                                 $graph,
+                                 { raw => 1 } );
             } else {
                 $component .=
-                     _pre_vertex( $vertex,
-                                  $graph,
-                                  { omit_chirality => 1, raw => $raw } );
+                    _pre_vertex( $vertex,
+                                 $graph,
+                                 { omit_chirality => 1, raw => $raw } );
             }
             if( $rings->{$i} ) {
                 for my $j (sort { $a <=> $b } keys %{$rings->{$i}}) {
@@ -241,13 +241,13 @@ sub write_SMILES
                         $rings->{$i}{$j}{ring} = ($ring_ids[0] < 10 ? '' : '%') .
                                                   $ring_ids[0];
                         $component .= $rings->{$i}{$j}{bond} .
-                                            $rings->{$i}{$j}{ring};
+                                      $rings->{$i}{$j}{ring};
                         shift @ring_ids;
                     } else {
                         $component .= ($rings->{$j}{$i}{bond} eq '/'  ? '\\' :
-                                             $rings->{$j}{$i}{bond} eq '\\' ? '/'  :
-                                             $rings->{$j}{$i}{bond}) .
-                                             $rings->{$j}{$i}{ring};
+                                       $rings->{$j}{$i}{bond} eq '\\' ? '/'  :
+                                       $rings->{$j}{$i}{bond}) .
+                                       $rings->{$j}{$i}{ring};
                         # Ring bond '0' must stay in the end
                         @ring_ids = sort { ($a == 0) - ($b == 0) || $a <=> $b }
                                          ($rings->{$j}{$i}{ring}, @ring_ids);
