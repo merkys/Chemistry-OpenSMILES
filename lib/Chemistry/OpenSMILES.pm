@@ -352,6 +352,24 @@ sub toggle_cistrans($)
     return $_[0] eq '/' ? '\\' : '/';
 }
 
+sub unsprout_hydrogens($)
+{
+    my( $moiety ) = @_;
+
+    for my $atom ($moiety->vertices) {
+        next unless $atom->{symbol} eq 'H';
+        next if any { exists $atom->{$_} } qw( chirality class isotope );
+        next if $atom->{charge};
+        next unless $moiety->degree( $atom ) == 1;
+
+        my( $neighbour ) = $moiety->neighbours( $atom );
+        next if $neighbour->{symbol} eq 'H';
+
+        $neighbour->{hcount}++;
+        $moiety->delete_vertex( $atom );
+    }
+}
+
 sub valence($$)
 {
     my( $moiety, $atom ) = @_;
