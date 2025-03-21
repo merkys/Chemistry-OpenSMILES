@@ -56,26 +56,19 @@ sub write_SMILES
 
     for my $graph (@moieties) {
         my @symbols;
-        my %vertex_symbols;
+        my %seen;
         my %discovered_from;
 
         my @ring_bonds;
 
         my $operations = {
-            tree_edge     => sub { my( $seen, $unseen ) = @_;
-                                   if( $vertex_symbols{$unseen} ) {
-                                       ( $seen, $unseen ) = ( $unseen, $seen );
-                                   }
-                                   push @symbols, '';
-                                   $discovered_from{$unseen} = $seen },
+            tree_edge     => sub { my( $u, $v ) = @_;
+                                   ( $u, $v ) = ( $v, $u ) if $seen{$v};
+                                   $discovered_from{$v} = $u },
 
             non_tree_edge  => sub { push @ring_bonds, [ @_[0..1] ] },
 
-            pre  => sub { my( $vertex ) = @_;
-                          push @symbols, '';
-                          $vertex_symbols{$vertex} = $#symbols },
-
-            post => sub { push @symbols, '' },
+            pre  => sub { $seen{$_[0]} = 1 },
 
             next_root => undef,
         };
