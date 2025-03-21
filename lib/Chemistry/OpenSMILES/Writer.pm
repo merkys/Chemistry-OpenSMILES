@@ -246,9 +246,7 @@ sub write_SMILES
                                       ($rings->{$i}{$j}{ring} < 10 ? '' : '%') .
                                        $rings->{$i}{$j}{ring}
                     } else {
-                        $component .= ($rings->{$j}{$i}{bond} eq '/'  ? '\\' :
-                                       $rings->{$j}{$i}{bond} eq '\\' ? '/'  :
-                                       $rings->{$j}{$i}{bond}) .
+                        $component .= toggle_cistrans( $rings->{$j}{$i}{bond} ) .
                                       ($rings->{$i}{$j}{ring} < 10 ? '' : '%') .
                                        $rings->{$j}{$i}{ring};
                         if( $options->{immediately_reuse_ring_numbers} ) {
