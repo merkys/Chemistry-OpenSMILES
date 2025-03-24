@@ -358,8 +358,9 @@ sub unsprout_hydrogens($)
 
     for my $atom ($moiety->vertices) {
         next unless $atom->{symbol} eq 'H';
-        next if any { exists $atom->{$_} } qw( chirality class isotope );
+        next if any { exists $atom->{$_} } qw( chirality isotope );
         next if $atom->{charge};
+        next if $atom->{class};
         next unless $moiety->degree( $atom ) == 1;
 
         my( $neighbour ) = $moiety->neighbours( $atom );
