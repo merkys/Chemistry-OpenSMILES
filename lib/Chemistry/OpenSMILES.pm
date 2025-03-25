@@ -372,9 +372,13 @@ sub unsprout_hydrogens($)
         # Also, this will need re-adjustment of chirality symbol.
         next if is_chiral $neighbour;
 
-        # TODO: Cannot remove if H atom is needed for cis/trans representation.
-        # This as well could be more sophisticated.
-        next if is_cis_trans_bond( $moiety, $atom, $neighbour );
+        # Remove only those H atoms with cis/trans bonds, where a substitution could be found.
+        if( is_cis_trans_bond( $moiety, $atom, $neighbour ) ) {
+            my $n_cis_trans =
+                grep { is_cis_trans_bond( $moiety, $neighbour, $_ ) }
+                     $moiety->neighbours( $neighbour );
+            next if $n_cis_trans == 1;
+        }
 
         $neighbour->{hcount}++;
         $moiety->delete_vertex( $atom );

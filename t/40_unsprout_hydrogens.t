@@ -19,7 +19,7 @@ my @cases = (
     [ 'F[C@H](Br)Cl', 'F[C@](Br)(Cl)[H]', 'F[C@](Br)(Cl)[H]' ], # This could be more compact
 
     [ 'Cl/C=C/Cl', 'Cl/[CH]=[CH]/Cl', 'Cl/C=C/Cl' ],
-    [ 'Cl/C=C(/Cl)\[H]', 'Cl/[CH]=C(/Cl)\[H]', 'Cl/C=C(/Cl)\[H]' ],
+    [ 'Cl/C=C(/Cl)\[H]', 'Cl/[CH]=[CH]/Cl', 'Cl/C=C/Cl' ],
 );
 
 plan tests => 2 * scalar @cases;
