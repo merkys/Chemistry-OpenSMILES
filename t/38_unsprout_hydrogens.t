@@ -12,13 +12,13 @@ my @cases = (
     [ 'C([H])([H])([H])[H]', '[CH4]' ],
     [ '[C]([H])([H])([H])[H]', '[CH4]' ],
 
-    [ 'C=C', '[CH2](=[CH2])' ],
-    [ 'C=1=C=C=C=1', 'C=1(=C(=C(=C=1)))' ],
+    [ 'C=C', '[CH2]=[CH2]' ],
+    [ 'C=1=C=C=C=1', 'C=1=C=C=C=1' ],
 
-    [ 'F[C@](Br)(Cl)[H]', 'F([C@](Br)(Cl)([H]))' ],
+    [ 'F[C@](Br)(Cl)[H]', 'F[C@](Br)(Cl)[H]' ],
 
-    [ 'Cl/C=C/Cl', 'Cl(/[CH](=[CH](/Cl)))' ],
-    [ 'Cl/C=C(/Cl)\[H]', 'Cl(/[CH](=C(/Cl)(\[H])))' ],
+    [ 'Cl/C=C/Cl', 'Cl/[CH]=[CH]/Cl' ],
+    [ 'Cl/C=C(/Cl)\[H]', 'Cl/[CH]=C(/Cl)\[H]' ],
 );
 
 plan tests => scalar @cases;
