@@ -375,19 +375,16 @@ sub unsprout_hydrogens($)
             next if $n_cis_trans == 1;
         }
 
-        # TODO: Adjust chirality of the parent atom.
-        # This can be done by moving the H atom to the second position of parent's chirality neighbours.
-        # Also, this will need re-adjustment of chirality symbol.
-        next if is_chiral $neighbour && !is_chiral_tetrahedral $neighbour;
+        # TODO: Adjust other chiralities as well
         if( is_chiral $neighbour ) {
-            if( is_chiral_tetrahedral $neighbour ) {
-                my $pos = first { $neighbour->{chirality_neighbours}[$_] == $atom } 0..3;
-                @{$neighbour->{chirality_neighbours}} =
-                    grep { $_ != $atom } @{$neighbour->{chirality_neighbours}};
-                $neighbour->{chirality} = toggle_cistrans $neighbour->{chirality} unless $pos % 2;
-            } else {
-                next;
-            }
+            next unless is_chiral_tetrahedral $neighbour;
+            next unless   $neighbour->{chirality_neighbours};
+            next unless @{$neighbour->{chirality_neighbours}} == 4;
+
+            my $pos = first { $neighbour->{chirality_neighbours}[$_] == $atom } 0..3;
+            @{$neighbour->{chirality_neighbours}} =
+                grep { $_ != $atom } @{$neighbour->{chirality_neighbours}};
+            $neighbour->{chirality} = toggle_cistrans $neighbour->{chirality} unless $pos % 2;
         }
 
         $neighbour->{hcount}++;
