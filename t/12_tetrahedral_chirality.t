@@ -7,7 +7,7 @@ use Chemistry::OpenSMILES::Writer qw(write_SMILES);
 use Test::More;
 
 my @cases = (
-    [ 'Br[C@H](Cl)(I)', 'Br([C@](Cl)(I)([H]))', '[H]([C@](I)(Cl)(Br))' ],
+    [ 'Br[C@H](Cl)(I)', 'Br[C@](Cl)(I)[H]', '[H][C@](I)(Cl)Br' ],
 );
 
 plan tests => 2 * scalar @cases;

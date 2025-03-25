@@ -11,6 +11,10 @@ use Chemistry::OpenSMILES qw(
     %normal_valence
     is_aromatic
     is_chiral
+    is_chiral_octahedral
+    is_chiral_planar
+    is_chiral_tetrahedral
+    is_chiral_trigonal_bipyramidal
     toggle_cistrans
     valence
 );
@@ -18,6 +22,7 @@ use Chemistry::OpenSMILES::Parser;
 use Chemistry::OpenSMILES::Stereo::Tables qw( @OH @TB );
 use Graph::Traversal::DFS;
 use List::Util qw( all any first min none sum0 uniq );
+use Set::Object qw( set );
 
 require Exporter;
 our @ISA = qw( Exporter );
@@ -40,6 +45,11 @@ sub write_SMILES
     my $order_sub = defined $options && ref $options eq 'CODE' ? $options : \&_order;
     $options = {} unless defined $options && ref $options eq 'HASH';
 
+    $options->{explicit_aromatic_bonds} = 1
+        unless exists $options->{explicit_aromatic_bonds};
+    $options->{immediately_reuse_ring_numbers} = 1
+        unless exists $options->{immediately_reuse_ring_numbers};
+
     $order_sub = $options->{order_sub} if $options->{order_sub};
     my $raw = $options->{raw};
 
@@ -50,42 +60,19 @@ sub write_SMILES
     my @components;
 
     for my $graph (@moieties) {
-        my @symbols;
-        my %vertex_symbols;
-        my $nrings = 0;
-        my %seen_rings;
-        my @chiral;
+        my %seen;
         my %discovered_from;
-
-        my $rings = {};
+        my @ring_bonds;
 
         my $operations = {
-            tree_edge     => sub { my( $seen, $unseen, $self ) = @_;
-                                   if( $vertex_symbols{$unseen} ) {
-                                       ( $seen, $unseen ) = ( $unseen, $seen );
-                                   }
-                                   push @symbols, _tree_edge( $seen, $unseen, $self );
-                                   $discovered_from{$unseen} = $seen },
+            tree_edge     => sub { my( $u, $v ) = @_;
+                                   ( $u, $v ) = ( $v, $u ) if $seen{$v};
+                                   $discovered_from{$v} = $u },
 
-            non_tree_edge => sub { my @sorted = sort { $vertex_symbols{$a} <=>
-                                                       $vertex_symbols{$b} }
-                                                     @_[0..1];
-                                   $rings->{$vertex_symbols{$_[0]}}
-                                           {$vertex_symbols{$_[1]}} =
-                                   $rings->{$vertex_symbols{$_[1]}}
-                                           {$vertex_symbols{$_[0]}} =
-                                        _depict_bond( @sorted, $graph ) },
+            non_tree_edge  => sub { push @ring_bonds, [ @_[0..1] ] },
 
-            pre  => sub { my( $vertex, $dfs ) = @_;
-                          push @chiral, $vertex if is_chiral $vertex;
-                          push @symbols,
-                          _pre_vertex( $vertex,
-                                       $graph,
-                                       { omit_chirality => 1,
-                                         raw => $raw } );
-                          $vertex_symbols{$vertex} = $#symbols },
+            pre  => sub { $seen{$_[0]} = 1 },
 
-            post => sub { push @symbols, ')' },
             next_root => undef,
         };
 
@@ -96,18 +83,34 @@ sub write_SMILES
 
         my $traversal = Graph::Traversal::DFS->new( $graph, %$operations );
         $traversal->dfs;
+        my @order = $traversal->preorder;
+        my $order_by_vertex = sub { first { $order[$_] == $_[0] } 0..$#order };
 
-        if( scalar keys %vertex_symbols != scalar $graph->vertices ) {
-            warn scalar( $graph->vertices ) - scalar( keys %vertex_symbols ) .
-                 ' unreachable atom(s) detected in moiety' . "\n";
+        if( @order != $graph->vertices ) {
+            warn $graph->vertices - @order . ' unreachable atom(s) detected in moiety' . "\n";
         }
 
-        next unless @symbols;
-        pop @symbols;
+        next unless @order;
 
-        # Dealing with chirality
-        for my $atom (@chiral) {
-            next unless $atom->{chirality} =~ /^@(@?|SP[123]|TB1?[1-9]|TB20|OH[1-9]|OH[12][0-9]|OH30)$/;
+        # Create both old and new ring data structures
+        my $rings;
+        for my $ring_bond (@ring_bonds) {
+            my @sorted = sort { $order_by_vertex->($a) <=> $order_by_vertex->($b) } @$ring_bond;
+            $rings->{$order_by_vertex->($ring_bond->[0])}
+                    {$order_by_vertex->($ring_bond->[1])} =
+            $rings->{$order_by_vertex->($ring_bond->[1])}
+                    {$order_by_vertex->($ring_bond->[0])} =
+                    { bond => _depict_bond( @sorted, $graph, $options ) };
+        }
+
+        # Deal with chirality
+        my %chirality;
+        for my $atom (@order) {
+            next unless is_chiral $atom;
+            next unless is_chiral_tetrahedral( $atom ) ||
+                        is_chiral_planar( $atom ) ||
+                        is_chiral_trigonal_bipyramidal( $atom ) ||
+                        is_chiral_octahedral( $atom );
 
             my @neighbours = $graph->neighbours($atom);
             my $has_lone_pair;
@@ -142,112 +145,138 @@ sub write_SMILES
                 $has_lone_pair = @neighbours == 5;
             }
 
+            next unless exists $atom->{chirality_neighbours};
+
             my $chirality_now = $atom->{chirality};
-            if( $atom->{chirality_neighbours} ) {
-                if( scalar @neighbours !=
-                    scalar @{$atom->{chirality_neighbours}} ) {
-                    warn 'number of neighbours does not match the length ' .
-                         "of 'chirality_neighbours' array, cannot process " .
-                         'such chiral centers' . "\n";
-                    next;
-                }
+            if( @neighbours != @{$atom->{chirality_neighbours}} ) {
+                warn 'number of neighbours does not match the length ' .
+                     "of 'chirality_neighbours' array, cannot process " .
+                     'such chiral centers' . "\n";
+                next;
+            }
 
-                my %indices;
-                for (0..$#{$atom->{chirality_neighbours}}) {
-                    my $pos = $_;
-                    if( $has_lone_pair && $_ != 0 ) {
-                        # Lone pair is always second in the chiral neighbours array
-                        $pos++;
-                    }
-                    $indices{$vertex_symbols{$atom->{chirality_neighbours}[$_]}} = $pos;
+            my %indices;
+            for (0..$#{$atom->{chirality_neighbours}}) {
+                my $pos = $_;
+                if( $has_lone_pair && $_ != 0 ) {
+                    # Lone pair is always second in the chiral neighbours array
+                    $pos++;
                 }
+                $indices{$order_by_vertex->($atom->{chirality_neighbours}[$_])} = $pos;
+            }
 
-                my @order_new;
-                # In the newly established order, the atom from which this one
-                # is discovered (left hand side) will be the first, if any
-                if( $discovered_from{$atom} ) {
-                    push @order_new,
-                         $indices{$vertex_symbols{$discovered_from{$atom}}};
-                }
-                # Second, there will be ring bonds as they are added before all of the neighbours
-                if( $rings->{$vertex_symbols{$atom}} ) {
-                    push @order_new, map  { $indices{$_} }
-                                     sort { $a <=> $b }
-                                     keys %{$rings->{$vertex_symbols{$atom}}};
-                }
-                # Finally, all neighbours are added, uniq will remove duplicates
+            my @order_new;
+            # In the newly established order, the atom from which this one
+            # is discovered (left hand side) will be the first, if any
+            if( $discovered_from{$atom} ) {
+                push @order_new,
+                     $indices{$order_by_vertex->($discovered_from{$atom})};
+            }
+            # Second, there will be ring bonds as they are added before all of the neighbours
+            if( $rings->{$order_by_vertex->($atom)} ) {
                 push @order_new, map  { $indices{$_} }
                                  sort { $a <=> $b }
-                                 map  { $vertex_symbols{$_} }
-                                      @neighbours;
-                @order_new = uniq @order_new;
+                                 keys %{$rings->{$order_by_vertex->($atom)}};
+            }
+            # Finally, all neighbours are added, uniq will remove duplicates
+            push @order_new, map  { $indices{$_} }
+                             sort { $a <=> $b }
+                             map  { $order_by_vertex->($_) }
+                                  @neighbours;
+            @order_new = uniq @order_new;
 
-                if( $has_lone_pair ) {
-                    # Accommodate the lone pair
-                    if( $discovered_from{$atom} ) {
-                        @order_new = ( $order_new[0], 1, @order_new[1..$#order_new] );
-                    } else {
-                        unshift @order_new, 1;
-                    }
-                }
-
-                if( $atom->{chirality} =~ /^@@?$/ ) {
-                    # Tetragonal centers
-                    if( join( '', _permutation_order( @order_new ) ) ne '0123' ) {
-                        $chirality_now = $chirality_now eq '@' ? '@@' : '@';
-                    }
-                } elsif( $atom->{chirality} =~ /^\@SP[123]$/ ) {
-                    # Square planar centers
-                    $chirality_now = _square_planar_chirality( @order_new, $chirality_now );
-                } elsif( $atom->{chirality} =~ /^\@TB..?$/ ) {
-                    # Trigonal bipyramidal centers
-                    $chirality_now = _trigonal_bipyramidal_chirality( @order_new, $chirality_now );
+            if( $has_lone_pair ) {
+                # Accommodate the lone pair
+                if( $discovered_from{$atom} ) {
+                    @order_new = ( $order_new[0], 1, @order_new[1..$#order_new] );
                 } else {
-                    # Octahedral centers
-                    $chirality_now = _octahedral_chirality( @order_new, $chirality_now );
+                    unshift @order_new, 1;
                 }
             }
 
-            my $parser = Chemistry::OpenSMILES::Parser->new;
-            my( $graph_reparsed ) = $parser->parse( $symbols[$vertex_symbols{$atom}],
-                                                    { raw => 1 } );
-            my( $atom_reparsed ) = $graph_reparsed->vertices;
-            $atom_reparsed->{chirality} = $chirality_now;
-            $symbols[$vertex_symbols{$atom}] =
-                write_SMILES( $atom_reparsed );
+            if( $atom->{chirality} =~ /^@@?$/ ) {
+                # Tetragonal centers
+                if( join( '', _permutation_order( @order_new ) ) ne '0123' ) {
+                    $chirality_now = $chirality_now eq '@' ? '@@' : '@';
+                }
+            } elsif( $atom->{chirality} =~ /^\@SP[123]$/ ) {
+                # Square planar centers
+                $chirality_now = _square_planar_chirality( @order_new, $chirality_now );
+            } elsif( $atom->{chirality} =~ /^\@TB..?$/ ) {
+                # Trigonal bipyramidal centers
+                $chirality_now = _trigonal_bipyramidal_chirality( @order_new, $chirality_now );
+            } else {
+                # Octahedral centers
+                $chirality_now = _octahedral_chirality( @order_new, $chirality_now );
+            }
+            $chirality{$atom} = $chirality_now;
         }
 
-        # Adding ring numbers
+        # Write the SMILES
+        my $component = '';
         my @ring_ids = ( 1..99, 0 );
-        my @ring_ends;
-        for my $i (0..$#symbols) {
+        for my $i (0..$#order) {
+            my $vertex = $order[$i];
+            if( $discovered_from{$vertex} ) {
+                if( $options->{explicit_parentheses} ||
+                    _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings ) ) {
+                    $component .= '(';
+                }
+                $component .= _depict_bond( $discovered_from{$vertex}, $vertex, $graph, $options );
+            }
+            if( $chirality{$vertex} ) {
+                $component .=
+                    _pre_vertex( { %$vertex, chirality => $chirality{$vertex} },
+                                 $graph,
+                                 { raw => 1 } );
+            } else {
+                $component .=
+                    _pre_vertex( $vertex,
+                                 $graph,
+                                 { omit_chirality => 1, raw => $raw } );
+            }
             if( $rings->{$i} ) {
+                my @rings_closed;
                 for my $j (sort { $a <=> $b } keys %{$rings->{$i}}) {
-                    next if $i > $j;
-                    if( !@ring_ids ) {
-                        # All 100 rings are open now.
-                        # There is no other solution but to terminate the program.
-                        die 'cannot represent more than 100 open ring bonds' . "\n";
+                    if( $i < $j ) {
+                        if( !@ring_ids ) {
+                            # All 100 rings are open now.
+                            # There is no other solution but to terminate the program.
+                            die 'cannot represent more than 100 open ring bonds' . "\n";
+                        }
+                        $rings->{$i}{$j}{ring} = shift @ring_ids;
+                        $component .=  $rings->{$i}{$j}{bond} .
+                                      ($rings->{$i}{$j}{ring} < 10 ? '' : '%') .
+                                       $rings->{$i}{$j}{ring}
+                    } else {
+                        $component .= toggle_cistrans( $rings->{$j}{$i}{bond} ) .
+                                      ($rings->{$i}{$j}{ring} < 10 ? '' : '%') .
+                                       $rings->{$j}{$i}{ring};
+                        if( $options->{immediately_reuse_ring_numbers} ) {
+                            # Ring bond '0' must stay in the end
+                            @ring_ids = sort { ($a == 0) - ($b == 0) || $a <=> $b }
+                                             ($rings->{$j}{$i}{ring}, @ring_ids);
+                        } else {
+                            push @rings_closed, $rings->{$j}{$i}{ring};
+                        }
                     }
-                    $symbols[$i] .= $rings->{$i}{$j} .
-                                    ($ring_ids[0] < 10 ? '' : '%') .
-                                     $ring_ids[0];
-                    $symbols[$j] .= ($rings->{$i}{$j} eq '/'  ? '\\' :
-                                     $rings->{$i}{$j} eq '\\' ? '/'  :
-                                     $rings->{$i}{$j}) .
-                                    ($ring_ids[0] < 10 ? '' : '%') .
-                                     $ring_ids[0];
-                    push @{$ring_ends[$j]}, shift @ring_ids;
+                }
+                if( !$options->{immediately_reuse_ring_numbers} ) {
+                    @ring_ids = sort { ($a == 0) - ($b == 0) || $a <=> $b }
+                                     (@rings_closed, @ring_ids);
                 }
             }
-            if( $ring_ends[$i] ) {
-                # Ring bond '0' must stay in the end
-                @ring_ids = sort { ($a == 0) - ($b == 0) || $a <=> $b }
-                                 (@{$ring_ends[$i]}, @ring_ids);
+            my $where = $i < $#order ? $discovered_from{$order[$i+1]} : $order[0];
+            while( $vertex != $where ) {
+                if( $options->{explicit_parentheses} ||
+                    _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings ) ) {
+                    $component .= ')';
+                }
+                $vertex = $discovered_from{$vertex};
             }
         }
 
-        push @components, join '', @symbols;
+        push @components, $component;
     }
 
     return join '.', @components;
@@ -255,13 +284,6 @@ sub write_SMILES
 
 # DEPRECATED
 sub write { &write_SMILES }
-
-sub _tree_edge
-{
-    my( $u, $v, $self ) = @_;
-
-    return '(' . _depict_bond( $u, $v, $self->graph );
-}
 
 sub _pre_vertex
 {
@@ -317,16 +339,26 @@ sub _pre_vertex
 # It flips '/' <=> '\' if post-order is opposite from pre-order.
 sub _depict_bond
 {
-    my( $u, $v, $graph ) = @_;
+    my( $u, $v, $graph, $options ) = @_;
+
+    my $n_aromatic = grep { is_aromatic $_ } ( $u, $v );
 
     if( !$graph->has_edge_attribute( $u, $v, 'bond' ) ) {
-        return is_aromatic $u && is_aromatic $v ? '-' : '';
+        return $n_aromatic == 2 ? '-' : '';
     }
 
     my $bond = $graph->get_edge_attribute( $u, $v, 'bond' );
-    return $bond if $bond ne '/' && $bond ne '\\';
+    return '' if $bond eq ':' && $n_aromatic && !$options->{explicit_aromatic_bonds};
     return $bond if $u->{number} < $v->{number};
     return toggle_cistrans $bond;
+}
+
+sub _has_more_unseen_children
+{
+    my( $vertex, $i, $order_by_vertex, $graph, $rings ) = @_;
+    my $orders = set( grep { $_ > $i } map { $order_by_vertex->($_) } $graph->neighbours( $vertex ) );
+    $orders->remove( keys %{$rings->{$order_by_vertex->($vertex)}} ) if $rings->{$order_by_vertex->($vertex)};
+    return $orders->size;
 }
 
 # Reorder a permutation of elements 0, 1, 2 and 3 by taking an element

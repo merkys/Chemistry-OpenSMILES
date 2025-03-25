@@ -349,6 +349,7 @@ sub mirror($)
 
 sub toggle_cistrans($)
 {
+    return $_[0] unless $_[0] =~ /^[\\\/]$/;
     return $_[0] eq '/' ? '\\' : '/';
 }
 
@@ -659,8 +660,7 @@ sub _neighbours_per_bond_type
         } else {
             $bond_type = '';
         }
-        if( $bond_type =~ /^[\\\/]$/ &&
-            $atom->{number} > $neighbour->{number} ) {
+        if( $atom->{number} > $neighbour->{number} ) {
             $bond_type = toggle_cistrans $bond_type;
         }
         push @{$bond_types{$bond_type}}, $neighbour;

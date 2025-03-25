@@ -7,8 +7,8 @@ use Chemistry::OpenSMILES::Writer qw(write_SMILES);
 use Test::More;
 
 my @cases = (
-    [ '[C]1[C]/C=N/[C][C][C][C][C]1', '[C]1([C](/C(=N(/[C]([C]([C]([C]([C]1))))))([H])))' ],
-    [ '[C:6]1[C:7]/C=N/[C:1][C:2][C:3][C:4][C:5]1', '[C:1]\1([C:2]([C:3]([C:4]([C:5]([C:6]([C:7](/C(=N/1)([H]))))))))' ],
+    [ '[C]1[C]/C=N/[C][C][C][C][C]1', '[C]1[C]/C(=N/[C][C][C][C][C]1)[H]' ],
+    [ '[C:6]1[C:7]/C=N/[C:1][C:2][C:3][C:4][C:5]1', '[C:1]\1[C:2][C:3][C:4][C:5][C:6][C:7]/C(=N/1)[H]' ],
 );
 
 plan tests => scalar @cases;

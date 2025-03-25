@@ -7,13 +7,13 @@ use Chemistry::OpenSMILES::Writer qw(write_SMILES);
 use Test::More;
 
 my @cases = (
-    [ '[C@](C)(N)(O)',  '[C@](C)(N)(O)',  'O([C@](N)(C))' ],
+    [ '[C@](C)(N)O',  '[C@](C)(N)O',  'O[C@](N)C' ],
     # Same as before, inverting enumeration direction:
-    [ '[C@@](C)(N)(O)', '[C@@](C)(N)(O)', 'O([C@@](N)(C))' ],
+    [ '[C@@](C)(N)O', '[C@@](C)(N)O', 'O[C@@](N)C' ],
 
-    [ 'C[C@](O)(N)', 'C([C@](O)(N))', 'N([C@@](O)(C))' ],
+    [ 'C[C@](O)N',    'C([C@](O)N)',  'N[C@@](O)C' ],
     # Same as before, inverting enumeration direction:
-    [ 'C[C@@](O)(N)', 'C([C@@](O)(N))', 'N([C@](O)(C))' ],
+    [ 'C[C@@](O)N',   'C([C@@](O)N)', 'N[C@](O)C' ],
 );
 
 plan tests => 2 * scalar @cases;
@@ -37,7 +37,7 @@ sub drop_H
 {
     my( $smiles ) = @_;
     $smiles =~ s/\(\[H\]\)//g;
-    $smiles =~ s/^\[H\]\((.+)\)$/$1/;
+    $smiles =~ s/\[H\]//g;
     return $smiles;
 }
 
