@@ -384,7 +384,7 @@ sub unsprout_hydrogens($)
             my $pos = first { $neighbour->{chirality_neighbours}[$_] == $atom } 0..3;
             @{$neighbour->{chirality_neighbours}} =
                 grep { $_ != $atom } @{$neighbour->{chirality_neighbours}};
-            $neighbour->{chirality} = toggle_cistrans $neighbour->{chirality} unless $pos % 2;
+            mirror $neighbour unless $pos % 2;
         }
 
         $neighbour->{hcount}++;

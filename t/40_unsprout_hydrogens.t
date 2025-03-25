@@ -16,6 +16,7 @@ my @cases = (
     [ 'C=1=C=C=C=1', 'C=1=C=C=C=1', 'C=1=C=C=C=1' ],
 
     [ 'F[C@](Br)(Cl)[H]', 'F[C@H](Br)Cl', 'F[C@H](Br)Cl' ],
+    [ 'F[C@](Br)([H])Cl', 'F[C@@H](Br)Cl', 'F[C@@H](Br)Cl' ],
     [ 'F[C@H](Br)Cl', 'F[C@H](Br)Cl', 'F[C@H](Br)Cl' ],
 
     [ 'Cl/C=C/Cl', 'Cl/[CH]=[CH]/Cl', 'Cl/C=C/Cl' ],
