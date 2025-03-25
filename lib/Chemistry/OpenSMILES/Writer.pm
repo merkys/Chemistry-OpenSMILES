@@ -308,6 +308,20 @@ sub _pre_vertex
         $is_simple = 0;
     }
 
+    # Decide what to do to atoms with usual/unusual valences
+    if(  $is_simple && $graph && !$raw && $normal_valence{ucfirst $atom} &&
+        !$vertex->{charge} &&
+        !$vertex->{class} ) {
+        my $valence = valence( $graph, $vertex );
+        if( any { $_ == $valence } @{$normal_valence{ucfirst $atom}} ) {
+            # Usual valence detected, no need to keep hcount
+            delete $vertex->{hcount} if $options->{remove_implicit_hydrogens};
+        } else {
+            # Unusual valence detected, need square brackets
+            $is_simple = 0;
+        }
+    }
+
     if( $vertex->{hcount} ) { # if non-zero
         $atom .= 'H' . ($vertex->{hcount} == 1 ? '' : $vertex->{hcount});
         $is_simple = 0;
@@ -323,13 +337,6 @@ sub _pre_vertex
     if( $vertex->{class} ) { # if non-zero
         $atom .= ':' . $vertex->{class};
         $is_simple = 0;
-    }
-
-    # Decide whether to put atom in square brackets because of unusual valence
-    if( $is_simple && $graph && !$raw && $normal_valence{ucfirst $atom} ) {
-        my $valence = valence( $graph, $vertex );
-        $is_simple = any { $_ == $valence }
-                         @{$normal_valence{ucfirst $atom}};
     }
 
     return $is_simple ? $atom : "[$atom]";
