@@ -69,9 +69,9 @@ sub write_SMILES
                                    ( $u, $v ) = ( $v, $u ) if $seen{$v};
                                    $discovered_from{$v} = $u },
 
-            non_tree_edge  => sub { push @ring_bonds, [ @_[0..1] ] },
+            non_tree_edge => sub { push @ring_bonds, [ @_[0..1] ] },
 
-            pre  => sub { $seen{$_[0]} = 1 },
+            pre => sub { $seen{$_[0]} = 1 },
 
             next_root => undef,
         };
