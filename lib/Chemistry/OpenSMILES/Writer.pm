@@ -418,7 +418,7 @@ sub _permutation_order
         (any { !defined || !/^[0-3]$/ } @_) ||
         (join( ',', sort @_ ) ne '0,1,2,3') ) {
         warn '_permutation_order() accepts only permutations of numbers ' .
-             "'0', '1', '2' and '3', unexpected input (@_) received";
+             "'0', '1', '2' and '3', unexpected input received";
         return 0..3; # Return original order
     }
 
