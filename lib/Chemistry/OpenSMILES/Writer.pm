@@ -94,7 +94,7 @@ sub write_SMILES
         next unless @order;
 
         if( $options->{unsprout_hydrogens} ) {
-            @order = grep { !can_unsprout_hydrogen( $_ ) } @order;
+            @order = grep { !can_unsprout_hydrogen( $graph, $_ ) } @order;
         }
 
         # Create both old and new ring data structures
@@ -373,15 +373,11 @@ sub _depict_bond
 
 sub _has_more_unseen_children
 {
-    my( $vertex, $i, $order_by_vertex, $graph, $rings, $options ) = @_;
+    my( $vertex, $i, $order_by_vertex, $graph, $rings ) = @_;
     my $orders = set( grep { $_ > $i }
+                      grep { defined $_ }
                       map  { $order_by_vertex->($_) }
                            $graph->neighbours( $vertex ) );
-    if( $options->{unsprout_hydrogens} ) {
-        $orders->remove( map  { $order_by_vertex->($_) }
-                         grep { can_unsprout_hydrogen( $graph, $_ ) }
-                              $graph->neighbours( $vertex ) );
-    }
     $orders->remove( keys %{$rings->{$order_by_vertex->($vertex)}} )
         if $rings->{$order_by_vertex->($vertex)};
     return $orders->size;
