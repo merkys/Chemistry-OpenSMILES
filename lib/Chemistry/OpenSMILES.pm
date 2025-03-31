@@ -17,6 +17,7 @@ our @EXPORT_OK = qw(
     %bond_order_to_symbol
     %bond_symbol_to_order
     %normal_valence
+    can_unsprout_hydrogen
     clean_chiral_centers
     is_aromatic
     is_aromatic_bond
