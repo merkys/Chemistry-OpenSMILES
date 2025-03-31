@@ -9,6 +9,7 @@ use warnings;
 use Chemistry::OpenSMILES qw(
     %bond_symbol_to_order
     %normal_valence
+    can_unsprout_hydrogen
     is_aromatic
     is_chiral
     is_chiral_octahedral
@@ -91,6 +92,10 @@ sub write_SMILES
         }
 
         next unless @order;
+
+        if( $options->{unsprout_hydrogens} ) {
+            @order = grep { !can_unsprout_hydrogen( $_ ) } @order;
+        }
 
         # Create both old and new ring data structures
         my $rings;
@@ -309,6 +314,10 @@ sub _depict_atom
     }
 
     my $hcount = $vertex->{hcount} ? $vertex->{hcount} : 0;
+    if( $options->{unsprout_hydrogens} && $atom ne 'H' ) {
+        $hcount += grep { can_unsprout_hydrogen( $graph, $_ ) }
+                        $graph->neighbours( $hcount );
+    }
 
     # Decide what to do to atoms with usual/unusual valences
     if(  $is_simple && $graph && !$raw && $normal_valence{ucfirst $atom} &&
