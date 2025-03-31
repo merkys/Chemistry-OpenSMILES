@@ -73,6 +73,37 @@ our %bond_symbol_to_order = (
     '$' => 4,
 );
 
+sub can_unsprout_hydrogen
+{
+    my( $moiety, $atom ) = @_;
+
+    return undef unless $atom->{symbol} eq 'H';
+    return '' if any { exists $atom->{$_} } qw( chirality isotope );
+    return '' if $atom->{charge};
+    return '' if $atom->{class};
+    return '' unless $moiety->degree( $atom ) == 1;
+
+    my( $neighbour ) = $moiety->neighbours( $atom );
+    return '' if $neighbour->{symbol} eq 'H';
+
+    # Can unsprout only those H atoms with cis/trans bonds, where a substitution could be found.
+    if( is_cis_trans_bond( $moiety, $atom, $neighbour ) ) {
+        my $n_cis_trans =
+            grep { is_cis_trans_bond( $moiety, $neighbour, $_ ) }
+                 $moiety->neighbours( $neighbour );
+        return '' if $n_cis_trans == 1;
+    }
+
+    # TODO: Support other chiralities as well
+    if( is_chiral $neighbour ) {
+        return '' unless is_chiral_tetrahedral $neighbour;
+        return '' unless   $neighbour->{chirality_neighbours};
+        return '' unless @{$neighbour->{chirality_neighbours}} == 4;
+    }
+
+    return 1;
+}
+
 # Removes chiral setting from allenal, square planar, tetrahedral and trigonal bipyramidal chiral centers if deemed unimportant.
 # For allenal, tetrahedral and trigonal bipyramidal arrangements when not all the neighbours are distinct.
 # For square planar arrangements this means situations when all neighbours are the same.
@@ -353,36 +384,18 @@ sub toggle_cistrans($)
     return $_[0] eq '/' ? '\\' : '/';
 }
 
-# TODO: Split into a subroutine which detects "unsproutable" hydrogens.
-#       The actual unsprouting has to happen during print.
+# TODO: The actual unsprouting has to happen during print.
 sub _unsprout_hydrogens($)
 {
     my( $moiety ) = @_;
 
     for my $atom ($moiety->vertices) {
-        next unless $atom->{symbol} eq 'H';
-        next if any { exists $atom->{$_} } qw( chirality isotope );
-        next if $atom->{charge};
-        next if $atom->{class};
-        next unless $moiety->degree( $atom ) == 1;
+        next unless can_unsprout_hydrogen( $moiety, $atom );
 
         my( $neighbour ) = $moiety->neighbours( $atom );
-        next if $neighbour->{symbol} eq 'H';
-
-        # Remove only those H atoms with cis/trans bonds, where a substitution could be found.
-        if( is_cis_trans_bond( $moiety, $atom, $neighbour ) ) {
-            my $n_cis_trans =
-                grep { is_cis_trans_bond( $moiety, $neighbour, $_ ) }
-                     $moiety->neighbours( $neighbour );
-            next if $n_cis_trans == 1;
-        }
 
         # TODO: Adjust other chiralities as well
-        if( is_chiral $neighbour ) {
-            next unless is_chiral_tetrahedral $neighbour;
-            next unless   $neighbour->{chirality_neighbours};
-            next unless @{$neighbour->{chirality_neighbours}} == 4;
-
+        if( is_chiral_tetrahedral $neighbour ) {
             my $pos = first { $neighbour->{chirality_neighbours}[$_] == $atom } 0..3;
             @{$neighbour->{chirality_neighbours}} =
                 grep { $_ != $atom } @{$neighbour->{chirality_neighbours}};
