@@ -29,7 +29,7 @@ for my $case (@cases) {
     my $parser = Chemistry::OpenSMILES::Parser->new;
     my @moieties = $parser->parse( $case->[0] );
     for (@moieties) {
-        Chemistry::OpenSMILES::unsprout_hydrogens( $_ );
+        Chemistry::OpenSMILES::_unsprout_hydrogens( $_ );
     }
     is write_SMILES( \@moieties ), $case->[1];
     is write_SMILES( \@moieties, { remove_implicit_hydrogens => 1 } ), $case->[2];

@@ -353,7 +353,9 @@ sub toggle_cistrans($)
     return $_[0] eq '/' ? '\\' : '/';
 }
 
-sub unsprout_hydrogens($)
+# TODO: Split into a subroutine which detects "unsproutable" hydrogens.
+#       The actual unsprouting has to happen during print.
+sub _unsprout_hydrogens($)
 {
     my( $moiety ) = @_;
 
