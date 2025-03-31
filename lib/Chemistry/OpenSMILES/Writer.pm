@@ -198,7 +198,8 @@ sub write_SMILES
                                           \@order_new );
             if( $has_lone_pair ) {
                 if( $discovered_from{$atom} ) {
-                    @permutation = ( $permutation[0], 1, map { $_ + 1 } @permutation[1..$#permutation] );
+                    @permutation = map { $_ ? $_ + 1 : $_ } @permutation;
+                    @permutation = ( $permutation[0], 1, @permutation[1..$#permutation] );
                 } else {
                     @permutation = ( 0, map { $_ + 1 } @permutation );
                 }
