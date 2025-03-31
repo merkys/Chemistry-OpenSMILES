@@ -161,12 +161,13 @@ sub write_SMILES
                 next;
             }
 
-            # PLAN:
-            # In @chirality_neighbours we have the old order.
-            # We can easily construct the new order by reordering atoms.
-            # Then we find correspondence chart and adjust the symbols.
-
-            # Remove unsproutable H from chirality neighbours
+            # Lone pair is simulated by an empty hash
+            my $lone_pair = {};
+            if( $has_lone_pair ) {
+                @chirality_neighbours = ( $chirality_neighbours[0],
+                                          $lone_pair,
+                                          @chirality_neighbours[1..$#chirality_neighbours] );
+            }
 
             my @order_new;
             # In the newly established order, the atom from which this one
@@ -175,6 +176,7 @@ sub write_SMILES
                 push @order_new, $discovered_from{$atom};
             }
             # Second, lone pair will stay in its place no matter what.
+            push @order_new, $lone_pair if $has_lone_pair;
             # Third, unsproutable H atoms.
             if( $options->{unsprout_hydrogens} ) {
                 push @order_new, grep { can_unsprout_hydrogen( $graph, $_ ) }
@@ -196,14 +198,6 @@ sub write_SMILES
 
             my @permutation = _array_map( \@chirality_neighbours,
                                           \@order_new );
-            if( $has_lone_pair ) {
-                if( $discovered_from{$atom} ) {
-                    @permutation = map { $_ ? $_ + 1 : $_ } @permutation;
-                    @permutation = ( $permutation[0], 1, @permutation[1..$#permutation] );
-                } else {
-                    @permutation = ( 0, map { $_ + 1 } @permutation );
-                }
-            }
 
             if( $atom->{chirality} =~ /^@@?$/ ) {
                 # Tetragonal centers
