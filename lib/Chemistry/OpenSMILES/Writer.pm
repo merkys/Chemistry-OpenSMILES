@@ -152,8 +152,16 @@ sub write_SMILES
 
             next unless exists $atom->{chirality_neighbours};
 
-            # Remove unsproutable H from chirality neighbours
+            my $chirality_now = $atom->{chirality};
             my @chirality_neighbours = @{$atom->{chirality_neighbours}};
+            if( @neighbours != @chirality_neighbours ) {
+                warn 'number of neighbours does not match the length ' .
+                     "of 'chirality_neighbours' array, cannot process " .
+                     'such chiral centers' . "\n";
+                next;
+            }
+
+            # Remove unsproutable H from chirality neighbours
             my $has_unsproutable_H = 0;
             if( $options->{unsprout_hydrogens} ) {
                 @chirality_neighbours = grep { !can_unsprout_hydrogen( $graph, $_ ) }
@@ -163,14 +171,6 @@ sub write_SMILES
             }
             if( $has_unsproutable_H > 1 ) {
                 # CHECKME: Degenerate state, what to do?
-                next;
-            }
-
-            my $chirality_now = $atom->{chirality};
-            if( @neighbours != @chirality_neighbours + $has_unsproutable_H ) {
-                warn 'number of neighbours does not match the length ' .
-                     "of 'chirality_neighbours' array, cannot process " .
-                     'such chiral centers' . "\n";
                 next;
             }
 
