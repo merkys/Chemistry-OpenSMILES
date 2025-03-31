@@ -150,10 +150,20 @@ sub write_SMILES
                 $has_lone_pair = @neighbours == 5;
             }
 
+            # Check for unsproutable H atoms
+            my $has_unsproutable_H =
+                grep { can_unsprout_hydrogen( $graph, $_ ) } @neighbours;
+            if( $has_unsproutable_H > 1 ) {
+                # CHECKME: Degenerate state, what to do?
+                next;
+            }
+
             next unless exists $atom->{chirality_neighbours};
+            my @chirality_neighbours = grep { !can_unsprout_hydrogen( $graph, $_ ) }
+                                            @{$atom->{chirality_neighbours}};
 
             my $chirality_now = $atom->{chirality};
-            if( @neighbours != @{$atom->{chirality_neighbours}} ) {
+            if( @neighbours != @chirality_neighbours + $has_unsproutable_H ) {
                 warn 'number of neighbours does not match the length ' .
                      "of 'chirality_neighbours' array, cannot process " .
                      'such chiral centers' . "\n";
@@ -161,13 +171,17 @@ sub write_SMILES
             }
 
             my %indices;
-            for (0..$#{$atom->{chirality_neighbours}}) {
+            for (0..$#chirality_neighbours) {
                 my $pos = $_;
-                if( $has_lone_pair && $_ != 0 ) {
+                if( $has_lone_pair && $_ ) {
                     # Lone pair is always second in the chiral neighbours array
                     $pos++;
                 }
-                $indices{$order_by_vertex->($atom->{chirality_neighbours}[$_])} = $pos;
+                if( $has_unsproutable_H && $_ ) {
+                    # CHECKME: Unsproutable H atoms go after lone pairs
+                    $pos++;
+                }
+                $indices{$order_by_vertex->($chirality_neighbours[$_])} = $pos;
             }
 
             my @order_new;
@@ -186,12 +200,18 @@ sub write_SMILES
             # Finally, all neighbours are added, uniq will remove duplicates
             push @order_new, map  { $indices{$_} }
                              sort { $a <=> $b }
+                             grep { defined $_ } # ignore removed H atoms
                              map  { $order_by_vertex->($_) }
                                   @neighbours;
             @order_new = uniq @order_new;
 
-            if( $has_lone_pair ) {
-                # Accommodate the lone pair
+            if(      $has_lone_pair && $has_unsproutable_H ) {
+                if( $discovered_from{$atom} ) {
+                    @order_new = ( $order_new[0], 1, 2, @order_new[1..$#order_new] );
+                } else {
+                    unshift @order_new, 1, 2;
+                }
+            } elsif( $has_lone_pair || $has_unsproutable_H ) {
                 if( $discovered_from{$atom} ) {
                     @order_new = ( $order_new[0], 1, @order_new[1..$#order_new] );
                 } else {
