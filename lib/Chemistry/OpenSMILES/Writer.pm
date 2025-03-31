@@ -251,14 +251,14 @@ sub write_SMILES
             }
             if( $chirality{$vertex} ) {
                 $component .=
-                    _depict_atom( { %$vertex, chirality => $chirality{$vertex} },
+                    _depict_atom( $vertex,
                                   $graph,
-                                  { %$options, raw => 1 } );
+                                  { %$options, chirality => $chirality{$vertex}, raw => 1 } );
             } else {
                 $component .=
                     _depict_atom( $vertex,
                                   $graph,
-                                  { %$options, omit_chirality => 1 } );
+                                  { %$options, chirality => undef } );
             }
             if( $rings->{$i} ) {
                 my @rings_closed;
@@ -314,9 +314,9 @@ sub _depict_atom
 {
     my( $vertex, $graph, $options ) = @_;
     $options = {} unless $options;
-    my( $omit_chirality,
+    my( $chirality,
         $raw ) =
-      ( $options->{omit_chirality},
+      ( $options->{chirality},
         $options->{raw} );
 
     my $atom = $vertex->{symbol};
@@ -328,7 +328,12 @@ sub _depict_atom
         $is_simple = 0;
     }
 
-    if( is_chiral $vertex && !$omit_chirality ) {
+    if( exists $options->{chirality} ) {
+        if( $options->{chirality} ) {
+            $atom .= $options->{chirality};
+            $is_simple = 0;
+        }
+    } elsif( is_chiral $vertex ) {
         $atom .= $vertex->{chirality};
         $is_simple = 0;
     }
@@ -336,7 +341,7 @@ sub _depict_atom
     my $hcount = $vertex->{hcount} ? $vertex->{hcount} : 0;
     if( $options->{unsprout_hydrogens} && $atom ne 'H' ) {
         $hcount += grep { can_unsprout_hydrogen( $graph, $_ ) }
-                        $graph->neighbours( $hcount );
+                        $graph->neighbours( $vertex );
     }
 
     # Decide what to do to atoms with usual/unusual valences
