@@ -224,7 +224,7 @@ sub write_SMILES
             my $vertex = $order[$i];
             if( $discovered_from{$vertex} ) {
                 if( $options->{explicit_parentheses} ||
-                    _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings ) ) {
+                    _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings, $options ) ) {
                     $component .= '(';
                 }
                 $component .= _depict_bond( $discovered_from{$vertex}, $vertex, $graph, $options );
@@ -274,7 +274,7 @@ sub write_SMILES
             my $where = $i < $#order ? $discovered_from{$order[$i+1]} : $order[0];
             while( $vertex != $where ) {
                 if( $options->{explicit_parentheses} ||
-                    _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings ) ) {
+                    _has_more_unseen_children( $discovered_from{$vertex}, $i, $order_by_vertex, $graph, $rings, $options ) ) {
                     $component .= ')';
                 }
                 $vertex = $discovered_from{$vertex};
@@ -373,7 +373,7 @@ sub _depict_bond
 
 sub _has_more_unseen_children
 {
-    my( $vertex, $i, $order_by_vertex, $graph, $rings ) = @_;
+    my( $vertex, $i, $order_by_vertex, $graph, $rings, $options ) = @_;
     my $orders = set( grep { $_ > $i }
                       map  { $order_by_vertex->($_) }
                            $graph->neighbours( $vertex ) );
