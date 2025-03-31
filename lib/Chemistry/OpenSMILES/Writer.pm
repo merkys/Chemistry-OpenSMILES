@@ -54,7 +54,7 @@ sub write_SMILES
     my $raw = $options->{raw};
 
     # Subroutine will also accept and properly represent a single atom:
-    return _pre_vertex( $what, undef, $options ) if ref $what eq 'HASH';
+    return _depict_atom( $what, undef, $options ) if ref $what eq 'HASH';
 
     my @moieties = ref $what eq 'ARRAY' ? @$what : ( $what );
     my @components;
@@ -226,14 +226,14 @@ sub write_SMILES
             }
             if( $chirality{$vertex} ) {
                 $component .=
-                    _pre_vertex( { %$vertex, chirality => $chirality{$vertex} },
-                                 $graph,
-                                 { %$options, raw => 1 } );
+                    _depict_atom( { %$vertex, chirality => $chirality{$vertex} },
+                                  $graph,
+                                  { %$options, raw => 1 } );
             } else {
                 $component .=
-                    _pre_vertex( $vertex,
-                                 $graph,
-                                 { %$options, omit_chirality => 1 } );
+                    _depict_atom( $vertex,
+                                  $graph,
+                                  { %$options, omit_chirality => 1 } );
             }
             if( $rings->{$i} ) {
                 my @rings_closed;
@@ -285,7 +285,7 @@ sub write_SMILES
 # DEPRECATED
 sub write { &write_SMILES }
 
-sub _pre_vertex
+sub _depict_atom
 {
     my( $vertex, $graph, $options ) = @_;
     $options = {} unless $options;
