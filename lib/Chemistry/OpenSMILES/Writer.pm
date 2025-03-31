@@ -198,7 +198,7 @@ sub write_SMILES
                                           \@order_new );
             if( $has_lone_pair ) {
                 if( $discovered_from{$atom} ) {
-                    @permutation = ( $permutation[0], 1, @permutation[1..$#permutation] );
+                    @permutation = ( $permutation[0], 1, map { $_ + 1 } @permutation[1..$#permutation] );
                 } else {
                     @permutation = ( 0, map { $_ + 1 } @permutation );
                 }
@@ -299,7 +299,6 @@ sub write { &write_SMILES }
 sub _array_map
 {
     my( $A, $B ) = @_;
-    if( @$A != @$B ) { use Data::Dumper; print STDERR Dumper [ $A, $B ] }
     die "arrays have unequal length\n" unless @$A == @$B;
 
     my @permutation;
