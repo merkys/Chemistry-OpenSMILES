@@ -161,82 +161,63 @@ sub write_SMILES
                 next;
             }
 
-            # Remove unsproutable H from chirality neighbours
-            my $has_unsproutable_H = 0;
-            if( $options->{unsprout_hydrogens} ) {
-                @chirality_neighbours = grep { !can_unsprout_hydrogen( $graph, $_ ) }
-                                             @{$atom->{chirality_neighbours}};
-                $has_unsproutable_H = @{$atom->{chirality_neighbours}} -
-                                      @chirality_neighbours;
-            }
-            if( $has_unsproutable_H > 1 ) {
-                # CHECKME: Degenerate state, what to do?
-                next;
-            }
+            # PLAN:
+            # In @chirality_neighbours we have the old order.
+            # We can easily construct the new order by reordering atoms.
+            # Then we find correspondence chart and adjust the symbols.
 
-            my %indices;
-            for (0..$#chirality_neighbours) {
-                my $pos = $_;
-                if( $has_lone_pair && $_ ) {
-                    # Lone pair is always second in the chiral neighbours array
-                    $pos++;
-                }
-                if( $has_unsproutable_H && $_ ) {
-                    # CHECKME: Unsproutable H atoms go after lone pairs
-                    $pos++;
-                }
-                $indices{$order_by_vertex->($chirality_neighbours[$_])} = $pos;
-            }
+            # Remove unsproutable H from chirality neighbours
 
             my @order_new;
             # In the newly established order, the atom from which this one
             # is discovered (left hand side) will be the first, if any
             if( $discovered_from{$atom} ) {
-                push @order_new,
-                     $indices{$order_by_vertex->($discovered_from{$atom})};
+                push @order_new, $discovered_from{$atom};
             }
-            # Second, there will be ring bonds as they are added before all of the neighbours
+            # Second, lone pair will stay in its place no matter what.
+            # Third, unsproutable H atoms.
+            if( $options->{unsprout_hydrogens} ) {
+                push @order_new, grep { can_unsprout_hydrogen( $graph, $_ ) }
+                                      @neighbours;
+            }
+            # Fourth, there will be ring bonds as they are added before all of the neighbours
             if( $rings->{$order_by_vertex->($atom)} ) {
-                push @order_new, map  { $indices{$_} }
+                push @order_new, map  { $order[$_] }
                                  sort { $a <=> $b }
                                  keys %{$rings->{$order_by_vertex->($atom)}};
             }
             # Finally, all neighbours are added, uniq will remove duplicates
-            push @order_new, map  { $indices{$_} }
+            push @order_new, map  { $order[$_] }
                              sort { $a <=> $b }
                              grep { defined $_ } # ignore removed H atoms
                              map  { $order_by_vertex->($_) }
                                   @neighbours;
             @order_new = uniq @order_new;
 
-            if(      $has_lone_pair && $has_unsproutable_H ) {
+            my @permutation = _array_map( \@chirality_neighbours,
+                                          \@order_new );
+            if( $has_lone_pair ) {
                 if( $discovered_from{$atom} ) {
-                    @order_new = ( $order_new[0], 1, 2, @order_new[1..$#order_new] );
+                    @permutation = ( $permutation[0], 1, @permutation[1..$#permutation] );
                 } else {
-                    unshift @order_new, 1, 2;
-                }
-            } elsif( $has_lone_pair || $has_unsproutable_H ) {
-                if( $discovered_from{$atom} ) {
-                    @order_new = ( $order_new[0], 1, @order_new[1..$#order_new] );
-                } else {
-                    unshift @order_new, 1;
+                    @permutation = ( 0, map { $_ + 1 } @permutation );
                 }
             }
 
             if( $atom->{chirality} =~ /^@@?$/ ) {
                 # Tetragonal centers
-                if( join( '', _permutation_order( @order_new ) ) ne '0123' ) {
+                if( join( '', _permutation_order( @permutation ) ) ne '0123' ) {
                     $chirality_now = $chirality_now eq '@' ? '@@' : '@';
                 }
             } elsif( $atom->{chirality} =~ /^\@SP[123]$/ ) {
                 # Square planar centers
-                $chirality_now = _square_planar_chirality( @order_new, $chirality_now );
+                $chirality_now = _square_planar_chirality( @permutation, $chirality_now );
             } elsif( $atom->{chirality} =~ /^\@TB..?$/ ) {
                 # Trigonal bipyramidal centers
-                $chirality_now = _trigonal_bipyramidal_chirality( @order_new, $chirality_now );
+                $chirality_now = _trigonal_bipyramidal_chirality( @permutation, $chirality_now );
             } else {
                 # Octahedral centers
-                $chirality_now = _octahedral_chirality( @order_new, $chirality_now );
+                $chirality_now = _octahedral_chirality( @permutation, $chirality_now );
             }
             $chirality{$atom} = $chirality_now;
         }
@@ -313,6 +294,20 @@ sub write_SMILES
 
 # DEPRECATED
 sub write { &write_SMILES }
+
+# Given arrays A and B, return a permutation of indices, making B from A.
+sub _array_map
+{
+    my( $A, $B ) = @_;
+    if( @$A != @$B ) { use Data::Dumper; print STDERR Dumper [ $A, $B ] }
+    die "arrays have unequal length\n" unless @$A == @$B;
+
+    my @permutation;
+    for my $element (@$B) {
+        push @permutation, grep { $A->[$_] eq $element } 0..$#$A;
+    }
+    return @permutation;
+}
 
 sub _depict_atom
 {
@@ -423,7 +418,7 @@ sub _permutation_order
         (any { !defined || !/^[0-3]$/ } @_) ||
         (join( ',', sort @_ ) ne '0,1,2,3') ) {
         warn '_permutation_order() accepts only permutations of numbers ' .
-             "'0', '1', '2' and '3', unexpected input received";
+             "'0', '1', '2' and '3', unexpected input (@_) received";
         return 0..3; # Return original order
     }
 
