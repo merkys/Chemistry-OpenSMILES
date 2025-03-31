@@ -150,17 +150,21 @@ sub write_SMILES
                 $has_lone_pair = @neighbours == 5;
             }
 
-            # Check for unsproutable H atoms
-            my $has_unsproutable_H =
-                grep { can_unsprout_hydrogen( $graph, $_ ) } @neighbours;
+            next unless exists $atom->{chirality_neighbours};
+
+            # Remove unsproutable H from chirality neighbours
+            my @chirality_neighbours = @{$atom->{chirality_neighbours}};
+            my $has_unsproutable_H = 0;
+            if( $options->{unsprout_hydrogens} ) {
+                @chirality_neighbours = grep { !can_unsprout_hydrogen( $graph, $_ ) }
+                                             @{$atom->{chirality_neighbours}};
+                $has_unsproutable_H = @{$atom->{chirality_neighbours}} -
+                                      @chirality_neighbours;
+            }
             if( $has_unsproutable_H > 1 ) {
                 # CHECKME: Degenerate state, what to do?
                 next;
             }
-
-            next unless exists $atom->{chirality_neighbours};
-            my @chirality_neighbours = grep { !can_unsprout_hydrogen( $graph, $_ ) }
-                                            @{$atom->{chirality_neighbours}};
 
             my $chirality_now = $atom->{chirality};
             if( @neighbours != @chirality_neighbours + $has_unsproutable_H ) {
