@@ -396,8 +396,10 @@ sub _has_more_unseen_children
                       grep { defined $_ } # ignore removed H atoms
                       map  { $order_by_vertex->($_) }
                            $graph->neighbours( $vertex ) );
-    $orders->remove( keys %{$rings->{$order_by_vertex->($vertex)}} )
-        if $rings->{$order_by_vertex->($vertex)};
+    if( defined  $order_by_vertex->($vertex) &&
+        $rings->{$order_by_vertex->($vertex)} ) {
+        $orders->remove( keys %{$rings->{$order_by_vertex->($vertex)}} );
+    }
     return $orders->size;
 }
 

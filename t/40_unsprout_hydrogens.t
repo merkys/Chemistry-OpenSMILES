@@ -21,6 +21,13 @@ my @cases = (
 
     [ 'Cl/C=C/Cl', 'Cl/[CH]=[CH]/Cl', 'Cl/C=C/Cl' ],
     [ 'Cl/C=C(/Cl)\[H]', 'Cl/[CH]=[CH]/Cl', 'Cl/C=C/Cl' ],
+
+    [ '[H]C([H])([H])[H]', '[CH4]', 'C' ],
+    [ '[H][C@](F)(Br)Cl', '[C@H](F)(Br)Cl', '[C@H](F)(Br)Cl' ],
+
+    [ '[H][H]', '[H][H]', '[H][H]' ],
+    [ '[O][H][O]', '[O][H][O]', '[O][H][O]' ],
+    [ '[H]1CCCC1', '[H]1[CH2][CH2][CH2][CH2]1', '[H]1CCCC1' ],
 );
 
 plan tests => 4 * scalar @cases;
