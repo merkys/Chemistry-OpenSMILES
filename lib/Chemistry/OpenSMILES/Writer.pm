@@ -332,7 +332,7 @@ sub _depict_atom
     }
 
     my $hcount = $vertex->{hcount} ? $vertex->{hcount} : 0;
-    if( $options->{unsprout_hydrogens} && $atom ne 'H' ) {
+    if( $graph && $options->{unsprout_hydrogens} && $atom ne 'H' ) {
         $hcount += grep { can_unsprout_hydrogen( $graph, $_ ) }
                         $graph->neighbours( $vertex );
     }
