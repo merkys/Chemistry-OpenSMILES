@@ -169,12 +169,14 @@ sub write_SMILES
                                           @chirality_neighbours[1..$#chirality_neighbours] );
             }
 
-            my @order_new;
-            # In the newly established order, the atom from which this one
-            # is discovered (left hand side) will be the first, if any
-            if( $discovered_from{$atom} ) {
-                push @order_new, $discovered_from{$atom};
-            }
+            # Set the newly established order
+            my @order_new = first { 1 }
+                            map   { $order[$_] }
+                            sort  { $a <=> $b }
+                            grep  { !exists $rings->{$_} } # ignore ring bonds
+                            grep  {  defined $_ }          # ignore removed H atoms
+                            map   { $order_by_vertex->($_) }
+                                  @neighbours;
             # Second, lone pair will stay in its place no matter what.
             push @order_new, $lone_pair if $has_lone_pair;
             # Third, unsproutable H atoms.

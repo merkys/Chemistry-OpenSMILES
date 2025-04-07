@@ -18,8 +18,8 @@ my @cases = (
     [ 'N[C@]([H])(O)S',   [ qw( N C O S ) ], 'N[C@H](O)S' ],
 
     # Local tests
-    [ '[C@@](S)([H])(O)N', [ qw( C N O S ) ], '[C@@H](N)(O)S' ],
-    [ '[H][C@@](N)(O)S',   [ qw( C N O S ) ], '[C@@H](N)(O)S' ],
+    [ '[C@@](S)([H])(O)N', [ qw( C N O S ) ], '[C@H](N)(O)S' ],
+    [ '[H][C@@](N)(O)S',   [ qw( C N O S ) ], '[C@H](N)(O)S' ],
 );
 
 plan tests => scalar @cases;

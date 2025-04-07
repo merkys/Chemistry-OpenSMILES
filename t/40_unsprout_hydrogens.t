@@ -23,7 +23,7 @@ my @cases = (
     [ 'Cl/C=C(/Cl)\[H]', 'Cl/[CH]=[CH]/Cl', 'Cl/C=C/Cl' ],
 
     [ '[H]C([H])([H])[H]', '[CH4]', 'C' ],
-    [ '[H][C@](F)(Br)Cl', '[C@H](F)(Br)Cl', '[C@H](F)(Br)Cl' ],
+    [ '[H][C@](F)(Br)Cl', '[C@@H](F)(Br)Cl', '[C@@H](F)(Br)Cl' ],
 
     [ '[H][H]', '[H][H]', '[H][H]' ],
     [ '[O][H][O]', '[O][H][O]', '[O][H][O]' ],
