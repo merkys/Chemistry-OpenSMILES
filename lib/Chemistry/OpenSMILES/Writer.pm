@@ -169,12 +169,14 @@ sub write_SMILES
                                           @chirality_neighbours[1..$#chirality_neighbours] );
             }
 
+            my $order = $order_by_vertex->($atom);
+
             # Set the newly established order
             my @order_new = first { 1 }
                             map   { $order[$_] }
                             sort  { $a <=> $b }
-                            grep  { !exists $rings->{$_} } # ignore ring bonds
-                            grep  {  defined $_ }          # ignore removed H atoms
+                            grep  { !exists $rings->{$order}{$_} } # ignore ring bonds
+                            grep  {  defined $_ }                  # ignore removed H atoms
                             map   { $order_by_vertex->($_) }
                                   @neighbours;
             # Second, lone pair will stay in its place no matter what.
