@@ -20,6 +20,9 @@ my @cases = (
     # Local tests
     [ '[C@@](S)([H])(O)N', [ qw( C N O S ) ], '[C@H](N)(O)S' ],
     [ '[H][C@@](N)(O)S',   [ qw( C N O S ) ], '[C@H](N)(O)S' ],
+
+    # COD entry 1100535
+    [ '[C@H](C)(c1ccccc1)N(C(=O)C)[C@@H](CO)Cc1ccccc1', undef, '[C@H](C)(c1ccccc1)N(C(=O)C)[C@@H](CO)Cc1ccccc1' ],
 );
 
 plan tests => scalar @cases;
@@ -31,20 +34,24 @@ for my $case (@cases) {
     my @moieties;
     my $result;
 
-    my $order_sub = sub {
-        my $vertices = shift;
-        for my $symbol (@$order) {
-            my $vertex = first { $_->{symbol} eq $symbol } values %$vertices;
-            return $vertex if $vertex;
-        }
-        my( $vertex ) = values %$vertices;
-        return $vertex;
-    };
+    my $order_sub;
+    if( $order ) {
+        $order_sub = sub {
+            my $vertices = shift;
+            for my $symbol (@$order) {
+                my $vertex = first { $_->{symbol} eq $symbol } values %$vertices;
+                return $vertex if $vertex;
+            }
+            my( $vertex ) = values %$vertices;
+            return $vertex;
+        };
+    }
 
     $parser = Chemistry::OpenSMILES::Parser->new;
     my( $input_moiety ) = $parser->parse( $input );
 
-    $result = write_SMILES( [ $input_moiety ], { order_sub => $order_sub,
+    $result = write_SMILES( [ $input_moiety ], { explicit_aromatic_bonds => '',
+                                                 order_sub => $order_sub,
                                                  remove_implicit_hydrogens => 1,
                                                  unsprout_hydrogens => 1 } );
     is $result, $output, $input;
