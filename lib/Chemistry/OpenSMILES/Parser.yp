@@ -337,10 +337,14 @@ sub parse
                                      number => $self->{USER}{ATOMNO} };
                     $graph->add_edge( $atom, $hydrogen );
                     $self->{USER}{ATOMNO} ++;
-                    if( $atom->{first_of_chain} ) {
-                        _unshift_chirality_neighbour( $atom, $hydrogen );
-                    } else {
-                        _push_chirality_neighbour( $atom, $hydrogen );
+                    if( is_chiral $atom ) {
+                        if( $atom->{chirality_neighbours} ) {
+                            splice @{$atom->{chirality_neighbours}}, 1, 0, $hydrogen;
+                        } else {
+                            # This only happens if chiral atom does not have neighbours other than implicit hydrogens.
+                            # This is degenerate case anyway.
+                            _push_chirality_neighbour( $atom, $hydrogen );
+                        }
                     }
                 }
                 delete $atom->{hcount};
