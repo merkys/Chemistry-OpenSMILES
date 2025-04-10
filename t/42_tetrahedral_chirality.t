@@ -21,8 +21,8 @@ my @cases = (
     [ '[C@@](S)([H])(O)N', [ qw( C N O S ) ], '[C@H](N)(O)S' ],
     [ '[H][C@@](N)(O)S',   [ qw( C N O S ) ], '[C@H](N)(O)S' ],
 
-    # COD entry 1100535
-    [ '[C@H](C)(c1ccccc1)N(C(=O)C)[C@@H](CO)Cc1ccccc1', undef, '[C@H](C)(c1ccccc1)N(C(=O)C)[C@@H](CO)Cc1ccccc1' ],
+    [ '[C@H](C)(c1ccccc1)N(C(=O)C)[C@@H](CO)Cc1ccccc1', undef, '[C@H](C)(c1ccccc1)N(C(=O)C)[C@@H](CO)Cc1ccccc1' ], # COD entry 1100535
+    [ '[C@@H]1(CCC[C@H](CCC)[NH2+]1)C', undef, '[C@@H]1(CCC[C@H](CCC)[NH2+]1)C' ], # COD entry 1501805 (partial)
 );
 
 plan tests => scalar @cases;
