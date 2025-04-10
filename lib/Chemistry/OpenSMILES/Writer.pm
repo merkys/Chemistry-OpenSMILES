@@ -171,22 +171,16 @@ sub write_SMILES
 
             my $order = $order_by_vertex->($atom);
 
-            # Set the newly established order
-            my @order_new = first { 1 }
-                            map   { $order[$_] }
+            # First, find the initial atom, there can only be one.
+            my @order_new = map   { $order[$_] }
                             sort  { $a <=> $b }
+                            grep  { $_ < $order }
                             grep  { !exists $rings->{$order}{$_} } # ignore ring bonds
                             grep  {  defined $_ }                  # ignore removed H atoms
                             map   { $order_by_vertex->($_) }
                                   @neighbours;
-            # Second, lone pair will stay in its place no matter what.
-            push @order_new, $lone_pair if $has_lone_pair;
-            # Third, unsproutable H atoms.
-            if( $options->{unsprout_hydrogens} ) {
-                push @order_new, grep { can_unsprout_hydrogen( $graph, $_ ) }
-                                      @neighbours;
-            }
-            # Fourth, there will be ring bonds as they are added before all of the neighbours
+            # Second, lone pair and unsproutable H atoms, will be added later.
+            # Third, there will be ring bonds as they are added before all of the neighbours
             if( $rings->{$order_by_vertex->($atom)} ) {
                 push @order_new, map  { $order[$_] }
                                  sort { $a <=> $b }
@@ -199,6 +193,16 @@ sub write_SMILES
                              map  { $order_by_vertex->($_) }
                                   @neighbours;
             @order_new = uniq @order_new;
+
+            # Add unsproutable H atoms
+            if( $options->{unsprout_hydrogens} ) {
+                splice @order_new, 1, 0, grep { can_unsprout_hydrogen( $graph, $_ ) }
+                                              @neighbours;
+            }
+            # Add lone pair
+            if( $has_lone_pair ) {
+                splice @order_new, 1, 0, $lone_pair;
+            }
 
             my @permutation = _array_map( \@chirality_neighbours,
                                           \@order_new );
