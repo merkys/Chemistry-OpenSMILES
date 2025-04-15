@@ -7,8 +7,13 @@ use Chemistry::OpenSMILES::Writer qw(write_SMILES);
 use Test::More;
 
 my @cases = (
-    [ '[C]1[C]/C=N/[C][C][C][C][C]1', '[C]1[C]/C(=N/[C][C][C][C][C]1)[H]' ],
-    [ '[C:6]1[C:7]/C=N/[C:1][C:2][C:3][C:4][C:5]1', '[C:1]\1[C:2][C:3][C:4][C:5][C:6][C:7]/C(=N/1)[H]' ],
+    [ '[C]1[C]/C=N/[C][C][C][C][C]1', '[C]1[C]/C=N/[C][C][C][C][C]1' ],
+    [ '[C:6]1[C:7]/C=N/[C:1][C:2][C:3][C:4][C:5]1', '[C:1]\1[C:2][C:3][C:4][C:5][C:6][C:7]/C=N/1' ],
+
+    # This test case highlights the difference between Daylight SMILES and OpenSMILES.
+    # In the former, if tetrahedral chiral atom with implicit H starts the SMILES, H atom is treated as the 'from' atom.
+    # In OpenSMILES, it is always the second atom.
+    [ '[C@H](Br)(Cl)[F:1]', '[F:1][C@H](Br)Cl' ],
 );
 
 plan tests => scalar @cases;
@@ -21,7 +26,9 @@ for my $case (@cases) {
     $parser = Chemistry::OpenSMILES::Parser->new;
     @moieties = $parser->parse( $case->[0] );
 
-    $result = write_SMILES( \@moieties, { order_sub => \&class_order } );
+    $result = write_SMILES( \@moieties, { order_sub => \&class_order,
+                                          remove_implicit_hydrogens => 1,
+                                          unsprout_hydrogens => 1 } );
     is $result, $case->[1];
 }
 
