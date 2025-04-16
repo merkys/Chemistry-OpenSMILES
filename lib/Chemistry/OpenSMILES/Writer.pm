@@ -48,6 +48,7 @@ sub write_SMILES
 
     $options->{explicit_aromatic_bonds} = 1
         unless exists $options->{explicit_aromatic_bonds};
+    $options->{flavor} = 'opensmiles' unless $options->{flavor};
     $options->{immediately_reuse_ring_numbers} = 1
         unless exists $options->{immediately_reuse_ring_numbers};
 
@@ -196,8 +197,15 @@ sub write_SMILES
 
             # Add unsproutable H atoms
             if( $options->{unsprout_hydrogens} ) {
-                splice @order_new, 1, 0, grep { can_unsprout_hydrogen( $graph, $_ ) }
-                                              @neighbours;
+                if( $options->{flavor} eq 'opensmiles' ||
+                    any { defined $_ && $_ < $order }
+                    map { $order_by_vertex->($_) } @neighbours ) {
+                    splice @order_new, 1, 0, grep { can_unsprout_hydrogen( $graph, $_ ) }
+                                                  @neighbours;
+                } else {
+                    unshift @order_new, grep { can_unsprout_hydrogen( $graph, $_ ) }
+                                             @neighbours;
+                }
             }
             # Add lone pair
             if( $has_lone_pair ) {

@@ -783,8 +783,8 @@ anonymous hash for its second parameter:
 
 SMILES has several flavors, OpenSMILES is just one of them. To support
 multiple flavors, C<flavor> option is used to specify the flavor used
-for input SMILES. The following flavors are supported by SMILES parser:
-C<opensmiles> (default) and C<daylight>.
+for input SMILES. The following flavors are supported: C<opensmiles>
+(default) and C<daylight>.
 
 =item C<max_hydrogen_count_digits>
 
