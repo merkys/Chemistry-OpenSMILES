@@ -13,23 +13,22 @@ my @cases = (
     # This test case highlights the difference between Daylight SMILES and OpenSMILES.
     # In the former, if tetrahedral chiral atom with implicit H starts the SMILES, H atom is treated as the 'from' atom.
     # In OpenSMILES, it is always the second atom.
-    [ '[C@H](Br)(Cl)[F:1]', '[F:1][C@H](Br)Cl' ],
+    [ '[C@H](Br)(Cl)[F:1]', '[F:1][C@H](Br)Cl',  { flavor => 'opensmiles' } ],
+    [ '[C@H](Br)(Cl)[F:1]', '[F:1][C@@H](Br)Cl', { flavor => 'daylight' } ],
 );
 
 plan tests => scalar @cases;
 
+my $parser = Chemistry::OpenSMILES::Parser->new;
+
 for my $case (@cases) {
-    my $parser;
-    my @moieties;
-    my $result;
+    my( $input, $output, $options ) = @$case;
+    my @moieties = $parser->parse( $input, $options );
 
-    $parser = Chemistry::OpenSMILES::Parser->new;
-    @moieties = $parser->parse( $case->[0] );
-
-    $result = write_SMILES( \@moieties, { order_sub => \&class_order,
-                                          remove_implicit_hydrogens => 1,
-                                          unsprout_hydrogens => 1 } );
-    is $result, $case->[1];
+    my $result = write_SMILES( \@moieties, { order_sub => \&class_order,
+                                             remove_implicit_hydrogens => 1,
+                                             unsprout_hydrogens => 1 } );
+    is $result, $output;
 }
 
 sub class_order
