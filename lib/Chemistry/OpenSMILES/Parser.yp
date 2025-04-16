@@ -295,6 +295,7 @@ sub parse
 {
     my( $self, $string, $options ) = @_;
     $options = {} unless $options;
+    $options->{flavor} = 'opensmiles' unless $options->{flavor};
 
     $self->YYData->{INPUT}   = $string;
     $self->{USER}{GRAPHS}    = [];
@@ -339,7 +340,12 @@ sub parse
                     $self->{USER}{ATOMNO} ++;
                     if( is_chiral $atom ) {
                         if( $atom->{chirality_neighbours} ) {
-                            splice @{$atom->{chirality_neighbours}}, 1, 0, $hydrogen;
+                            if( $options->{flavor} eq 'opensmiles' ||
+                                any { $_->{number} < $atom->{number} } @{$atom->{chirality_neighbours}} ) {
+                                splice @{$atom->{chirality_neighbours}}, 1, 0, $hydrogen;
+                            } elsif( $options->{flavor} eq 'daylight' ) {
+                                _unshift_chirality_neighbour( $atom, $hydrogen );
+                            }
                         } else {
                             # This only happens if chiral atom does not have neighbours other than implicit hydrogens.
                             # This is degenerate case anyway.
