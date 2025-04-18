@@ -34,7 +34,6 @@ chain: atom
 
             $_[1]->{graph} = $g;
             $_[1]->{index} = @{$_[0]->{USER}{GRAPHS}}-1;
-            $_[1]->{first_of_chain} = 1;
 
             return { first => $_[1],
                      last  => $_[1] };
@@ -52,8 +51,6 @@ chain: atom
                                                     'bond',
                                                     ':' );
             }
-
-            delete $_[2]->{first_of_chain};
 
             _push_chirality_neighbour( $_[1]->{last}, $_[2] );
             _push_chirality_neighbour( $_[2], $_[1]->{last} );
@@ -76,8 +73,6 @@ chain: atom
                 $_[3]->{graph}->add_edge( $_[1]->{last}, $_[3] );
             }
 
-            delete $_[3]->{first_of_chain};
-
             _push_chirality_neighbour( $_[1]->{last}, $_[3] );
             _push_chirality_neighbour( $_[3], $_[1]->{last} );
 
@@ -93,7 +88,6 @@ chain: atom
 
             $_[3]->{graph} = $g;
             $_[3]->{index} = @{$_[0]->{USER}{GRAPHS}}-1;
-            $_[3]->{first_of_chain} = 1;
 
             return { first => $_[3],
                      last  => $_[3] };
@@ -113,8 +107,6 @@ chain: atom
                                                           'bond',
                                                           ':' );
             }
-
-            delete $_[3]->{first}{first_of_chain};
 
             _push_chirality_neighbour( $_[1]->{last}, $_[3]->{first} );
             _unshift_chirality_neighbour( $_[3]->{first}, $_[1]->{last} );
@@ -137,8 +129,6 @@ chain: atom
                 $_[1]->{last}{graph}->add_edge( $_[1]->{last},
                                                 $_[4]->{first} );
             }
-
-            delete $_[4]->{first}{first_of_chain};
 
             _push_chirality_neighbour( $_[1]->{last}, $_[4]->{first} );
             _unshift_chirality_neighbour( $_[4]->{first}, $_[1]->{last} );
@@ -371,7 +361,6 @@ sub parse
                     $atom->{chirality} =~ s/^\@TH2$/@@/;
                 }
             }
-            delete $atom->{first_of_chain};
         }
     }
 
