@@ -3,6 +3,26 @@ package Chemistry::OpenSMILES::Writer;
 # ABSTRACT: OpenSMILES format writer
 # VERSION
 
+=head1 NAME
+
+Chemistry::OpenSMILES::Writer - OpenSMILES format writer
+
+=head1 SYNOPSIS
+
+    use Graph::Undirected;
+    use Chemistry::OpenSMILES::Writer qw( write_SMILES );
+
+    my $g = Graph::Undirected->new;
+    $g->add_edge( { symbol => 'C' }, { symbol => 'O' } );
+    print write_SMILES( [ $g ] );
+
+=head1 DESCRIPTION
+
+C<Chemistry::OpenSMILES::Writer> is writer for molecular graph objects created by L<Chemistry::OpenSMILES::Parser> or other means.
+It exports a single subroutine, C<write_SMILES()>, which is given an array of molecular graph objects and outputs a SMILES representation of them.
+
+=cut
+
 use strict;
 use warnings;
 
@@ -34,10 +54,18 @@ our @EXPORT_OK = qw(
 my %shape_to_SP = ( 'U' => '@SP1', '4' => '@SP2', 'Z' => '@SP3' );
 my %SP_to_shape = reverse %shape_to_SP;
 
-# write_SMILES() does not necessary respect the order subroutine: if performs DFS guided by the requested order.
-# Thus before calling write_SMILES(), the exact post-order is not known.
-# Only pre-order is known, thus relative properties, such as cis/trans markers, have to be adjusted to pre-order.
-# Thus order-dependent markers have to be adjusted to pre-order.
+=head1 METHODS
+
+=head2 C<write_SMILES( \@molecules, \%options )>
+
+C<@molecules> is an array of molecular graph objects.
+
+=head3 Options
+
+=over
+
+=cut
+
 sub write_SMILES
 {
     my( $what, $options ) = @_;
@@ -46,18 +74,76 @@ sub write_SMILES
     my $order_sub = defined $options && ref $options eq 'CODE' ? $options : \&_order;
     $options = {} unless defined $options && ref $options eq 'HASH';
 
+=item C<explicit_aromatic_bonds>
+
+Boolean flag instructing the writer to output all aromatic bonds as ':'.
+Off by default.
+
+=cut
+
     $options->{explicit_aromatic_bonds} = ''
         unless exists $options->{explicit_aromatic_bonds};
+
+=item C<flavor>
+
+SMILES flavor to use in output.
+Possible values are C<opensmiles> (default) and C<daylight>.
+At this moment they control only the chirality of the initial chain's atom having an implicit hydrogen.
+This difference is explained in more detail in L<https://projects.ibt.lt/repositories/issues/1703>.
+
+=cut
+
     $options->{flavor} = 'opensmiles' unless $options->{flavor};
+
+=item C<immediately_reuse_ring_numbers>
+
+Boolean flag instructing the writer to immediately reuse ring closure numbers.
+On by default.
+Immediately reused ring numbers might cause some confusion for human readers, but the benefit of reuse is the ability to have more open rings at once.
+
+=cut
+
     $options->{immediately_reuse_ring_numbers} = 1
         unless exists $options->{immediately_reuse_ring_numbers};
+
+=item C<remove_implicit_hydrogens>
+
+Boolean flag instructing the writer to remove hydrogens, expressed as atom properties, when their number can be unambiguously derived from normal valency.
+On by default.
+
+=cut
+
     $options->{remove_implicit_hydrogens} = 1
         unless exists $options->{remove_implicit_hydrogens};
+
+=item C<unsprout_hydrogens>
+
+Boolean flag instructing the writer to demote explicit hydrogens ("atoms on their own", "sprouted") to atom properties of their parent heavy atom.
+On by default.
+Not all hydrogens can be demoted.
+
+=cut
+
     $options->{unsprout_hydrogens} = 1
         unless exists $options->{unsprout_hydrogens};
 
+=item C<order_sub>
+
+Subroutine reference used to determine the next atom in order upon ambiguity.
+If none is provided, input order is retained whenever possible.
+It should be noted, however, that C<write_SMILES()> does not necessary respect the order subroutine: if performs DFS merely guided by the requested order.
+Thus before calling C<write_SMILES()> the exact postorder is not known.
+Only preorder is known, thus relative properties, such as cis/trans markers, have to be adjusted to preorder.
+Other order-dependent markers have to be adjusted to preorder as well.
+
+=cut
+
     $order_sub = $options->{order_sub} if $options->{order_sub};
     my $raw = $options->{raw};
+
+=back
+
+=cut
 
     # Subroutine will also accept and properly represent a single atom:
     return _depict_atom( $what, undef, $options ) if ref $what eq 'HASH';
