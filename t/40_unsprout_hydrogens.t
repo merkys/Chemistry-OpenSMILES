@@ -33,19 +33,12 @@ my @cases = (
     [ '[C@](C)(F)(O)([H])', '[C@H]([CH3])(F)[OH]', '[C@H](C)(F)O' ],
 );
 
-plan tests => 4 * scalar @cases;
+plan tests => 2 * scalar @cases;
 
 for my $case (@cases) {
     my $parser = Chemistry::OpenSMILES::Parser->new;
     my @moieties = $parser->parse( $case->[0] );
 
-    is write_SMILES( \@moieties, { unsprout_hydrogens => 1 } ), $case->[1];
-    is write_SMILES( \@moieties, { remove_implicit_hydrogens => 1,
-                                   unsprout_hydrogens => 1 } ), $case->[2];
-
-    for (@moieties) {
-        Chemistry::OpenSMILES::_unsprout_hydrogens( $_ );
-    }
-    is write_SMILES( \@moieties ), $case->[1];
-    is write_SMILES( \@moieties, { remove_implicit_hydrogens => 1 } ), $case->[2];
+    is write_SMILES( \@moieties, { remove_implicit_hydrogens => '' } ), $case->[1];
+    is write_SMILES( \@moieties ), $case->[2];
 }

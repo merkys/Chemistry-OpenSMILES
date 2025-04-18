@@ -20,13 +20,15 @@ for my $case (@cases) {
     $parser = Chemistry::OpenSMILES::Parser->new;
     @moieties = $parser->parse( $case->[0] );
 
-    $result = write_SMILES( \@moieties );
+    $result = write_SMILES( \@moieties, { unsprout_hydrogens => '' } );
     is $result, $case->[1];
 
-    $result = write_SMILES( \@moieties, { order_sub => \&reverse_order } );
+    $result = write_SMILES( \@moieties, { unsprout_hydrogens => '',
+                                          order_sub => \&reverse_order } );
     is $result, $case->[2];
 
-    $result = write_SMILES( \@moieties, { order_sub => \&class_order } );
+    $result = write_SMILES( \@moieties, { unsprout_hydrogens => '',
+                                          order_sub => \&class_order } );
     is $result, $case->[3];
 }
 

@@ -41,7 +41,8 @@ for my $case (@cases) {
     $parser = Chemistry::OpenSMILES::Parser->new;
     my( $input_moiety ) = $parser->parse( $input );
 
-    $result = write_SMILES( [ $input_moiety ], { order_sub => $order_sub } );
+    $result = write_SMILES( [ $input_moiety ], { order_sub => $order_sub,
+                                                 unsprout_hydrogens => '' } );
     is $result, $output, $input;
 
     next unless $has_Graph_Nauty;

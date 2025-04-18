@@ -26,11 +26,12 @@ for my $case (@cases) {
     $parser = Chemistry::OpenSMILES::Parser->new;
     @moieties = $parser->parse( $case->[0] );
 
-    $result = write_SMILES( \@moieties );
-    is( drop_H( $result ), $case->[1] );
+    $result = write_SMILES( \@moieties, { unsprout_hydrogens => '' } );
+    is drop_H( $result ), $case->[1];
 
-    $result = write_SMILES( \@moieties, \&reverse_order );
-    is( drop_H( $result ), $case->[2] );
+    $result = write_SMILES( \@moieties, { order_sub => \&reverse_order,
+                                          unsprout_hydrogens => '' } );
+    is drop_H( $result ), $case->[2];
 }
 
 sub drop_H

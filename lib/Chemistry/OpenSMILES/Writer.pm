@@ -51,6 +51,10 @@ sub write_SMILES
     $options->{flavor} = 'opensmiles' unless $options->{flavor};
     $options->{immediately_reuse_ring_numbers} = 1
         unless exists $options->{immediately_reuse_ring_numbers};
+    $options->{remove_implicit_hydrogens} = 1
+        unless exists $options->{remove_implicit_hydrogens};
+    $options->{unsprout_hydrogens} = 1
+        unless exists $options->{unsprout_hydrogens};
 
     $order_sub = $options->{order_sub} if $options->{order_sub};
     my $raw = $options->{raw};

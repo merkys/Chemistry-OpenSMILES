@@ -27,7 +27,7 @@ for my $case (@cases) {
     my $parser = Chemistry::OpenSMILES::Parser->new;
     my @moieties = $parser->parse( $case->[0] );
 
-    is( write_SMILES( \@moieties ), $case->[1] );
+    is write_SMILES( \@moieties, { unsprout_hydrogens => '' } ), $case->[1];
 
     $warning =~ s/\n$// if $warning;
     is $warning, $case->[2];
