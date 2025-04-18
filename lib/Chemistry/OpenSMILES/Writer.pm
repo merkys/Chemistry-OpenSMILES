@@ -46,7 +46,7 @@ sub write_SMILES
     my $order_sub = defined $options && ref $options eq 'CODE' ? $options : \&_order;
     $options = {} unless defined $options && ref $options eq 'HASH';
 
-    $options->{explicit_aromatic_bonds} = 1
+    $options->{explicit_aromatic_bonds} = ''
         unless exists $options->{explicit_aromatic_bonds};
     $options->{flavor} = 'opensmiles' unless $options->{flavor};
     $options->{immediately_reuse_ring_numbers} = 1

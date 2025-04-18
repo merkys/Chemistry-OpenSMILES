@@ -9,11 +9,11 @@ use Test::More;
 
 my @cases = (
     [ 'C1=CC=CC=C1',
-      'c:1(:c(:c(:c(:c(:c:1[H])[H])[H])[H])[H])[H]',
+      'c1(c(c(c(c(c1[H])[H])[H])[H])[H])[H]',
       'C=1(C(=C(C(=C(C=1[H])[H])[H])[H])[H])[H]' ],
 
     [ 'C1=CC=CC=C1C1=CC=CC=C1',
-      'c:1(:c(:c(:c(:c(:c:1-c:1:c(:c(:c(:c(:c:1[H])[H])[H])[H])[H])[H])[H])[H])[H])[H]',
+      'c1(c(c(c(c(c1-c1c(c(c(c(c1[H])[H])[H])[H])[H])[H])[H])[H])[H])[H]',
       'C=1(C(=C(C(=C(C=1C=1C(=C(C(=C(C=1[H])[H])[H])[H])[H])[H])[H])[H])[H])[H]' ],
 );
 
