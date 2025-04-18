@@ -729,12 +729,11 @@ Chemistry::OpenSMILES provides support for SMILES chemical identifiers
 conforming to OpenSMILES v1.0 specification
 (L<http://opensmiles.org/opensmiles.html>).
 
-Chemistry::OpenSMILES::Parser reads in SMILES strings and returns them
-parsed to arrays of L<Graph::Undirected|Graph::Undirected> objects. Each
-atom is represented by a hash.
+L<Chemistry::OpenSMILES::Parser> reads in SMILES strings and returns them parsed to arrays of L<Graph::Undirected> objects.
+Each atom is represented by a hash.
 
-Chemistry::OpenSMILES::Writer performs the inverse operation. Generated
-SMILES strings are by no means optimal.
+L<Chemistry::OpenSMILES::Writer> performs the inverse operation.
+For SMILES writing conventions and options refer to its description.
 
 =head2 Molecular graph
 
@@ -761,8 +760,8 @@ Except for C<symbol>, C<class> and C<number>, all keys of hash are
 optional. Per OpenSMILES specification, default values for C<hcount>
 and C<class> are 0.
 
-For chiral atoms, the order of its neighbours in input is preserved in
-an array added as value for C<chirality_neighbours> key of the atom hash.
+For chiral atoms, the order of its neighbours in input is preserved in an array added as value for C<chirality_neighbours> key of the atom hash.
+The order of atoms there follow OpenSMILES convention.
 
 =head3 Bonds
 
@@ -814,8 +813,7 @@ be instructed to expect raw data structure:
 
 Deprecated charge notations (C<--> and C<++>) are supported.
 
-OpenSMILES specification mandates a strict order of ring bonds and
-branches:
+OpenSMILES specification mandates a strict order of ring bonds and branches:
 
     branched_atom ::= atom ringbond* branch*
 

@@ -2,6 +2,31 @@
 
 %{
 
+=head1 NAME
+
+Chemistry::OpenSMILES::Parser - OpenSMILES format reader
+
+=head1 SYNOPSIS
+
+    use Chemistry::OpenSMILES::Parser;
+
+    my $parser = Chemistry::OpenSMILES::Parser->new;
+    my @moieties = $parser->parse( 'C#C.c1ccccc1' );
+
+    $\ = "\n";
+    for my $moiety (@moieties) {
+        #  $moiety is a Graph::Undirected object
+        print scalar $moiety->vertices;
+        print scalar $moiety->edges;
+    }
+
+=head1 DESCRIPTION
+
+C<Chemistry::OpenSMILES::Parser> is OpenSMILES format reader.
+While based primarily on OpenSMILES format, it can parse other SMILES flavors (such as Daylight) and has somewhat relaxed syntax regarding some other format aspects (see below).
+
+=cut
+
 use warnings;
 use 5.0100;
 
