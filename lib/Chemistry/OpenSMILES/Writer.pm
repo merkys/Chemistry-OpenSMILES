@@ -84,6 +84,16 @@ Off by default.
     $options->{explicit_aromatic_bonds} = ''
         unless exists $options->{explicit_aromatic_bonds};
 
+=item C<explicit_parentheses>
+
+Boolean flag instructing the writer to always enclose "children" atoms in parentheses.
+Off by default.
+
+=cut
+
+    $options->{explicit_parentheses} = ''
+        unless exists $options->{explicit_parentheses};
+
 =item C<immediately_reuse_ring_numbers>
 
 Boolean flag instructing the writer to immediately reuse ring closure numbers.
