@@ -35,8 +35,9 @@ my @cases = (
 
 plan tests => 2 * scalar @cases;
 
+my $parser = Chemistry::OpenSMILES::Parser->new;
+
 for my $case (@cases) {
-    my $parser = Chemistry::OpenSMILES::Parser->new;
     my @moieties = $parser->parse( $case->[0] );
 
     is write_SMILES( \@moieties, { remove_implicit_hydrogens => '' } ), $case->[1];
