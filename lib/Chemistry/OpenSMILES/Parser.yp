@@ -23,7 +23,6 @@ Chemistry::OpenSMILES::Parser - OpenSMILES format reader
 =head1 DESCRIPTION
 
 C<Chemistry::OpenSMILES::Parser> is OpenSMILES format reader.
-While based primarily on OpenSMILES format, it can parse other SMILES flavors (such as Daylight) and has somewhat relaxed syntax regarding some other format aspects (see below).
 
 =cut
 
@@ -310,7 +309,6 @@ sub parse
 {
     my( $self, $string, $options ) = @_;
     $options = {} unless $options;
-    $options->{flavor} = 'opensmiles' unless $options->{flavor};
 
     $self->YYData->{INPUT}   = $string;
     $self->{USER}{GRAPHS}    = [];
@@ -355,10 +353,9 @@ sub parse
                     $self->{USER}{ATOMNO} ++;
                     if( is_chiral $atom ) {
                         if( $atom->{chirality_neighbours} ) {
-                            if( $options->{flavor} eq 'opensmiles' ||
-                                any { $_->{number} < $atom->{number} } @{$atom->{chirality_neighbours}} ) {
+                            if( any { $_->{number} < $atom->{number} } @{$atom->{chirality_neighbours}} ) {
                                 splice @{$atom->{chirality_neighbours}}, 1, 0, $hydrogen;
-                            } elsif( $options->{flavor} eq 'daylight' ) {
+                            } else {
                                 _unshift_chirality_neighbour( $atom, $hydrogen );
                             }
                         } else {

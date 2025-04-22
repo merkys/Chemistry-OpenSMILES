@@ -84,17 +84,6 @@ Off by default.
     $options->{explicit_aromatic_bonds} = ''
         unless exists $options->{explicit_aromatic_bonds};
 
-=item C<flavor>
-
-SMILES flavor to use in output.
-Possible values are C<opensmiles> (default) and C<daylight>.
-At this moment they control only the chirality of the initial chain's atom having an implicit hydrogen.
-This difference is explained in more detail in L<https://projects.ibt.lt/repositories/issues/1703>.
-
-=cut
-
-    $options->{flavor} = 'opensmiles' unless $options->{flavor};
-
 =item C<immediately_reuse_ring_numbers>
 
 Boolean flag instructing the writer to immediately reuse ring closure numbers.
@@ -287,8 +276,7 @@ Other order-dependent markers have to be adjusted to preorder as well.
 
             # Add unsproutable H atoms
             if( $options->{unsprout_hydrogens} ) {
-                if( $options->{flavor} eq 'opensmiles' ||
-                    any { defined $_ && $_ < $order }
+                if( any { defined $_ && $_ < $order }
                     map { $order_by_vertex->($_) } @neighbours ) {
                     splice @order_new, 1, 0, grep { can_unsprout_hydrogen( $graph, $_ ) }
                                                   @neighbours;
