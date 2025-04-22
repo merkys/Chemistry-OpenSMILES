@@ -3,8 +3,6 @@
     - Ceasing to output aromatic bonds, excess parentheses and explicit
       hydrogen atoms by default. These features can be re-enabled by
       writer options.
-    - Implementing different SMILES flavors in both reading and writing.
-      Currently supporting OpenSMILES and Daylight.
     - Reusing ring bond numbers immediately after their closure. The
       old behavior can be brought back via an option.
 
