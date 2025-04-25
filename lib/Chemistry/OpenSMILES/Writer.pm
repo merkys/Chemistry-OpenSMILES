@@ -704,3 +704,9 @@ sub _order
 }
 
 1;
+
+=head1 AUTHORS
+
+Andrius Merkys, E<lt>merkys@cpan.orgE<gt>
+
+=cut

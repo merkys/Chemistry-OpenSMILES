@@ -760,7 +760,7 @@ Except for C<symbol>, C<class> and C<number>, all keys of hash are
 optional. Per OpenSMILES specification, default values for C<hcount>
 and C<class> are 0.
 
-For chiral atoms, the order of its neighbours in input is preserved in an array added as value for C<chirality_neighbours> key of the atom hash.
+For chiral atoms, the order of their neighbours in input is preserved in an array added as value for C<chirality_neighbours> key of the atom hash.
 The order of atoms there follow OpenSMILES convention.
 
 =head3 Bonds
@@ -770,65 +770,6 @@ L<Graph::Undirected|Graph::Undirected> internal representation. Bond
 orders other than single (C<->, which is also a default) are represented
 as values of edge attribute C<bond>. They correspond to the symbols used
 in OpenSMILES specification.
-
-=head2 Options
-
-C<parse> accepts the following options for key-value pairs in an
-anonymous hash for its second parameter:
-
-=over
-
-=item C<max_hydrogen_count_digits>
-
-In OpenSMILES specification the number of attached hydrogen atoms for
-atoms in square brackets is limited to 9. IUPAC SMILES+ has increased
-this number to 99. With the value of C<max_hydrogen_count_digits> the
-parser could be instructed to allow other than 1 digit for attached
-hydrogen count.
-
-=item C<raw>
-
-With C<raw> set to anything evaluating to true, the parser will not
-convert neither implicit nor explicit hydrogen atoms in square brackets
-to atom hashes of their own. Moreover, it will not attempt to unify the
-representations of chirality. It should be noted, though, that many of
-subroutines of Chemistry::OpenSMILES expect non-raw data structures,
-thus processing raw output may produce distorted results. In particular,
-C<write_SMILES()> calls from
-L<Chemistry::OpenSMILES::Writer|Chemistry::OpenSMILES::Writer> have to
-be instructed to expect raw data structure:
-
-    write_SMILES( \@moieties, { raw => 1 } );
-
-=back
-
-=head1 CAVEATS
-
-Deprecated charge notations (C<--> and C<++>) are supported.
-
-OpenSMILES specification mandates a strict order of ring bonds and branches:
-
-    branched_atom ::= atom ringbond* branch*
-
-Chemistry::OpenSMILES::Parser supports both the mandated, and inverted
-structure, where ring bonds follow branch descriptions.
-
-Whitespace is not supported yet. SMILES descriptors must be cleaned of
-it before attempting reading with Chemistry::OpenSMILES::Parser.
-
-The derivation of implicit hydrogen counts for aromatic atoms is not
-unambiguously defined in the OpenSMILES specification. Thus only
-aromatic carbon is accounted for as if having valence of 3.
-
-Chiral atoms with three neighbours are interpreted as having a lone
-pair of electrons as the fourth chiral neighbour. The lone pair is
-always understood as being the second in the order of neighbour
-enumeration, except when the atom with the lone pair starts a chain. In
-that case lone pair is the first.
-
-=head1 SEE ALSO
-
-perl(1)
 
 =head1 AUTHORS
 

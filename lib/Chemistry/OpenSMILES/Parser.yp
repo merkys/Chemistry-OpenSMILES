@@ -40,6 +40,62 @@ use Chemistry::OpenSMILES qw(
 use Graph::Undirected;
 use List::Util qw( any first sum0 );
 
+=head1 METHODS
+
+=head2 C<parse( $smiles, \%options )>
+
+Parses a SMILES string and returns an array of disconnected molecular entities as separate instances of L<Graph::Undirected>.
+Their interpretation is described in detail in L<Chemistry::OpenSMILES>.
+
+=head3 Options
+
+C<parse()> accepts the following options for key-value pairs in an anonymous hash for its second parameter:
+
+=over
+
+=item C<max_hydrogen_count_digits>
+
+In OpenSMILES specification the number of attached hydrogen atoms for atoms in square brackets is limited to 9.
+IUPAC SMILES+ has increased this number to 99.
+With the value of C<max_hydrogen_count_digits> the parser can be instructed to allow other than 1 digit for attached hydrogen count.
+
+=item C<raw>
+
+With C<raw> set to anything evaluating to true, the parser will not convert neither implicit nor explicit hydrogen atoms in square brackets to atom hashes of their own.
+Moreover, it will not attempt to unify the representations of chirality.
+It should be noted, though, that many of subroutines of Chemistry::OpenSMILES expect non-raw data structures, thus processing raw output may produce distorted results.
+In particular, C<write_SMILES()> calls from L<Chemistry::OpenSMILES::Writer|Chemistry::OpenSMILES::Writer> have to be instructed to expect raw data structure:
+
+    write_SMILES( \@moieties, { raw => 1 } );
+
+This option is now deprecated and may be removed in upcoming versions.
+
+=back
+
+=head1 CAVEATS
+
+Deprecated charge notations (C<--> and C<++>) are supported.
+
+OpenSMILES specification mandates a strict order of ring bonds and branches:
+
+    branched_atom ::= atom ringbond* branch*
+
+Chemistry::OpenSMILES::Parser supports both the mandated, and inverted
+structure, where ring bonds follow branch descriptions.
+
+Whitespace is not supported yet. SMILES descriptors must be cleaned of
+it before attempting reading with Chemistry::OpenSMILES::Parser.
+
+The derivation of implicit hydrogen counts for aromatic atoms is not
+unambiguously defined in the OpenSMILES specification. Thus only
+aromatic carbon is accounted for as if having valence of 3.
+
+Chiral atoms with three neighbours are interpreted as having a lone pair of electrons one of its chiral neighbours.
+The lone pair is always understood as being the second in the order of neighbour enumeration, except when the atom with the lone pair starts a chain.
+In that case lone pair is the first.
+
+=cut
+
 %}
 
 %%
@@ -487,3 +543,9 @@ sub _unshift_chirality_neighbour
 }
 
 1;
+
+=head1 AUTHORS
+
+Andrius Merkys, E<lt>merkys@cpan.orgE<gt>
+
+=cut
