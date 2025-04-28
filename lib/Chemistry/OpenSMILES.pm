@@ -590,6 +590,19 @@ sub _validate($@)
                              $B->{number};
             }
         }
+
+        # Warn about 2 aromatic atoms in a cycle not having an aromatic bond between them
+        if(  is_aromatic( $A ) &&
+             is_aromatic( $B ) &&
+            !is_aromatic_bond( $moiety, $A, $B ) &&
+             is_ring_bond( $moiety, $A, $B ) ) {
+            warn sprintf 'aromatic atoms %s(%d) and %s(%d) belong to same cycle, ' .
+                         'but the bond between them is not aromatic' . "\n",
+                         $A->{symbol},
+                         $A->{number},
+                         $B->{symbol},
+                         $B->{number};
+        }
     }
 
     # Check allene systems
@@ -646,7 +659,6 @@ sub _validate($@)
     }
 
     # TODO: SP, TB, OH chiral centers
-    # TODO: Warn about 2 aromatic atoms in a cycle not having an aromatic bond between them
 }
 
 sub _allene_graph
