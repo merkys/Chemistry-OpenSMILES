@@ -646,6 +646,7 @@ sub _validate($@)
     }
 
     # TODO: SP, TB, OH chiral centers
+    # TODO: Warn about 2 aromatic atoms in a cycle not having an aromatic bond between them
 }
 
 sub _allene_graph
