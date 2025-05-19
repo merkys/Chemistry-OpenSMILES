@@ -169,8 +169,9 @@ chain: atom
             $_[3]->{graph} = $g;
             $_[3]->{index} = @{$_[0]->{USER}{GRAPHS}}-1;
 
-            return { first => $_[3],
-                     last  => $_[3] };
+            $_[1]->{last} = $_[3];
+
+            return $_[1];
         }
      | chain '(' chain ')'
         {
