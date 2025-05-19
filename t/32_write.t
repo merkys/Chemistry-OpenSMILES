@@ -14,6 +14,10 @@ my @cases = (
     # See https://github.com/opensmiles/OpenSMILES/issues/10
     [ '[C@H](Br)(Cl)[F:1]', '[F:1][C@@H](Br)Cl' ],
     [ '[C@H](Br)(Cl)F', '[C@H](Br)(Cl)F', ],
+
+    # Examples from OpenSMILES specification, "3.7. Disconnected Structures"
+    [ 'c1cc(O.NCCO)ccc1', 'c1cc(NCCO)ccc1.O' ], # FIXME: Incorrect!
+    [ 'Oc1cc(.NCCO)ccc1', 'Oc1ccccc1.NCCO' ],
 );
 
 plan tests => scalar @cases;
