@@ -2,6 +2,10 @@
 
     - Do not remove square brackets from atom if its normal valence is
       ambiguous.
+    - Fix a bug in handling of disconnected molecular entities in
+      parentheses.
+    - Warn about 2 aromatic atoms in a cycle not having an aromatic bond
+      between them.
 
 0.12.0 2025-04-25
 
