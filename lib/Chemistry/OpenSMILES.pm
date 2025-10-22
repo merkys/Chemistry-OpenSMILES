@@ -432,6 +432,16 @@ sub _validate($@)
     my $color_by_element = sub { $_[0]->{symbol} };
 
     for my $atom (sort { $a->{number} <=> $b->{number} } $moiety->vertices) {
+
+        # Warn about aromatic atoms with less than two aromatic bonds
+        if( is_aromatic($atom) && $moiety->degree($atom) &&
+            2 > grep { is_aromatic_bond( $moiety, $atom, $_ ) }
+                     $moiety->neighbours( $atom ) ) {
+            warn sprintf 'aromatic atom %s(%d) has less than 2 aromatic bonds' . "\n",
+                         $atom->{symbol},
+                         $atom->{number};
+        }
+
         if( is_chiral_allenal($atom) ) {
             if( $moiety->degree($atom) != 2 ) {
                 warn sprintf 'tetrahedral chiral allenal setting for %s(%d) ' .
