@@ -1,4 +1,4 @@
-0.12.1 unreleased
+0.12.1 2025-10-22
 
     - Do not remove square brackets from atom if its normal valence is
       ambiguous.
