@@ -54,10 +54,13 @@ sub aromatise
     for my $cycle (@electron_cycles) {
         for my $i (0..$#$cycle) {
             # Set bond to aromatic
-            $moiety->set_edge_attribute( $cycle->[$i],
-                                         $cycle->[($i + 1) % scalar @$cycle],
-                                         'bond',
-                                         ':' );
+            if( is_single_bond( $moiety, $cycle->[$i], $cycle->[($i + 1) % scalar @$cycle] ) ||
+                is_double_bond( $moiety, $cycle->[$i], $cycle->[($i + 1) % scalar @$cycle] ) ) {
+                $moiety->set_edge_attribute( $cycle->[$i],
+                                             $cycle->[($i + 1) % scalar @$cycle],
+                                             'bond',
+                                             ':' );
+            }
             # Set atom to aromatic
             if( $cycle->[$i]{symbol} =~ /^([BCNOPS]|Se|As)$/ ) {
                 $cycle->[$i]{symbol} = lcfirst $cycle->[$i]{symbol};
