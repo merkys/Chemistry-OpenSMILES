@@ -186,8 +186,12 @@ sub is_aromatic($)
 sub is_aromatic_bond
 {
     my( $moiety, $a, $b ) = @_;
-    return $moiety->has_edge_attribute( $a, $b, 'bond' ) &&
-           $moiety->get_edge_attribute( $a, $b, 'bond' ) eq ':';
+    return 1 if $moiety->has_edge_attribute( $a, $b, 'bond' ) &&
+                $moiety->get_edge_attribute( $a, $b, 'bond' ) eq ':';
+    return '' unless is_aromatic( $a ) && is_aromatic( $b );
+    return '' if $moiety->has_edge_attribute( $a, $b, 'bond' ) &&
+                 $moiety->get_edge_attribute( $a, $b, 'bond' ) eq '-';
+    return 1;
 }
 
 sub is_chiral($)
