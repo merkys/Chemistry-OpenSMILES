@@ -36,6 +36,11 @@ my %cases = (
     # From COD entry 4501115, r297562
     'OC(=C\C(=O)/C=C/c1ccc(O)c(OC)c1)/C=C/c1cc(OC)c(cc1)O' => undef,
     'OC(=C\C/C=C/c1ccc(O)c(OC)c1)/C=C/c1cc(OC)c(cc1)O' => undef,
+
+    # COD entry 1000065, r298713
+    '[c]' => undef,
+
+    'cC' => 'aromatic atom c(0) has less than 2 aromatic bonds',
 );
 
 plan tests => scalar keys %cases;
