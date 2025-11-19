@@ -67,6 +67,12 @@ sub aromatise
             }
         }
     }
+    # Preserve explicitly non-aromatic bonds between aromatic cycles
+    for my $edge ($moiety->edges) {
+        next unless all { is_aromatic $_ } @$edge;
+        next if $moiety->has_edge_attribute( @$edge, 'bond' );
+        $moiety->set_edge_attribute( @$edge, 'bond', '-' );
+    }
 }
 
 =item kekulise( $moiety, $order_sub )
@@ -106,10 +112,13 @@ sub kekulise
                              $aromatic_only->neighbours( $first );
         for my $i (0..$#$component) {
             $first->{symbol} = ucfirst $first->{symbol};
+            for ($moiety->neighbours( $first )) {
+                next unless $moiety->has_edge_attribute( $first, $_, 'bond' );
+                next unless $moiety->get_edge_attribute( $first, $_, 'bond' ) =~ /^[-:]$/;
+                $moiety->delete_edge_attribute( $first, $_, 'bond' );
+            }
             if( $i % 2 ) {
                 $moiety->set_edge_attribute( $first, $second, 'bond', '=' );
-            } else {
-                $moiety->delete_edge_attribute( $first, $second, 'bond' );
             }
             ( $first, $second ) =
                 ( $second, first { $_ ne $first } $aromatic_only->neighbours( $second ) );
