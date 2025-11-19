@@ -15,7 +15,8 @@ my %cases = (
     # Atom coloring is not given, thus the following is not detected as unimportant chiral center
     'CC(C)=[C@]=C(C)C' => undef,
 
-    'c=12ccccc=1cccc2' => 'aromatic atoms c(0) and c(5) belong to same cycle, but the bond between them is not aromatic',
+    'c=12ccccc=1cccc2' => undef,
+    'c-12ccccc-1cccc2' => 'aromatic atoms c(0) and c(5) belong to same cycle, but the bond between them is not aromatic',
 
     # COD entry 2230139, r176798, chemical name translated by OPSIN v2.8.0
     # The mentioned double bond gets its marker from another double bond

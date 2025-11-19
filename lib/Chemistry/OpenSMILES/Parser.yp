@@ -38,7 +38,7 @@ use Chemistry::OpenSMILES qw(
     toggle_cistrans
 );
 use Graph::Undirected;
-use List::Util qw( any first sum0 );
+use List::Util qw( all any first sum0 );
 
 =head1 METHODS
 
@@ -149,14 +149,10 @@ chain: atom
             $_[3]->{graph} = $_[1]->{last}{graph};
             $_[3]->{index} = $_[1]->{last}{index};
 
-            if( $_[2] ne '-' ) {
-                $_[3]->{graph}->set_edge_attribute( $_[1]->{last},
-                                                    $_[3],
-                                                    'bond',
-                                                    $_[2] );
-            } else {
-                $_[3]->{graph}->add_edge( $_[1]->{last}, $_[3] );
-            }
+            $_[3]->{graph}->set_edge_attribute( $_[1]->{last},
+                                                $_[3],
+                                                'bond',
+                                                $_[2] );
 
             _push_chirality_neighbour( $_[1]->{last}, $_[3] );
             _push_chirality_neighbour( $_[3], $_[1]->{last} );
@@ -216,15 +212,10 @@ chain: atom
                                       $_[4]->{first}{index} );
             }
 
-            if( $_[3] ne '-' ) {
-                $_[1]->{last}{graph}->set_edge_attribute( $_[1]->{last},
-                                                          $_[4]->{first},
-                                                          'bond',
-                                                          $_[3] );
-            } else {
-                $_[1]->{last}{graph}->add_edge( $_[1]->{last},
-                                                $_[4]->{first} );
-            }
+            $_[1]->{last}{graph}->set_edge_attribute( $_[1]->{last},
+                                                      $_[4]->{first},
+                                                      'bond',
+                                                      $_[3] );
 
             _push_chirality_neighbour( $_[1]->{last}, $_[4]->{first} );
             _unshift_chirality_neighbour( $_[4]->{first}, $_[1]->{last} );
@@ -463,6 +454,12 @@ sub parse
                 $atom->{chirality} =~ s/^\@TH2$/@@/;
             }
         }
+        for my $bond ($graph->edges) {
+            next unless $graph->has_edge_attribute( @$bond, 'bond' );
+            next unless $graph->get_edge_attribute( @$bond, 'bond' ) eq '-';
+            next if all { is_aromatic $_ } @$bond;
+            $graph->delete_edge_attribute( @$bond, 'bond' );
+        }
     }
 
     return @graphs;
@@ -498,7 +495,7 @@ sub _add_ring_bond
         if( !$bond && is_aromatic $ring_atom && is_aromatic $atom ) {
             $bond = ':';
         }
-        if( $bond && $bond ne '-' ) {
+        if( $bond ) {
             $atom->{graph}->set_edge_attribute( $ring_atom,
                                                 $atom,
                                                 'bond',

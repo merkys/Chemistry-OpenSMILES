@@ -18,10 +18,10 @@ my %cases = (
     'c:c'    => { ':' => 1 },
     'c(c)'   => { ':' => 1 },
     'c1ccc1' => { ':' => 4 },
-    'c-c'    => {},
-    'c(-c)'  => {},
-    'c1cc-1' => { ':' => 2 },
-    'c-1cc1' => { ':' => 2 },
+    'c-c'    => { '-' => 1 },
+    'c(-c)'  => { '-' => 1 },
+    'c1cc-1' => { '-' => 1, ':' => 2 },
+    'c-1cc1' => { '-' => 1, ':' => 2 },
 );
 
 plan tests => 2 * scalar keys %cases;
@@ -39,7 +39,7 @@ for my $case (sort keys %cases) {
         $orders{ $graph->get_edge_attribute( @$_, 'bond' )} ++;
     }
 
-    is( serialize( \%orders ), serialize( $cases{$case} ) );
+    is serialize( \%orders ), serialize( $cases{$case} ), $case;
 }
 
 sub serialize
