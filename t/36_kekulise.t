@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Chemistry::OpenSMILES qw(is_single_bond);
+use Chemistry::OpenSMILES qw(is_double_bond);
 use Chemistry::OpenSMILES::Aromaticity qw(kekulise);
 use Chemistry::OpenSMILES::Parser;
 use Chemistry::OpenSMILES::Writer qw(write_SMILES);
@@ -36,5 +36,5 @@ for my $reverse (('', 1) x $repeats) {
     my $order_sub = sub { $order{$_[0]} };
     kekulise( $moiety, $order_sub );
 
-    ok is_single_bond( $moiety, grep { $moiety->degree($_) == 3 } $moiety->vertices );
+    ok is_double_bond( $moiety, grep { $moiety->degree($_) == 3 } $moiety->vertices );
 }

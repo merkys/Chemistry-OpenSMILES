@@ -117,9 +117,7 @@ sub kekulise
                 next unless $moiety->get_edge_attribute( $first, $_, 'bond' ) =~ /^[-:]$/;
                 $moiety->delete_edge_attribute( $first, $_, 'bond' );
             }
-            if( $i % 2 ) {
-                $moiety->set_edge_attribute( $first, $second, 'bond', '=' );
-            }
+            $moiety->set_edge_attribute( $first, $second, 'bond', '=' ) unless $i % 2;
             ( $first, $second ) =
                 ( $second, first { $_ ne $first } $aromatic_only->neighbours( $second ) );
         }

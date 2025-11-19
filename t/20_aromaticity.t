@@ -8,9 +8,8 @@ use Chemistry::OpenSMILES::Writer qw( write_SMILES );
 use Test::More;
 
 my @cases = (
-    [ 'C1=CC=CC=C1', 'c1ccccc1', 'C=1C=CC=CC=1' ],
-
-    [ 'C1=CC=CC=C1C1=CC=CC=C1', 'c1ccccc1-c1ccccc1', 'C=1C=CC=CC=1C=1C=CC=CC=1' ],
+    [ 'C1=CC=CC=C1', 'c1ccccc1', 'C1=CC=CC=C1' ],
+    [ 'C1=CC=CC=C1C1=CC=CC=C1', 'c1ccccc1-c1ccccc1', 'C1=CC=CC=C1C1=CC=CC=C1' ],
 );
 
 plan tests => 2 * scalar @cases;
