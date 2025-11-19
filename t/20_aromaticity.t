@@ -23,9 +23,9 @@ for my $case (@cases) {
 
     aromatise( $moiety );
     $result = write_SMILES( [ $moiety ] );
-    is $result, $case->[1];
+    is $result, $case->[1], "aromatise($case->[0])";
 
     kekulise( $moiety );
     $result = write_SMILES( [ $moiety ] );
-    is $result, $case->[2];
+    is $result, $case->[2], "kekulise($case->[1])";
 }
