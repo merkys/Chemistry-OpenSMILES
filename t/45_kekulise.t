@@ -9,6 +9,7 @@ use Test::More;
 
 my %cases = (
     'c1ccccc1-c1ccccc1' => 'C1=CC=CC=C1C1=CC=CC=C1',
+    'c1ccccc1c1ccccc1'  => 'c1cccc[c]1[c]1ccccc1',
 );
 
 plan tests => scalar keys %cases;
