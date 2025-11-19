@@ -70,6 +70,11 @@ In particular, C<write_SMILES()> calls from L<Chemistry::OpenSMILES::Writer|Chem
 
 This option is now deprecated and may be removed in upcoming versions.
 
+=item C<report_unnecessary_dot_usage>
+
+With C<report_unnecessary_dot_usage> set to anything evaluating to true, the parser will emit warnings about bot bonds used in parentheses.
+This could be used to detect the unnecessary use of dot bonds.
+
 =back
 
 =head1 CAVEATS
