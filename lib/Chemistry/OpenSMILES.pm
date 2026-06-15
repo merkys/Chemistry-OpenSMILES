@@ -8,6 +8,8 @@ use warnings;
 use 5.0100;
 
 use Chemistry::OpenSMILES::Stereo::Tables qw( @OH @TB );
+use Graph::MoreUtils qw( SSSR );
+use Graph::MoreUtils::SSSR;
 use Graph::Traversal::BFS;
 use List::Util qw( all any first max min none sum0 );
 
@@ -34,6 +36,7 @@ our @EXPORT_OK = qw(
     is_single_bond
     is_triple_bond
     mirror
+    rings
     toggle_cistrans
     valence
 );
@@ -42,6 +45,7 @@ sub is_chiral($);
 sub is_chiral_planar($);
 sub is_chiral_tetrahedral($);
 sub mirror($);
+sub rings($@);
 sub toggle_cistrans($);
 
 our %normal_valence = (
@@ -377,6 +381,33 @@ sub mirror($)
             mirror( $_ );
         }
     }
+}
+
+sub rings($@)
+{
+    my( $graph, $atom, $max_length ) = @_;
+    $max_length = 7 unless defined $max_length;
+
+    my @rings;
+    if( $atom ) {
+        @rings = Graph::MoreUtils::SSSR::detect_rings( $graph, $atom, undef, undef, $max_length );
+    } else {
+        @rings = SSSR( $graph, $max_length );
+    }
+
+    # TODO: Maybe establish deterministic order inside @rings?
+
+    # Find unique rings
+    my %rings_by_name = map { join( '', @$_ ) => $_ } @rings;
+    my @rings_now;
+    for (@rings) {
+        my $name = join '', @$_;
+        next unless $rings_by_name{$name};
+        push @rings_now, $_;
+        delete $rings_by_name{$name};
+    }
+
+    return @rings_now;
 }
 
 sub toggle_cistrans($)
