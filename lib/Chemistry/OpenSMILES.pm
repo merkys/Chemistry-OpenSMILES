@@ -391,6 +391,19 @@ sub mirror($)
     }
 }
 
+sub _order_rings
+{
+    my( $A, $B ) = @_;
+    return @$A <=> @$B if @$A <=> @$B;
+
+    for (0..$#$A) {
+        next unless $A->[$_]{number} <=> $B->[$_]{number};
+        return      $A->[$_]{number} <=> $B->[$_]{number};
+    }
+
+    return 0;
+}
+
 sub rings($@)
 {
     my( $graph, $atom, $max_length ) = @_;
@@ -403,8 +416,6 @@ sub rings($@)
         @rings = SSSR( $graph, $max_length );
     }
 
-    # TODO: Maybe establish deterministic order inside @rings?
-
     # Find unique rings
     my %rings_by_name = map { join( '', @$_ ) => $_ } @rings;
     my @rings_now;
@@ -414,6 +425,7 @@ sub rings($@)
         push @rings_now, $_;
         delete $rings_by_name{$name};
     }
+    @rings_now = sort { _order_rings( $a, $b ) } @rings_now;
 
     return @rings_now;
 }
