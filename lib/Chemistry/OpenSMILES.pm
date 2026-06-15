@@ -12,6 +12,7 @@ use Graph::MoreUtils qw( SSSR );
 use Graph::MoreUtils::SSSR;
 use Graph::Traversal::BFS;
 use List::Util qw( all any first max min none sum0 );
+use Set::Object qw( set );
 
 require Exporter;
 our @ISA = qw( Exporter );
@@ -644,12 +645,21 @@ sub _validate($@)
              is_aromatic( $B ) &&
             !is_aromatic_bond( $moiety, $A, $B ) &&
              is_ring_bond( $moiety, $A, $B ) ) {
-            warn sprintf 'aromatic atoms %s(%d) and %s(%d) belong to same cycle, ' .
-                         'but the bond between them is not aromatic' . "\n",
-                         $A->{symbol},
-                         $A->{number},
-                         $B->{symbol},
-                         $B->{number};
+
+            my %A_rings = map { join( '', @$_ ) => $_ } rings( $moiety, $A );
+            my %B_rings = map { join( '', @$_ ) => $_ } rings( $moiety, $B );
+
+            my $common_rings = set( keys %A_rings ) * set( keys %B_rings );
+            for (map { $A_rings{$_} } @$common_rings) {
+                next unless can_be_aromatic_ring( @$_ );
+                warn sprintf 'aromatic atoms %s(%d) and %s(%d) belong to same cycle, ' .
+                             'but the bond between them is not aromatic' . "\n",
+                             $A->{symbol},
+                             $A->{number},
+                             $B->{symbol},
+                             $B->{number};
+                last;
+            }
         }
     }
 
