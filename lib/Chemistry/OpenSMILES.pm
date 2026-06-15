@@ -19,6 +19,7 @@ our @EXPORT_OK = qw(
     %bond_order_to_symbol
     %bond_symbol_to_order
     %normal_valence
+    can_be_aromatic_ring
     can_unsprout_hydrogen
     clean_chiral_centers
     is_aromatic
@@ -77,6 +78,12 @@ our %bond_symbol_to_order = (
     '#' => 3,
     '$' => 4,
 );
+
+sub can_be_aromatic_ring
+{
+    my @atoms = @_;
+    return all { /^(Se|As|[BCNOPS])$/i } map { $_->{symbol} } @atoms;
+}
 
 sub can_unsprout_hydrogen
 {
