@@ -1,4 +1,4 @@
-0.12.4 unreleased
+0.12.4 2026-06-16
 
     - Warn only about nonaromatic bonds between aromatic atoms in rings
       which could be regarded as aromatic.
